@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { equipamentos } from '../../data/equipamentos';
 import { equipamentosCategorias } from '../../data/equipamentos-categorias';
 import { Equipamento } from '../../interfaces/equipamento';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-equipamentos',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './equipamentos.html',
   styleUrl: './equipamentos.css',
 })

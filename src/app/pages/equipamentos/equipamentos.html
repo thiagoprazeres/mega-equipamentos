@@ -1,13 +1,31 @@
-<section class="container mx-auto p-4 space-y-6">
-  <h1 class="text-3xl font-bold">Equipamentos</h1>
+<section id="hero" class="bg-[url('/imagens/hero-construction.jpg')] bg-cover bg-center">
+  <div class="bg-linear-to-r from-primary to-[#3679D2]/10 pt-20">
+    <div class="container mx-auto text-primary-content py-20 px-2">
+      <div class="lg:max-w-1/2 mr-0">
+        <h1 class="text-5xl lg:text-6xl font-extrabold">Equipamentos</h1>
+        <p class="mt-4 text-2xl">
+          Catálogo completo com equipamentos para todas as etapas da sua obra. Locação diária,
+          semanal, quinzenal e mensal.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
+<section class="container mx-auto p-4 space-y-6">
   <section>
-    <h2 class="text-xl font-semibold mb-2">Categorias</h2>
-    <div class="flex flex-wrap gap-2">
-      <a *ngFor="let c of categorias" class="badge badge-lg hover:badge-primary inline-flex items-center gap-2" [routerLink]="['/equipamentos']" [attr.aria-label]="c.nome">
-        <!-- <img [src]="c.foto" [alt]="c.nome" class="size-4" /> -->
-        <span>{{ c.nome }}</span>
+    <h2 class="text-xl font-semibold mb-2">Locação de equipamentos para construção civil</h2>
+    <div>
+      @for (c of categorias; track $index) {
+      <a
+        class="bg-secondary text-primary px-2 py-1 rounded-full flex items-center justify-center w-12 h-12"
+        [routerLink]="['/equipamentos']"
+        [attr.aria-label]="c.nome"
+      >
+        <lucide-angular [img]="c.icone" class="w-6 h-6"></lucide-angular>
       </a>
+      <p>{{ c.nome }}</p>
+      }
     </div>
   </section>
 
@@ -24,7 +42,13 @@
           <p><strong>Diferenciais:</strong> {{ e.diferenciais }}</p>
         </div>
         <div class="card-actions justify-end mt-3">
-          <a class="btn btn-secondary" [href]="whatsappHref(e)" target="_blank" rel="noopener noreferrer">Pedir orçamento</a>
+          <a
+            class="btn btn-secondary"
+            [href]="whatsappHref(e)"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Pedir orçamento</a
+          >
         </div>
       </div>
     </div>

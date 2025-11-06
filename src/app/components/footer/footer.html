@@ -44,15 +44,35 @@
           >
         </li>
         <li class="flex items-center gap-2">
-          <lucide-angular [img]="Instagram" class="w-4 h-4"></lucide-angular>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-instagram-icon lucide-instagram"
+          >
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+          </svg>
           <a href="https://www.instagram.com/mega_equip" target="_blank" rel="noopener" class="link"
             >@mega_equip</a
           >
         </li>
-        <li class="flex items-center gap-2">
+        <a
+          href="https://maps.app.goo.gl/Yo51jNdqGJeMpqEu9"
+          target="_blank"
+          rel="noopener"
+          class="flex items-center gap-2 link"
+        >
           <lucide-angular [img]="MapPin" class="w-4 h-4"></lucide-angular>
-          <span>Base: Caruaru – PE</span>
-        </li>
+          <span>Av. Zé Tatú, 11B - Jardim Boa Vista, Caruaru - PE, 55038-220</span>
+        </a>
       </ul>
     </div>
 
@@ -65,9 +85,9 @@
         <div class="flex items-center gap-2">
           <lucide-angular [img]="Building2" class="w-4 h-4"></lucide-angular>
           <span
-            >CNPJ: 00.000.000/0000-00 <br />
-            IE: 000.000.000.000</span
-          >
+            >MEGA EQUIPAMENTOS LTDA<br />
+            CNPJ/PIX: 58.471.366/0001-29
+          </span>
         </div>
         <div class="flex items-center gap-2">
           <lucide-angular [img]="Clock" class="w-4 h-4"></lucide-angular>
@@ -81,8 +101,8 @@
     <div
       class="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2 text-xs opacity-90"
     >
-      <p>© {{ year }} Mega Equipamentos. Todos os direitos reservados.</p>
-      <p>Desenvolvido pela Cafeína Dev</p>
+      <p>© {{ year }} <b>Mega Equipamentos</b>. Todos os direitos reservados.</p>
+      <p>Desenvolvido pela <b>Cafeína Dev</b></p>
     </div>
   </div>
 </footer>

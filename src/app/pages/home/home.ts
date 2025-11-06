@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { equipamentosCategorias } from '../../data/equipamentos-categorias';
 import { EquipamentoCategoria } from '../../interfaces/equipamento-categoria';
-import { LucideAngularModule, Shield, Clock, Wrench, Drill } from 'lucide-angular';
+import { LucideAngularModule, Shield, Clock, Wrench, Drill, TrendingUp, ArrowRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-home',
@@ -15,6 +15,7 @@ import { LucideAngularModule, Shield, Clock, Wrench, Drill } from 'lucide-angula
 export class HomePage {
   readonly categorias: EquipamentoCategoria[] = equipamentosCategorias;
   readonly Drill = Drill;
+  readonly ArrowRight = ArrowRight;
   readonly diferenciais = [
     {
       icone: Shield,
@@ -31,6 +32,12 @@ export class HomePage {
       titulo: 'Manutenção Própria',
       descricao:
         'Equipe técnica especializada para manter todos os equipamentos em perfeito estado',
+    },
+    {
+      icone: TrendingUp,
+      titulo: 'Melhor Custo-Benefício',
+      descricao:
+        'Preços competitivos com transparência total. Locação diária, semanal, quinzenal ou mensal.',
     },
   ];
 }

@@ -5,7 +5,7 @@
 **Empresa:** Mega Equipamentos Ltda.
 **Telefone / WhatsApp:** (81) 98555-5943
 **E-mail:** megaequipamentospe@gmail.com
-**Cidade-base:** Caruaru – PE
+**Cidade:** Caruaru – PE
 **Instagram:** https://www.instagram.com/mega_equip
 **Google Meu Negócio:** [Mega Equipamentos](https://maps.app.goo.gl/sdL7SyubuZfnRLUR6)
 
@@ -60,9 +60,9 @@ Títulos sugeridos:
 
 ### 6. Contato
 
-- Telefone / WhatsApp: (81) 9 8555-
+- Telefone / WhatsApp: (81) 9 8555-5943
 - E-mail: megaequipamentospe@gmail.com
-- Endereço: Rua (...), Caruaru – PE
+- Endereço: Av. Zé Tatú, 11B - Jardim Boa Vista, Caruaru - PE, 55038-220
 - Mapa Google embedado
 - Formulário: Nome, Telefone, Cidade, Equipamento
 - Área de atendimento: Caruaru, Toritama, Santa Cruz do Capibaribe, Bezerros, Belo Jardim e região

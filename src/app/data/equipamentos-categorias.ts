@@ -1,5 +1,18 @@
 import { EquipamentoCategoria } from '../interfaces/equipamento-categoria';
 import { EquipamentosCategoriasId } from '../enums/equipamentos-categorias-id';
+import {
+  ArrowUpRight,
+  Building2,
+  Layers,
+  Waves,
+  Box,
+  Scissors,
+  Trash2,
+  Drill,
+  Plug,
+  Truck,
+  Package,
+} from 'lucide-angular';
 
 export const equipamentosCategorias: EquipamentoCategoria[] = [
   {
@@ -7,7 +20,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Acesso e Elevação',
     name: 'Access and Elevation',
     slug: 'acesso-e-elevacao',
-    icone: '/icons/acesso-e-elevacao.svg',
+    icone: ArrowUpRight,
     avatar: 'https://images.pexels.com/photos/34581859/pexels-photo-34581859.jpeg',
     objetivo:
       'Facilitar o acesso e o transporte vertical de materiais e profissionais em diferentes níveis de obra, com equipamentos seguros e de alta performance.',
@@ -17,7 +30,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Andaimes',
     name: 'Scaffolding',
     slug: 'andaimes',
-    icone: '/icons/andaimes.svg',
+    icone: Building2,
     avatar: '/imagens/equipamentos/andaimes.jpg',
     objetivo:
       'Oferecer sistemas de andaimes modulares, seguros e de fácil montagem para serviços em altura.',
@@ -27,7 +40,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Escoramento de Estruturas',
     name: 'Structural Shoring',
     slug: 'escoramento-de-estruturas',
-    icone: '/icons/escoramento-de-estruturas.svg',
+    icone: Layers,
     avatar:
       'https://images.pexels.com/photos/585419/pexels-photo-585419.jpeg?w=800&h=600&auto=compress&cs=tinysrgb',
     objetivo: 'Sustentação temporária de lajes, vigas e pilares durante concretagens.',
@@ -37,7 +50,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Compactação e Solo',
     name: 'Soil Compaction',
     slug: 'compactacao-e-solo',
-    icone: '/icons/compactacao-e-solo.svg',
+    icone: Waves,
     avatar: '/imagens/equipamentos/placa-vibratoria.jpg',
     objetivo: 'Garantir estabilidade e resistência do solo antes da concretagem e pavimentação.',
   },
@@ -46,7 +59,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Concretagem',
     name: 'Concreting',
     slug: 'concretagem',
-    icone: '/icons/concretagem.svg',
+    icone: Box,
     avatar: '/imagens/equipamentos/concretagem.png',
     objetivo: 'Mistura e adensamento do concreto com eficiência e qualidade.',
   },
@@ -55,7 +68,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Corte e Demolição',
     name: 'Cutting and Demolition',
     slug: 'corte-e-demolicao',
-    icone: '/icons/corte-e-demolicao.svg',
+    icone: Scissors,
     avatar:
       'https://images.pexels.com/photos/585420/pexels-photo-585420.jpeg?w=800&h=600&auto=compress&cs=tinysrgb',
     objetivo: 'Corte e demolição de materiais e estruturas.',
@@ -65,7 +78,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Demolição',
     name: 'Demolition',
     slug: 'demolicao',
-    icone: '/icons/demolicao.svg',
+    icone: Trash2,
     avatar: '/imagens/equipamentos/martelete-demolidor.jpg',
     objetivo: 'Demolição de materiais e estruturas.',
   },
@@ -74,7 +87,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Ferramentas Elétricas',
     name: 'Power Tools',
     slug: 'ferramentas-eletricas',
-    icone: '/icons/ferramentas-eletricas.svg',
+    icone: Drill,
     avatar:
       'https://conecta.fg.com.br/wp-content/uploads/2023/12/37_Aprenda_como_escolher_o_n%C3%ADvel_a_laser_ideal_para_seu_trabalho_blog.png',
     objetivo: 'Ferramentas elétricas para serviços de construção.',
@@ -84,7 +97,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Motores e Geradores',
     name: 'Engines and Generators',
     slug: 'motores-e-geradores',
-    icone: '/icons/motores-e-geradores.svg',
+    icone: Plug,
     avatar: 'https://conecta.fg.com.br/wp-content/uploads/2020/05/05_Usos_Geradores.png',
     objetivo: 'Motores e geradores para serviços de construção.',
   },
@@ -93,7 +106,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Reboque e Transporte',
     name: 'Trailers and Transport',
     slug: 'reboque-e-transporte',
-    icone: '/icons/reboque-e-transporte.svg',
+    icone: Truck,
     avatar:
       'https://images.pexels.com/photos/2199293/pexels-photo-2199293.jpeg?w=800&h=600&auto=compress&cs=tinysrgb',
     objetivo: 'Reboque e transporte de materiais e estruturas.',
@@ -103,7 +116,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     nome: 'Diversos',
     name: 'Miscellaneous',
     slug: 'diversos',
-    icone: '/icons/diversos.svg',
+    icone: Package,
     avatar:
       'https://www.c3equipamentos.com.br/images/Blog/diadamulher-americandaimes-1200x800.webp',
     objetivo: 'Diversos',
