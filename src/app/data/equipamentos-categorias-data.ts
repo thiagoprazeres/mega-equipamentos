@@ -14,7 +14,7 @@ import {
   Package,
 } from 'lucide-angular';
 
-export const equipamentosCategorias: EquipamentoCategoria[] = [
+export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   {
     id: EquipamentosCategoriasId.Acesso_e_Elevacao,
     nome: 'Acesso e Elevação',
@@ -71,7 +71,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     icone: Scissors,
     avatar:
       'https://images.pexels.com/photos/585420/pexels-photo-585420.jpeg?w=800&h=600&auto=compress&cs=tinysrgb',
-    objetivo: 'Corte e demolição de materiais e estruturas.',
+    objetivo: 'Equipamentos de corte e demolição de concretos e alvenarias.',
   },
   {
     id: EquipamentosCategoriasId.Demolicao,
@@ -80,7 +80,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     slug: 'demolicao',
     icone: Trash2,
     avatar: '/imagens/equipamentos/martelete-demolidor.jpg',
-    objetivo: 'Demolição de materiais e estruturas.',
+    objetivo: 'Fornecer marteletes de diversos portes para demolições leves a pesadas.',
   },
   {
     id: EquipamentosCategoriasId.Ferramentas_Eletricas,
@@ -90,7 +90,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     icone: Drill,
     avatar:
       'https://conecta.fg.com.br/wp-content/uploads/2023/12/37_Aprenda_como_escolher_o_n%C3%ADvel_a_laser_ideal_para_seu_trabalho_blog.png',
-    objetivo: 'Ferramentas elétricas para serviços de construção.',
+    objetivo: 'Equipamentos de precisão e acabamento para marcenaria, instalação e manutenção.',
   },
   {
     id: EquipamentosCategoriasId.Motores_e_Geradores,
@@ -99,7 +99,7 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     slug: 'motores-e-geradores',
     icone: Plug,
     avatar: 'https://conecta.fg.com.br/wp-content/uploads/2020/05/05_Usos_Geradores.png',
-    objetivo: 'Motores e geradores para serviços de construção.',
+    objetivo: 'Energia, compressão e bombeamento para obras e serviços gerais.',
   },
   {
     id: EquipamentosCategoriasId.Reboque_e_Transporte,
@@ -108,8 +108,8 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     slug: 'reboque-e-transporte',
     icone: Truck,
     avatar:
-      'https://images.pexels.com/photos/2199293/pexels-photo-2199293.jpeg?w=800&h=600&auto=compress&cs=tinysrgb',
-    objetivo: 'Reboque e transporte de materiais e estruturas.',
+      'https://images.pexels.com/photos/188679/pexels-photo-188679.jpeg?w=800&h=600&auto=compress',
+    objetivo: 'Soluções logísticas seguras para transporte de materiais e equipamentos.',
   },
   {
     id: EquipamentosCategoriasId.Diversos,
@@ -119,6 +119,6 @@ export const equipamentosCategorias: EquipamentoCategoria[] = [
     icone: Package,
     avatar:
       'https://www.c3equipamentos.com.br/images/Blog/diadamulher-americandaimes-1200x800.webp',
-    objetivo: 'Diversos',
+    objetivo: 'Apoio à estrutura e organização do canteiro de obras.',
   },
 ];

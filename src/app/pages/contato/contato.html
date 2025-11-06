@@ -1,21 +1,276 @@
-<section class="container mx-auto p-4 space-y-4">
-  <h1 class="text-3xl font-bold">Contato</h1>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="space-y-2">
-      <p><strong>Telefone / WhatsApp:</strong> <a class="link" href="https://wa.me/5581985555943" target="_blank" rel="noopener">(81) 98555-5943</a></p>
-      <p><strong>E-mail:</strong> <a class="link" href="mailto:megaequipamentospe@gmail.com">megaequipamentospe@gmail.com</a></p>
-      <p><strong>Cidade-base:</strong> Caruaru – PE</p>
-      <p><strong>Instagram:</strong> <a class="link" href="https://www.instagram.com/mega_equip" target="_blank" rel="noopener">@mega_equip</a></p>
-      <p><strong>Atendimento:</strong> Caruaru, Toritama, Santa Cruz do Capibaribe, Bezerros, Belo Jardim e região</p>
-    </div>
-    <form class="space-y-3">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <input class="input input-bordered w-full" placeholder="Nome" />
-        <input class="input input-bordered w-full" placeholder="Telefone" />
-        <input class="input input-bordered w-full md:col-span-2" placeholder="Cidade" />
-        <input class="input input-bordered w-full md:col-span-2" placeholder="Equipamento" />
+<section
+  id="hero"
+  class="bg-[url('https://arcengenharia.com/wp-content/uploads/2016/10/o-perigo-do-celular-no-canteiro-de-obras.jpeg')] bg-cover bg-center"
+>
+  <div class="bg-linear-to-r from-primary to-[#3679D2]/10 pt-20">
+    <div class="container mx-auto text-primary-content py-20 px-2">
+      <div class="lg:max-w-1/2 mr-0">
+        <h1 class="text-5xl lg:text-6xl font-extrabold">Contato</h1>
+        <p class="mt-4 text-2xl">Entre em contato conosco. Estamos prontos para atender você!</p>
       </div>
-      <button type="button" class="btn btn-primary">Enviar</button>
-    </form>
+    </div>
   </div>
 </section>
+<main>
+  <section class="py-16 md:py-24">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div>
+          <h2 class="text-3xl font-bold mb-6">Solicite um Orçamento</h2>
+          <div>
+            <div>
+              <form class="space-y-4">
+                <div>
+                  <label for="name" class="block text-sm font-medium mb-2">Nome Completo *</label
+                  ><input
+                    data-slot="input"
+                    class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                    id="name"
+                    required=""
+                    placeholder="Seu nome"
+                    value=""
+                  />
+                </div>
+                <div>
+                  <label for="phone" class="block text-sm font-medium mb-2"
+                    >Telefone / WhatsApp *</label
+                  ><input
+                    data-slot="input"
+                    class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                    id="phone"
+                    required=""
+                    placeholder="(81) 9 0000-0000"
+                    type="tel"
+                    value=""
+                  />
+                </div>
+                <div>
+                  <label for="city" class="block text-sm font-medium mb-2">Cidade *</label
+                  ><input
+                    data-slot="input"
+                    class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                    id="city"
+                    required=""
+                    placeholder="Sua cidade"
+                    value=""
+                  />
+                </div>
+                <div>
+                  <label for="equipment" class="block text-sm font-medium mb-2"
+                    >Equipamento Desejado *</label
+                  ><input
+                    data-slot="input"
+                    class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                    id="equipment"
+                    required=""
+                    placeholder="Ex: Betoneira 400L"
+                    value=""
+                  />
+                </div>
+                <div>
+                  <label for="message" class="block text-sm font-medium mb-2">Mensagem</label
+                  ><textarea
+                    data-slot="textarea"
+                    class="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    id="message"
+                    placeholder="Informações adicionais sobre sua necessidade"
+                    rows="4"
+                  ></textarea>
+                </div>
+                <button data-slot="button" class="btn btn-primary" type="submit">
+                  Enviar via WhatsApp
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-6">
+          <div>
+            <h2 class="text-3xl font-bold mb-6">Informações de Contato</h2>
+            <div class="space-y-4">
+              <div class="card card-side">
+                <div class="flex items-center justify-center">
+                  <figure>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-phone h-5 w-5 text-primary"
+                    >
+                      <path
+                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                      ></path>
+                    </svg>
+                  </figure>
+                </div>
+                <div class="card-body">
+                  <h2 class="card-title">Telefone / WhatsApp</h2>
+                  <a
+                    href="https://wa.me/5581985555943"
+                    class="link text-lg hover:text-primary transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >(81) 9 8555-5943</a
+                  >
+                </div>
+              </div>
+              <div class="card card-side">
+                <div class="flex items-center justify-center">
+                  <figure>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-mail h-5 w-5 text-primary"
+                    >
+                      <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                    </svg>
+                  </figure>
+                </div>
+                <div class="card-body">
+                  <h2 class="card-title">E-mail</h2>
+                  <a
+                    href="mailto:megaequipamentospe@gmail.com"
+                    class="link text-lg hover:text-primary transition-colors"
+                    >megaequipamentospe@gmail.com</a
+                  >
+                </div>
+              </div>
+              <div class="card card-side">
+                <div class="flex items-center justify-center">
+                  <figure>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-map-pin h-5 w-5 text-primary"
+                    >
+                      <path
+                        d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"
+                      ></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </figure>
+                </div>
+                <div class="card-body">
+                  <h2 class="card-title">Localização</h2>
+                  <a
+                    href="https://maps.app.goo.gl/3oSe8WXcBPw3xfxCA"
+                    class="link text-lg hover:text-primary transition-colors"
+                  >
+                    <address>Av. Zé Tatú, 11B - Jardim Boa Vista, Caruaru - PE, 55038-220</address>
+                  </a>
+                </div>
+              </div>
+              <div class="card card-side">
+                <div class="flex items-center justify-center">
+                  <figure>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-instagram h-5 w-5 text-primary"
+                    >
+                      <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                    </svg>
+                  </figure>
+                </div>
+                <div class="card-body">
+                  <h2 class="card-title">Redes Sociais</h2>
+                  <a
+                    href="https://www.instagram.com/mega_equip/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="link text-lg hover:text-primary transition-colors"
+                    >@mega_equip</a
+                  >
+                </div>
+              </div>
+              <div class="card card-side">
+                <div class="flex items-center justify-center">
+                  <figure>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-clock h-5 w-5 text-primary"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </figure>
+                </div>
+                <div class="card-body">
+                  <h2 class="card-title">Horário de Atendimento</h2>
+                  <p class="text-lg">Segunda a Sexta: 7h às 18h</p>
+                  <p class="text-lg">Sábado: 7h às 12h</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card bg-base-300">
+            <div class="card-body">
+              <h2 class="card-title">Área de Atendimento</h2>
+              <p>Atendemos as seguintes cidades e região:</p>
+              <ul class="grid grid-cols-2 gap-2 text-sm">
+                <li>• Caruaru</li>
+                <li>• Toritama</li>
+                <li>• Santa Cruz do Capibaribe</li>
+                <li>• Bezerros</li>
+                <li>• Belo Jardim</li>
+                <li>• E região</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="py-16 bg-muted">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-8">Nossa Localização</h2>
+    </div>
+  </section>
+  <iframe
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3948.255351669439!2d-35.9942979!3d-8.2773646!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7a98b578feb4ce9%3A0xc2d6ea6ae6308f47!2sMega%20Equipamentos%20Ltda!5e0!3m2!1spt-BR!2sbr!4v1762468110284!5m2!1spt-BR!2sbr"
+    width="100%"
+    height="450"
+    style="border: 0"
+    allowfullscreen=""
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade"
+  ></iframe>
+</main>

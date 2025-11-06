@@ -16,22 +16,22 @@
   >
     <div class="navbar container mx-auto">
       <div class="navbar-start">
-        <a routerLink="/">
+        <a href="/" routerLink="/">
           <img src="logo-mega-equipamentos-branca.png" alt="Mega Equipamentos" class="h-8 w-auto" />
         </a>
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal gap-1 font-medium">
-          <li><a routerLink="/">Home</a></li>
-          <li><a routerLink="/quem-somos">Quem Somos</a></li>
-          <li><a routerLink="/equipamentos">Equipamentos</a></li>
-          <li><a routerLink="/como-alugar">Como Alugar</a></li>
-          <li><a routerLink="/blog">Blog</a></li>
-          <li><a routerLink="/contato">Contato</a></li>
+          <li><a href="/" routerLink="/">Home</a></li>
+          <li><a href="/quem-somos" routerLink="/quem-somos">Quem Somos</a></li>
+          <li><a href="/equipamentos" routerLink="/equipamentos">Equipamentos</a></li>
+          <li><a href="/como-alugar" routerLink="/como-alugar">Como Alugar</a></li>
+          <!-- <li><a href="/blog" routerLink="/blog">Blog</a></li> -->
+          <li><a href="/contato" routerLink="/contato">Contato</a></li>
         </ul>
       </div>
       <div class="navbar-end hidden lg:flex">
-        <a routerLink="/contato" class="btn btn-secondary shadow-xs border-none">
+        <a href="/contato" routerLink="/contato" class="btn btn-secondary shadow-xs border-none">
           <lucide-angular [img]="PhoneCall" class="my-icon w-5 h-5"></lucide-angular>
           Solicitar orçamento
         </a>

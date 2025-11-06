@@ -9,5 +9,5 @@ export enum EquipamentosCategoriasId {
   Ferramentas_Eletricas = 8,
   Motores_e_Geradores = 9,
   Reboque_e_Transporte = 10,
-  Diversos,
+  Diversos = 11,
 }

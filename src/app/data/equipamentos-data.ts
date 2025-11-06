@@ -1,8 +1,8 @@
 import { Equipamento } from '../interfaces/equipamento';
 import { EquipamentosCategoriasId } from '../enums/equipamentos-categorias-id';
-import { equipamentosCategorias } from './equipamentos-categorias';
+import { equipamentosCategoriasData } from './equipamentos-categorias-data';
 
-export const equipamentos: Equipamento[] = [
+export const equipamentosData: Equipamento[] = [
   {
     id: 1,
     nome: 'Guincho de Coluna 400 kg',
@@ -13,7 +13,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Içamento de materiais, alvenaria, concretagem.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Instalação rápida • Baixo consumo • Operação segura',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Acesso_e_Elevacao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Acesso_e_Elevacao
+    )!,
   },
   {
     id: 2,
@@ -25,7 +27,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Acesso e mobilidade vertical.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Leve e durável • Altura ajustável • Transporte fácil',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Acesso_e_Elevacao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Acesso_e_Elevacao
+    )!,
   },
   {
     id: 3,
@@ -36,7 +40,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Elevação e posicionamento de cargas.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Robustez • Baixa manutenção • Operação simples',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Acesso_e_Elevacao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Acesso_e_Elevacao
+    )!,
   },
   {
     id: 4,
@@ -48,7 +54,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Acesso e plataformas de trabalho.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta resistência • Padrão Mega • Montagem ágil',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Andaimes],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Andaimes
+    )!,
   },
   {
     id: 5,
@@ -60,7 +68,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Acesso em espaços reduzidos.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Versátil • Leve • Compatível com plataformas e barras',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Andaimes],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Andaimes
+    )!,
   },
   {
     id: 6,
@@ -71,7 +81,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Apoio e circulação.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Antiderrapante • Encaixe firme • Alta durabilidade',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Andaimes],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Andaimes
+    )!,
   },
   {
     id: 7,
@@ -82,7 +94,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Reforço estrutural.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Galvanizada • Instalação rápida • Estabilidade',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Andaimes],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Andaimes
+    )!,
   },
   {
     id: 8,
@@ -93,7 +107,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Apoio e sustentação.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Apoio firme • Proteção anticorrosiva • Compatibilidade total',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Andaimes],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Andaimes
+    )!,
   },
   {
     id: 9,
@@ -104,7 +120,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Apoio nivelador.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Ajuste preciso • Rosca reforçada • Produção própria',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Andaimes],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Andaimes
+    )!,
   },
   {
     id: 10,
@@ -115,7 +133,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Proteção coletiva NR-18.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Travamento reforçado • Instalação fácil • Segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Andaimes],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Andaimes
+    )!,
   },
   {
     id: 11,
@@ -126,7 +146,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Mobilidade de torres.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Rodas reforçadas • Travamento eficiente • Para pisos lisos',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Andaimes],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Andaimes
+    )!,
   },
   {
     id: 12,
@@ -138,7 +160,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Acesso entre plataformas.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Compatível 1,00×1,50 e 1,00×1,00 • Alto grip • Estrutura robusta',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Andaimes],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Andaimes
+    )!,
   },
   {
     id: 13,
@@ -150,8 +174,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Escoramento temporário.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Ajuste preciso • Alta capacidade • Produção própria',
-    equipamentoCategoria:
-      equipamentosCategorias[EquipamentosCategoriasId.Escoramento_de_Estruturas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Escoramento_de_Estruturas
+    )!,
   },
   {
     id: 14,
@@ -162,8 +187,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Escoramento em grande altura.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Estrutura reforçada • Ampla regulagem • Pintura protetiva',
-    equipamentoCategoria:
-      equipamentosCategorias[EquipamentosCategoriasId.Escoramento_de_Estruturas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Escoramento_de_Estruturas
+    )!,
   },
   {
     id: 15,
@@ -174,8 +200,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Apoio e sustentação de formas.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Encaixe rápido • Aço de alta resistência • Compatível com toda a linha',
-    equipamentoCategoria:
-      equipamentosCategorias[EquipamentosCategoriasId.Escoramento_de_Estruturas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Escoramento_de_Estruturas
+    )!,
   },
   {
     id: 16,
@@ -186,8 +213,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Apoio estrutural e travamento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rigidez • Acabamento protetivo • Modularidade',
-    equipamentoCategoria:
-      equipamentosCategorias[EquipamentosCategoriasId.Escoramento_de_Estruturas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Escoramento_de_Estruturas
+    )!,
   },
   {
     id: 17,
@@ -198,8 +226,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Travamento e fixação estrutural.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Resistência à pressão • Alinhamento preciso • Montagem rápida',
-    equipamentoCategoria:
-      equipamentosCategorias[EquipamentosCategoriasId.Escoramento_de_Estruturas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Escoramento_de_Estruturas
+    )!,
   },
   {
     id: 18,
@@ -211,7 +240,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Preparação e nivelamento de solo.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta densidade • Robusto • Ideal para áreas de difícil acesso',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Compactacao_e_Solo],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Compactacao_e_Solo
+    )!,
   },
   {
     id: 19,
@@ -222,7 +253,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Acabamento e nivelamento de superfícies.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Compactação homogênea • Operação simples • Baixo consumo',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Compactacao_e_Solo],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Compactacao_e_Solo
+    )!,
   },
   {
     id: 20,
@@ -234,7 +267,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Mistura e adensamento do concreto.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta capacidade • Robusto • Produção rápida',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Concretagem],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Concretagem
+    )!,
   },
   {
     id: 21,
@@ -246,7 +281,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Adensamento e estruturação de fundações.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta eficiência • Reduz falhas • Modelos elétrico/combustão',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Concretagem],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Concretagem
+    )!,
   },
   {
     id: 22,
@@ -257,7 +294,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Demolição pesada.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Potência elevada • Punhos antivibração • Alta confiabilidade',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Corte_e_Demolicao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Corte_e_Demolicao
+    )!,
   },
   {
     id: 23,
@@ -268,7 +307,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Reforma e perfuração.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Compacto • Precisão • Menor fadiga do operador',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Corte_e_Demolicao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Corte_e_Demolicao
+    )!,
   },
   {
     id: 24,
@@ -279,7 +320,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte, desbaste e polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Corte limpo • Alta rotação • Fácil de operar',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Corte_e_Demolicao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Corte_e_Demolicao
+    )!,
   },
   {
     id: 25,
@@ -290,7 +333,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte, desbaste e polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Corte limpo • Alta rotação • Fácil de operar',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Corte_e_Demolicao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Corte_e_Demolicao
+    )!,
   },
   {
     id: 26,
@@ -301,7 +346,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte, desbaste e polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Corte limpo • Alta rotação • Fácil de operar',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Corte_e_Demolicao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Corte_e_Demolicao
+    )!,
   },
   {
     id: 27,
@@ -312,7 +359,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Reforma e acabamento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Leveza • Precisão • Fácil operação',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Corte_e_Demolicao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Demolicao
+    )!,
   },
   {
     id: 28,
@@ -323,7 +372,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Reforma e demolição controlada.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Potência equilibrada • Ergonômico • Confiável',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Corte_e_Demolicao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Demolicao
+    )!,
   },
   {
     id: 29,
@@ -334,7 +385,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Demolição pesada.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Potência equilibrada • Ergonômico • Confiável',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Corte_e_Demolicao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Demolicao
+    )!,
   },
   {
     id: 30,
@@ -345,7 +398,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Demolição estrutural.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Durabilidade • Alta força • Desempenho superior',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Corte_e_Demolicao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Demolicao
+    )!,
   },
   {
     id: 31,
@@ -356,7 +411,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Demolição pesada/industrial.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Força superior • Robustez • Alto rendimento',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Corte_e_Demolicao],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Demolicao
+    )!,
   },
   {
     id: 32,
@@ -367,7 +424,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Montagem e fixação.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Produtividade • Fixação instantânea • Sistema antirrecúo',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 33,
@@ -378,7 +437,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 34,
@@ -389,7 +450,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 35,
@@ -400,7 +463,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 36,
@@ -411,7 +476,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 37,
@@ -422,7 +489,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 38,
@@ -433,7 +502,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 39,
@@ -444,7 +515,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 40,
@@ -455,7 +528,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 41,
@@ -466,7 +541,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 42,
@@ -477,7 +554,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 43,
@@ -488,7 +567,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 44,
@@ -499,7 +580,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 45,
@@ -510,7 +593,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Ferramentas_Eletricas
+    )!,
   },
   {
     id: 46,
@@ -521,7 +606,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Motores_e_Geradores],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Motores_e_Geradores
+    )!,
   },
   {
     id: 47,
@@ -532,7 +619,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Pressurização e alimentação de ar.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Tanque reforçado • Válvula de segurança • Durável',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Motores_e_Geradores],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Motores_e_Geradores
+    )!,
   },
   {
     id: 48,
@@ -543,7 +632,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Geração monofásica.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Energia estável • Autonomia prolongada • Operação simples',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Motores_e_Geradores],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Motores_e_Geradores
+    )!,
   },
   {
     id: 49,
@@ -554,7 +645,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Drenagem e esgotamento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Auto-limpeza • Baixo consumo • Baixo ruído',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Motores_e_Geradores],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Motores_e_Geradores
+    )!,
   },
   {
     id: 50,
@@ -565,7 +658,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Pintura profissional.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta pressão • Baixo consumo • Baixo ruído',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Motores_e_Geradores],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Motores_e_Geradores
+    )!,
   },
   {
     id: 51,
@@ -577,7 +672,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Logística de pequeno porte.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Aço tubular • ~500 kg de carga • Ideal para utilitários',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Reboque_e_Transporte],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Reboque_e_Transporte
+    )!,
   },
   {
     id: 52,
@@ -588,7 +685,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Logística de médio porte.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Reforço estrutural • Até ~800 kg • Travamento seguro',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Reboque_e_Transporte],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Reboque_e_Transporte
+    )!,
   },
   {
     id: 53,
@@ -599,7 +698,9 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Apoio de canteiro.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Leve • Instalação rápida • Atende NR-18',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Diversos],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Diversos
+    )!,
   },
   {
     id: 54,
@@ -610,6 +711,8 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Guarda de materiais e suporte ao canteiro.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Estrutura soldada • Tranca de segurança • Piso reforçado',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Diversos],
+    equipamentoCategoria: equipamentosCategoriasData.find(
+      (e) => e.id === EquipamentosCategoriasId.Diversos
+    )!,
   },
 ];

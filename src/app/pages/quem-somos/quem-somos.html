@@ -1,4 +1,7 @@
-<section id="hero" class="bg-[url('https://cdn.pixabay.com/photo/2020/03/17/17/08/engineer-4941163_1280.jpg')] bg-cover bg-center">
+<section
+  id="hero"
+  class="bg-[url('https://cdn.pixabay.com/photo/2020/03/17/17/08/engineer-4941163_1280.jpg')] bg-cover bg-center"
+>
   <div class="bg-linear-to-r from-primary to-[#3679D2]/10 pt-20">
     <div class="container mx-auto text-primary-content py-20 px-2">
       <div class="lg:max-w-1/2 mr-0">
@@ -40,13 +43,10 @@
   <div class="container mx-auto px-4">
     <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Nossos Valores</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-      <div
-        data-slot="card"
-        class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm"
-      >
+      <div class="card">
         <div data-slot="card-content" class="px-6 pt-6 text-center">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4"
+            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary mb-4"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -72,13 +72,10 @@
           </p>
         </div>
       </div>
-      <div
-        data-slot="card"
-        class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm"
-      >
+      <div class="card">
         <div data-slot="card-content" class="px-6 pt-6 text-center">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4"
+            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary mb-4"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -104,13 +101,10 @@
           </p>
         </div>
       </div>
-      <div
-        data-slot="card"
-        class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm"
-      >
+      <div class="card">
         <div data-slot="card-content" class="px-6 pt-6 text-center">
           <div
-            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4"
+            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary mb-4"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -140,6 +134,24 @@
     </div>
   </div>
 </section>
+<section class="py-16 md:py-24 bg-primary text-primary-content">
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto text-center">
+      <div>
+        <div class="text-5xl md:text-6xl font-heading font-bold mb-2">100+</div>
+        <div class="text-xl opacity-90">Equipamentos Disponíveis</div>
+      </div>
+      <div>
+        <div class="text-5xl md:text-6xl font-heading font-bold mb-2">500+</div>
+        <div class="text-xl opacity-90">Obras Atendidas</div>
+      </div>
+      <div>
+        <div class="text-5xl md:text-6xl font-heading font-bold mb-2">7+</div>
+        <div class="text-xl opacity-90">Cidades na Região</div>
+      </div>
+    </div>
+  </div>
+</section>
 <section class="py-16 md:py-24">
   <div class="container mx-auto px-4">
     <div class="max-w-4xl mx-auto">
@@ -147,65 +159,65 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="flex items-start gap-3">
           <div
-            class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5"
+            class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
           >
-            <div class="w-2 h-2 rounded-full bg-primary"></div>
+            <div class="status status-primary animate-bounce"></div>
           </div>
           <p class="text-lg">Acervo completo e diversificado</p>
         </div>
         <div class="flex items-start gap-3">
           <div
-            class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5"
+            class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
           >
-            <div class="w-2 h-2 rounded-full bg-primary"></div>
+            <div class="status status-primary animate-bounce"></div>
           </div>
           <p class="text-lg">Equipamentos bem conservados</p>
         </div>
         <div class="flex items-start gap-3">
           <div
-            class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5"
+            class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
           >
-            <div class="w-2 h-2 rounded-full bg-primary"></div>
+            <div class="status status-primary animate-bounce"></div>
           </div>
           <p class="text-lg">Manutenção técnica especializada</p>
         </div>
         <div class="flex items-start gap-3">
           <div
-            class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5"
+            class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
           >
-            <div class="w-2 h-2 rounded-full bg-primary"></div>
+            <div class="status status-primary animate-bounce"></div>
           </div>
           <p class="text-lg">Atendimento personalizado</p>
         </div>
         <div class="flex items-start gap-3">
           <div
-            class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5"
+            class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
           >
-            <div class="w-2 h-2 rounded-full bg-primary"></div>
+            <div class="status status-primary animate-bounce"></div>
           </div>
           <p class="text-lg">Entrega rápida na obra</p>
         </div>
         <div class="flex items-start gap-3">
           <div
-            class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5"
+            class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
           >
-            <div class="w-2 h-2 rounded-full bg-primary"></div>
+            <div class="status status-primary animate-bounce"></div>
           </div>
           <p class="text-lg">Flexibilidade de locação</p>
         </div>
         <div class="flex items-start gap-3">
           <div
-            class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5"
+            class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
           >
-            <div class="w-2 h-2 rounded-full bg-primary"></div>
+            <div class="status status-primary animate-bounce"></div>
           </div>
           <p class="text-lg">Preços competitivos</p>
         </div>
         <div class="flex items-start gap-3">
           <div
-            class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5"
+            class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
           >
-            <div class="w-2 h-2 rounded-full bg-primary"></div>
+            <div class="status status-primary animate-bounce"></div>
           </div>
           <p class="text-lg">Atendimento em Caruaru e região</p>
         </div>

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { equipamentosCategorias } from '../../data/equipamentos-categorias';
+import { equipamentosCategoriasData } from '../../data/equipamentos-categorias-data';
 import { EquipamentoCategoria } from '../../interfaces/equipamento-categoria';
 import { LucideAngularModule, Shield, Clock, Wrench, Drill, TrendingUp, ArrowRight } from 'lucide-angular';
 
@@ -13,7 +13,7 @@ import { LucideAngularModule, Shield, Clock, Wrench, Drill, TrendingUp, ArrowRig
   styleUrls: ['./home.css'],
 })
 export class HomePage {
-  readonly categorias: EquipamentoCategoria[] = equipamentosCategorias;
+  readonly categorias: EquipamentoCategoria[] = equipamentosCategoriasData;
   readonly Drill = Drill;
   readonly ArrowRight = ArrowRight;
   readonly diferenciais = [

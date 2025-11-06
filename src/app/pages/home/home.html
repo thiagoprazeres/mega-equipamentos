@@ -50,28 +50,21 @@
     <p class="text-xl font-extralight text-primary">
       Amplo acervo para todas as necessidades da sua obra
     </p>
-    <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+
+    <div class="flex flex-wrap gap-4 mt-8">
+      @for (c of categorias; track $index) {
       <a
-        *ngFor="let c of categorias"
-        class="card bg-primary text-primary-content shadow-md hover:shadow-lg transition-shadow"
-        [routerLink]="['/equipamentos']"
+        class="bg-linear-to-t from-primary to-[#3679D2] text-primary-content px-2 py-1 rounded-4xl flex flex-col items-center justify-center w-48 h-48"
+        [routerLink]="['/equipamentos', c.slug]"
         [attr.aria-label]="c.nome"
       >
-        <figure class="bg-primary h-48">
-          <img [src]="c.avatar" [alt]="c.nome" class="w-full h-full object-cover" />
-        </figure>
-
-        <div class="card-body">
-          <div class="flex items-center gap-2">
-            <lucide-angular [img]="c.icone" class="w-5 h-5 text-secondary"></lucide-angular>
-            <h3 class="card-title text-lg">{{ c.nome }}</h3>
-          </div>
-          <p class="text-sm opacity-80">{{ c.objetivo }}</p>
-        </div>
+        <lucide-angular [img]="c.icone" class="w-24 h-24 text-secondary"></lucide-angular>
+        <p class="text-center text-xl">{{ c.nome }}</p>
       </a>
+      }
       <a
         routerLink="/equipamentos"
-        class="card bg-transparent flex items-center justify-center text-base-700"
+        class="px-2 py-1 rounded-4xl flex flex-col items-center justify-center w-48 h-48"
       >
         <div class="flex items-center">
           <lucide-angular [img]="ArrowRight"></lucide-angular>

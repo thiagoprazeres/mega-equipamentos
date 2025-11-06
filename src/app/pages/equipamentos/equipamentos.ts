@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { equipamentos } from '../../data/equipamentos';
-import { equipamentosCategorias } from '../../data/equipamentos-categorias';
+import { equipamentosCategoriasData } from '../../data/equipamentos-categorias-data';
 import { Equipamento } from '../../interfaces/equipamento';
 import { LucideAngularModule } from 'lucide-angular';
+import { equipamentosData } from '../../data/equipamentos-data';
 
 @Component({
   selector: 'app-equipamentos',
@@ -14,8 +14,8 @@ import { LucideAngularModule } from 'lucide-angular';
   styleUrl: './equipamentos.css',
 })
 export class EquipamentosPage {
-  categorias = equipamentosCategorias;
-  itens = equipamentos;
+  categorias = equipamentosCategoriasData;
+  itens = equipamentosData;
 
   whatsappHref(e: Equipamento): string {
     const msg = "Olá! 👋 Sou da Mega Equipamentos. Recebi sua mensagem pelo site. Equipamento: " + e.nome + " | Período: (diária/semanal/quinzenal/mensal)";

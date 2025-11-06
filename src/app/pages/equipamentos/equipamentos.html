@@ -12,45 +12,60 @@
   </div>
 </section>
 
-<section class="container mx-auto p-4 space-y-6">
+<section class="container mx-auto py-10 space-y-6 mb-10">
   <section>
-    <h2 class="text-xl font-semibold mb-2">Locação de equipamentos para construção civil</h2>
-    <div>
-      @for (c of categorias; track $index) {
+    <h2 class="text-4xl font-semibold my-10 text-center text-primary">
+      Locação de equipamentos para construção civil
+    </h2>
+    <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+      @for (c of categorias; track c.slug) {
       <a
-        class="bg-secondary text-primary px-2 py-1 rounded-full flex items-center justify-center w-12 h-12"
-        [routerLink]="['/equipamentos']"
+        class="card bg-primary text-primary-content shadow-md hover:shadow-lg transition-shadow"
+        [routerLink]="['/equipamentos', c.slug]"
         [attr.aria-label]="c.nome"
       >
-        <lucide-angular [img]="c.icone" class="w-6 h-6"></lucide-angular>
+        <figure class="bg-primary h-48">
+          <img [src]="c.avatar" [alt]="c.nome" class="w-full h-full object-cover" />
+        </figure>
+
+        <div class="card-body">
+          <div class="flex gap-6">
+            <div>
+              <lucide-angular [img]="c.icone" class="w-16 h-16 text-secondary"></lucide-angular>
+            </div>
+            <div>
+              <h3 class="card-title text-lg">{{ c.nome }}</h3>
+              <p class="text-sm opacity-80">{{ c.objetivo }}</p>
+            </div>
+          </div>
+
+          <!-- <div class="flex items-center gap-2">
+            
+          </div> -->
+        </div>
       </a>
-      <p>{{ c.nome }}</p>
       }
     </div>
   </section>
+</section>
 
-  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <div *ngFor="let e of itens" class="card bg-base-100 shadow">
-      <div class="card-body">
-        <h3 class="card-title">{{ e.nome }}</h3>
-        <!-- <p class="text-sm opacity-80">{{ e.equipamentoCategoria.nome }}</p> -->
-        <p class="mt-2">{{ e.descricao }}</p>
-        <div class="mt-3 text-sm">
-          <p><strong>Aplicação:</strong> {{ e.aplicacao }}</p>
-          <p><strong>Serviço:</strong> {{ e.tipoDeServico }}</p>
-          <p><strong>Período:</strong> {{ e.periodoDeLocacao }}</p>
-          <p><strong>Diferenciais:</strong> {{ e.diferenciais }}</p>
-        </div>
-        <div class="card-actions justify-end mt-3">
-          <a
-            class="btn btn-secondary"
-            [href]="whatsappHref(e)"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Pedir orçamento</a
-          >
-        </div>
-      </div>
+<section class="py-16 md:py-24 bg-muted">
+  <div class="container mx-auto px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 class="text-3xl md:text-4xl font-heading font-bold mb-4">
+        Não encontrou o equipamento que precisa?
+      </h2>
+      <p class="text-lg text-muted-foreground mb-8">
+        Entre em contato conosco! Temos diversos outros equipamentos disponíveis e nossa equipe terá
+        prazer em ajudar você a encontrar a solução ideal.
+      </p>
+      <a
+        href="https://wa.me/5581985555943?text=Olá!%20Gostaria%20de%20informações%20sobre%20equipamentos."
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-primary text-secondary"
+        >Falar com Nossa Equipe</a
+      >
     </div>
-  </section>
+  </div>
 </section>
