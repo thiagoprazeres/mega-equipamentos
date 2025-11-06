@@ -45,7 +45,6 @@ Barra Diagonal - Descrição: Travamento estrutural para garantir rigidez e segu
 Aplicações: Torres e fachadas de andaime. - Tipo de serviço: Reforço estrutural. - Período de locação:
 Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Galvanizada • Instalação rápida • Estabilidade
 
-
 Sapata Fixa - Descrição: Base de apoio para pisos nivelados, garantindo estabilidade do conjunto. -
 Aplicações: Pisos regulares e ambientes internos. - Tipo de serviço: Apoio e sustentação. - Período de
 locação:Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Apoio firme • Proteção anticorrosiva •
@@ -63,8 +62,8 @@ fácil • Segurança
 Rodízio para Andaime - Descrição: Roda com trava dupla acoplada à base para movimentação segura.
 
 - Aplicações: Obras internas, manutenção e pintura. - Tipo de serviço: Mobilidade de torres. - Período
-de locação:Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Rodas reforçadas • Travamento
-eficiente • Para pisos lisos
+  de locação:Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Rodas reforçadas • Travamento
+  eficiente • Para pisos lisos
 
 Escada de Andaime - Descrição: Módulo de acesso com degraus antiderrapantes; opção com alçapão
 para passagem entre níveis. - Aplicações: Montagens de fachada, manutenção e pintura. - Tipo de
@@ -88,14 +87,13 @@ Diferenciais: Estrutura reforçada • Ampla regulagem • Pintura protetiva
 Forcado Simples/Duplo - Descrição: Apoio superior para escoras, garantindo encaixe seguro de vigas.
 
 - Aplicações: Lajes, formas e vigas metálicas. - Tipo de serviço: Apoio e sustentação de formas. -
-Período de locação:Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Encaixe rápido • Aço de alta
-resistência • Compatível com toda a linha
+  Período de locação:Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Encaixe rápido • Aço de alta
+  resistência • Compatível com toda a linha
 
 Vigas Metálicas 1,3 m / 2 m / 3 m - Descrição: Vigas de apoio para formas e lajes, em comprimentos
 variados. - Aplicações: Concretagem e estruturas temporárias. - Tipo de serviço: Apoio estrutural e
 travamento. - Período de locação:Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Alta rigidez •
 Acabamento protetivo • Modularidade
-
 
 Barra de Ancoragem e Travamento - Descrição: Sistema de barras/porcas para fixação e travamento
 de formas em vigas e pilares. - Aplicações: Concreto armado, pilares e painéis de forma. - Tipo de
@@ -145,7 +143,6 @@ Aplicações: Paredes, pisos e revestimentos. - Tipo de serviço: Reforma e perf
 locação:Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Compacto • Precisão • Menor fadiga do
 operador
 
-
 Serra Mármore - Descrição: Cortes em pisos cerâmicos, blocos e alvenaria com discos diamantados. -
 Aplicações: Revestimentos e acabamentos. - Tipo de serviço: Corte e acabamento. - Período de
 locação:Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Corte limpo • Alta rotação • Fácil de
@@ -193,7 +190,6 @@ Objetivo: Equipamentos de precisão e acabamento para marcenaria, instalação e
 
 Pistola Finca-Pinos - Descrição: Fixação rápida de pinos em concreto e aço com cartuchos de pólvora. -
 Aplicações: Instalações elétricas, hidráulicas e estruturas. - Tipo de serviço: Montagem e fixação. -
-
 
 Período de locação:Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Produtividade • Fixação
 instantânea • Sistema antirrecúo
@@ -246,7 +242,6 @@ Furadeira e Parafusadeira - Descrição: Perfuração e fixação rápidas; vers
 Aplicações: Montagens, instalações e marcenaria. - Tipo de serviço: Perfuração e fixação. - Período de
 locação:Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Alto torque • Leveza • Praticidade
 
-
 Plaina Elétrica - Descrição: Nivelamento e ajuste de superfícies de madeira. - Aplicações: Carpintaria e
 marcenaria. - Tipo de serviço: Acabamento em madeira. - Período de locação:Diária, Semanal,
 Quinzenal e Mensal. - Diferenciais: Lâminas precisas • Ajuste fino • Excelente acabamento
@@ -294,7 +289,6 @@ engate padrão e iluminação traseira. - Aplicações: Ferramentas, materiais e
 Tipo de serviço: Logística de pequeno porte. - Período de locação:Diária, Semanal, Quinzenal e
 Mensal. - Diferenciais: Aço tubular • ~500 kg de carga • Ideal para utilitários
 
-
 Carretinha 1,60 × 3,00 m (1 eixo) - Descrição: Plataforma ampla para máquinas e materiais maiores;
 piso com chapa antiderrapante. - Aplicações: Betoneiras, compactadores e cargas médias. - Tipo de
 serviço: Logística de médio porte. - Período de locação:Diária, Semanal, Quinzenal e Mensal. -
@@ -309,7 +303,4 @@ acabamento de fácil higienização. - Aplicações: Obras, eventos e áreas sem
 de serviço: Apoio de canteiro. - Período de locação: Diária, Semanal, Quinzenal e Mensal. -
 Diferenciais: Leve • Instalação rápida • Atende NR-
 
-Container Almoxarifado 1,50 × 3,00 × 2,00 m - Descrição: Armazenamento seguro de ferramentas/
-insumos com porta e ventilação. - Aplicações: Logística e apoio em obras. - Tipo de serviço: Guarda de
-materiais e suporte ao canteiro. - Período de locação:Diária, Semanal, Quinzenal e Mensal. -
-Diferenciais: Estrutura soldada • Tranca de segurança • Piso reforçado
+Container Almoxarifado 1,50 × 3,00 × 2,00 m - Descrição: Armazenamento seguro de ferramentas/insumos com porta e ventilação. - Aplicações: Logística e apoio em obras. - Tipo de serviço: Guarda de materiais e suporte ao canteiro. - Período de locação: Diária, Semanal, Quinzenal e Mensal. - Diferenciais: Estrutura soldada • Tranca de segurança • Piso reforçado

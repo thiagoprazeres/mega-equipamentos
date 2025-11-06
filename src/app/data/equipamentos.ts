@@ -521,7 +521,7 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Corte/desbaste/polimento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta rotação • Ergonomia • Trava de segurança',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Motores_e_Geradores],
   },
   {
     id: 47,
@@ -532,7 +532,7 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Pressurização e alimentação de ar.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Tanque reforçado • Válvula de segurança • Durável',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Motores_e_Geradores],
   },
   {
     id: 48,
@@ -543,7 +543,7 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Geração monofásica.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Energia estável • Autonomia prolongada • Operação simples',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Motores_e_Geradores],
   },
   {
     id: 49,
@@ -554,7 +554,7 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Drenagem e esgotamento.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Auto-limpeza • Baixo consumo • Baixo ruído',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Motores_e_Geradores],
   },
   {
     id: 50,
@@ -565,7 +565,7 @@ export const equipamentos: Equipamento[] = [
     tipoDeServico: 'Pintura profissional.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Alta pressão • Baixo consumo • Baixo ruído',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Ferramentas_Eletricas],
+    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Motores_e_Geradores],
   },
   {
     id: 51,
@@ -594,12 +594,12 @@ export const equipamentos: Equipamento[] = [
     id: 53,
     nome: 'Banheiro de Obra (Módulo Sanitário)',
     slug: 'banheiro-de-obra-modulo-sanitario',
-    descricao: 'Unidade sanitária móvel com ventilação e iluminação.',
-    aplicacao: 'Obras civis, eventos e serviços gerais.',
-    tipoDeServico: 'Sanitário móvel.',
+    descricao: 'Unidade sanitária móvel com ventilação e acabamento de fácil higienização.',
+    aplicacao: 'Obras, eventos e áreas sem infraestrutura fixa.',
+    tipoDeServico: 'Apoio de canteiro.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
-    diferenciais: 'Ventilação • Iluminação • Sanitário completo',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Reboque_e_Transporte],
+    diferenciais: 'Leve • Instalação rápida • Atende NR-18',
+    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Diversos],
   },
   {
     id: 54,
@@ -609,7 +609,7 @@ export const equipamentos: Equipamento[] = [
     aplicacao: 'Logística e apoio em obras.',
     tipoDeServico: 'Guarda de materiais e suporte ao canteiro.',
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
-    diferenciais: 'Porta • Ventilação • Armazenamento seguro',
-    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Reboque_e_Transporte],
+    diferenciais: 'Estrutura soldada • Tranca de segurança • Piso reforçado',
+    equipamentoCategoria: equipamentosCategorias[EquipamentosCategoriasId.Diversos],
   },
 ];

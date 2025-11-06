@@ -1,1 +1,88 @@
-<p>© 2025 Mega Equipamentos Ltda. Todos os direitos reservados.</p>
+<footer class="bg-secondary text-secondary-content">
+  <div class="container mx-auto px-4 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div class="space-y-3">
+      <a routerLink="/" class="inline-flex items-center gap-2">
+        <img src="logo-mega-equipamentos.png" alt="Mega Equipamentos" class="h-10 w-auto" />
+      </a>
+      <p class="opacity-90 text-sm max-w-xs">
+        Equipamentos de confiança para obras sem interrupção.
+      </p>
+    </div>
+
+    <div>
+      <h3 class="font-semibold mb-3">Links Rápidos</h3>
+      <ul class="space-y-2 opacity-90">
+        <li><a routerLink="/" class="link link-hover">Home</a></li>
+        <li><a routerLink="/quem-somos" class="link link-hover">Quem Somos</a></li>
+        <li><a routerLink="/equipamentos" class="link link-hover">Equipamentos</a></li>
+        <li><a routerLink="/como-alugar" class="link link-hover">Como Alugar</a></li>
+        <li><a routerLink="/blog" class="link link-hover">Blog</a></li>
+        <li><a routerLink="/contato" class="link link-hover">Contato</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="font-semibold mb-3">Contato</h3>
+      <ul class="space-y-2 opacity-90 text-sm">
+        <li class="flex items-center gap-2">
+          <lucide-angular [img]="PhoneCall" class="w-4 h-4"></lucide-angular>
+          <span
+            >WhatsApp:
+            <a
+              href="https://api.whatsapp.com/send/?phone=5581985555943"
+              target="_blank"
+              rel="noopener"
+              class="link"
+              >(81) 98555-5943</a
+            ></span
+          >
+        </li>
+        <li class="flex items-center gap-2">
+          <lucide-angular [img]="Mail" class="w-4 h-4"></lucide-angular>
+          <a href="mailto:megaequipamentospe@gmail.com" class="link"
+            >megaequipamentospe@gmail.com</a
+          >
+        </li>
+        <li class="flex items-center gap-2">
+          <lucide-angular [img]="Instagram" class="w-4 h-4"></lucide-angular>
+          <a href="https://www.instagram.com/mega_equip" target="_blank" rel="noopener" class="link"
+            >@mega_equip</a
+          >
+        </li>
+        <li class="flex items-center gap-2">
+          <lucide-angular [img]="MapPin" class="w-4 h-4"></lucide-angular>
+          <span>Base: Caruaru – PE</span>
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="font-semibold mb-3">Área de Atendimento</h3>
+      <p class="opacity-90 text-sm">
+        Caruaru, Toritama, Santa Cruz do Capibaribe, Bezerros, Belo Jardim e região.
+      </p>
+      <div class="mt-4 space-y-2 opacity-90 text-sm">
+        <div class="flex items-center gap-2">
+          <lucide-angular [img]="Building2" class="w-4 h-4"></lucide-angular>
+          <span
+            >CNPJ: 00.000.000/0000-00 <br />
+            IE: 000.000.000.000</span
+          >
+        </div>
+        <div class="flex items-center gap-2">
+          <lucide-angular [img]="Clock" class="w-4 h-4"></lucide-angular>
+          <span>Seg a Sex: 08h às 17h • Sáb: 08h às 12h</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-[#EFBE00]">
+    <div
+      class="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2 text-xs opacity-90"
+    >
+      <p>© {{ year }} Mega Equipamentos. Todos os direitos reservados.</p>
+      <p>Desenvolvido pela Cafeína Dev</p>
+    </div>
+  </div>
+</footer>

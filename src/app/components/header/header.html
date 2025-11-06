@@ -1,1 +1,75 @@
-<img src="logo-mega-equipamentos-branca.png" alt="Logo Mega Equipamentos">
+<header>
+  <div class="bg-primary text-primary-content">
+    <div class="mx-auto max-w-7xl justify-between px-2 py-1 text-xs hidden lg:flex">
+      <div>Locação de equipamentos para construção civil</div>
+      <a href="https://api.whatsapp.com/send/?phone=5581985555943" target="_blank"
+        >Fale com a gente: <span class="text-secondary">(81) 98555-5943</span></a
+      >
+    </div>
+    <div class="mx-auto max-w-7xl justify-between px-2 py-1 text-xs flex lg:hidden">
+      <div>Locação para construção civil</div>
+      <a
+        href="https://api.whatsapp.com/send/?phone=5581985555943"
+        target="_blank"
+        class="text-secondary"
+        >(81) 98555-5943</a
+      >
+    </div>
+  </div>
+  <div
+    class="bg-[#3679D2]/30 text-primary-content absolute w-full backdrop-blur-xs shadow-xs border-b border-white/20"
+  >
+    <div class="navbar container mx-auto">
+      <div class="navbar-start">
+        <a routerLink="/">
+          <img src="logo-mega-equipamentos-branca.png" alt="Mega Equipamentos" class="h-8 w-auto" />
+        </a>
+      </div>
+      <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal gap-1 font-medium">
+          <li><a routerLink="/">Home</a></li>
+          <li><a routerLink="/quem-somos">Quem Somos</a></li>
+          <li><a routerLink="/equipamentos">Equipamentos</a></li>
+          <li><a routerLink="/como-alugar">Como Alugar</a></li>
+          <li><a routerLink="/blog">Blog</a></li>
+          <li><a routerLink="/contato">Contato</a></li>
+        </ul>
+      </div>
+      <div class="navbar-end hidden lg:flex">
+        <a routerLink="/contato" class="btn btn-secondary shadow-xs border-none">
+          <lucide-angular [img]="PhoneCall" class="my-icon w-5 h-5"></lucide-angular>
+          Solicitar orçamento
+        </a>
+      </div>
+      <div class="navbar-end lg:hidden">
+        <details class="dropdown dropdown-end">
+          <summary class="btn btn-ghost">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              class="inline-block h-5 w-5 stroke-current"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
+          </summary>
+          <ul
+            class="menu dropdown-content bg-base-100 text-primary rounded-box z-1 mt-2 w-52 p-2 shadow"
+          >
+            <li><a routerLink="/">Home</a></li>
+            <li><a routerLink="/quem-somos">Quem Somos</a></li>
+            <li><a routerLink="/equipamentos">Equipamentos</a></li>
+            <li><a routerLink="/como-alugar">Como Alugar</a></li>
+            <li><a routerLink="/blog">Blog</a></li>
+            <li><a routerLink="/contato">Contato</a></li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </div>
+</header>

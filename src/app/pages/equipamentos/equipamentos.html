@@ -1,0 +1,32 @@
+<section class="container mx-auto p-4 space-y-6">
+  <h1 class="text-3xl font-bold">Equipamentos</h1>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-2">Categorias</h2>
+    <div class="flex flex-wrap gap-2">
+      <a *ngFor="let c of categorias" class="badge badge-lg hover:badge-primary inline-flex items-center gap-2" [routerLink]="['/equipamentos']" [attr.aria-label]="c.nome">
+        <!-- <img [src]="c.foto" [alt]="c.nome" class="size-4" /> -->
+        <span>{{ c.nome }}</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div *ngFor="let e of itens" class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h3 class="card-title">{{ e.nome }}</h3>
+        <!-- <p class="text-sm opacity-80">{{ e.equipamentoCategoria.nome }}</p> -->
+        <p class="mt-2">{{ e.descricao }}</p>
+        <div class="mt-3 text-sm">
+          <p><strong>Aplicação:</strong> {{ e.aplicacao }}</p>
+          <p><strong>Serviço:</strong> {{ e.tipoDeServico }}</p>
+          <p><strong>Período:</strong> {{ e.periodoDeLocacao }}</p>
+          <p><strong>Diferenciais:</strong> {{ e.diferenciais }}</p>
+        </div>
+        <div class="card-actions justify-end mt-3">
+          <a class="btn btn-secondary" [href]="whatsappHref(e)" target="_blank" rel="noopener noreferrer">Pedir orçamento</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>

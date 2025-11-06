@@ -1,0 +1,69 @@
+<section class="bg-[url('/imagens/crop-architect-opening-blueprint.jpg')] bg-cover bg-center">
+  <div class="bg-linear-to-r from-primary to-[#3679D2]/10 pt-20">
+    <div class="container mx-auto text-primary-content py-20 px-2">
+      <div class="lg:max-w-1/2 mr-0">
+        <h1 class="text-5xl lg:text-6xl font-extrabold">
+          Equipamentos de confiança para obras sem interrupção
+        </h1>
+        <p class="mt-4 text-2xl">
+          Locação diária, semanal, quinzenal e mensal. Entrega rápida em Caruaru e região.
+        </p>
+        <a
+          class="btn btn-outline border-white/40 btn-light bg-white/5 shadow-none mt-6 backdrop-blur-sm hover:text-primary-content hover:border-white/60"
+          href="/equipamentos"
+          routerLink="/equipamentos"
+        >
+          <lucide-angular [img]="Drill" class="w-5 h-5"></lucide-angular>
+          Ver equipamentos
+        </a>
+      </div>
+      <div
+        class="py-5 text-center border-white/30 border btn-light bg-white/10 backdrop-blur-sm rounded-4xl mt-8 shadow-lg opacity-90 px-2"
+      >
+        <h2 class="text-4xl font-semibold">Por que escolher a Mega</h2>
+        <p class="text-xl mb-6 font-extralight">
+          A Mega Equipamentos é a sua parceira ideal para projetos de construção e obras.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          @for (diferencial of diferenciais; track $index) {
+          <div class="text-center md:px-5">
+            <lucide-angular
+              [img]="diferencial.icone"
+              class="my-icon w-16 h-16 mx-auto mb-4"
+            ></lucide-angular>
+            <h3 class="text-lg font-semibold">{{ diferencial.titulo }}</h3>
+            <p class="text-base">{{ diferencial.descricao }}</p>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-base-200">
+  <div class="container mx-auto py-10 text-center px-2">
+    <h2 class="text-4xl font-extrabold text-primary">Nossos Equipamentos</h2>
+    <p class="mt-2 text-xl text-base-500">Amplo acervo para todas as necessidades da sua obra</p>
+    <div
+      class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 text-left"
+    >
+      <a
+        *ngFor="let c of categorias"
+        class="card bg-white shadow hover:shadow-md transition-shadow"
+        [routerLink]="['/equipamentos']"
+        [attr.aria-label]="c.nome"
+      >
+        <figure class="bg-primary">
+          <img [src]="c.avatar" [alt]="c.nome" class="h-40 w-full object-cover grayscale-50" />
+        </figure>
+        <div class="card-body">
+          <div class="flex items-center gap-2">
+            <h3 class="card-title text-lg">{{ c.nome }}</h3>
+          </div>
+          <p class="text-sm opacity-80">{{ c.objetivo }}</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
