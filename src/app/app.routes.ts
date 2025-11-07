@@ -10,11 +10,11 @@ import { ContatoPage } from './pages/contato/contato';
 
 export const routes: Routes = [
   { path: '', component: HomePage },
-  { path: 'quem-somos', component: QuemSomosPage },
-  { path: 'equipamentos', component: EquipamentosPage },
-  { path: 'equipamentos/:slug', component: EquipamentosCategoriaPage },
-  { path: 'como-alugar', component: ComoAlugarPage },
-  { path: 'blog', component: BlogPage },
-  { path: 'contato', component: ContatoPage },
+  { path: 'quem-somos', component: QuemSomosPage, title: 'Quem Somos' },
+  { path: 'equipamentos', component: EquipamentosPage, title: 'Equipamentos' },
+  { path: 'equipamentos/:slug', component: EquipamentosCategoriaPage, title: 'Equipamentos' },
+  { path: 'como-alugar', component: ComoAlugarPage, title: 'Como Alugar' },
+  { path: 'blog', component: BlogPage, title: 'Blog' },
+  { path: 'contato', component: ContatoPage, title: 'Contato' },
   { path: '**', redirectTo: '' },
 ];

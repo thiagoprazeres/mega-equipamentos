@@ -18,7 +18,7 @@
       <div class="navbar-start">
         <a href="/" routerLink="/">
           <img
-            src="logo-mega-equipamentos-branca-48px.png"
+            src="logo-mega-equipamentos-branca-96px.png"
             alt="Mega Equipamentos"
             class="h-auto md:h-12 w-auto"
           />
@@ -26,7 +26,15 @@
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal gap-1 font-medium text-base">
-          <li><a href="/" routerLink="/" routerLinkActive="active">Home</a></li>
+          <li>
+            <a
+              href="/"
+              routerLink="/"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              >Home</a
+            >
+          </li>
           <li>
             <a href="/quem-somos" routerLink="/quem-somos" routerLinkActive="active">Quem Somos</a>
           </li>
@@ -71,7 +79,14 @@
             class="menu dropdown-content bg-base-100 text-primary rounded-box z-1 mt-2 w-52 p-2 shadow"
           >
             <li>
-              <a href="/" routerLink="/" (click)="handleClick()" routerLinkActive="active">Home</a>
+              <a
+                href="/"
+                routerLink="/"
+                (click)="handleClick()"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                >Home</a
+              >
             </li>
             <li>
               <a

@@ -5,7 +5,7 @@ import { LucideAngularModule, PhoneCall } from 'lucide-angular';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule],
+  imports: [RouterLink, RouterLinkActive, LucideAngularModule],
   templateUrl: './header.html',
   styleUrls: ['./header.css'],
 })

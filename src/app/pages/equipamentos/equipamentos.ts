@@ -29,9 +29,9 @@ export class EquipamentosPage {
 
   whatsappHref(e: Equipamento): string {
     const msg =
-      'Olá! 👋 Sou da Mega Equipamentos. Recebi sua mensagem pelo site. Equipamento: ' +
+      'Olá! Vi o equipamento ' +
       e.nome +
-      ' | Período: (diária/semanal/quinzenal/mensal)';
+      ' no site da Mega Equipamentos. Quero tengo interesse em alugar.';
     const encoded = encodeURIComponent(msg);
     return `https://wa.me/5581985555943?text=${encoded}`;
   }
