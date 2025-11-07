@@ -5,10 +5,10 @@
   <div class="bg-linear-to-r from-primary to-[#3679D2]/10 pt-20">
     <div class="container mx-auto text-primary-content py-10 px-2">
       <div class="lg:max-w-1/2 mr-0">
-        <h1 class="text-5xl lg:text-6xl font-extrabold">
+        <h1 class="text-4xl lg:text-5xl font-extrabold">
           Equipamentos de confiança para obras sem interrupção
         </h1>
-        <p class="mt-4 text-2xl">
+        <p class="mt-4 text-xl">
           Locação diária, semanal, quinzenal e mensal. Entrega rápida em Caruaru e região.
         </p>
         <a
@@ -51,15 +51,18 @@
       Amplo acervo para todas as necessidades da sua obra
     </p>
 
-    <div class="flex flex-wrap gap-4 mt-8">
+    <div class="mt-8 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
       @for (c of categorias; track $index) {
       <a
-        class="bg-linear-to-t from-primary to-[#3679D2] text-primary-content px-2 py-1 rounded-4xl flex flex-col items-center justify-center w-48 h-48"
+        class="bg-linear-to-t from-primary to-[#3679D2] text-primary-content px-2 py-1 rounded-4xl flex flex-col items-center justify-center md:w-full md:h-48 w-full h-32"
         [routerLink]="['/equipamentos', c.slug]"
         [attr.aria-label]="c.nome"
       >
-        <lucide-angular [img]="c.icone" class="w-24 h-24 text-secondary"></lucide-angular>
-        <p class="text-center text-xl">{{ c.nome }}</p>
+        <lucide-angular
+          [img]="c.icone"
+          class="md:w-24 md:h-24 w-16 h-16 text-secondary"
+        ></lucide-angular>
+        <p class="text-center md:text-xl text-base">{{ c.nome }}</p>
       </a>
       }
       <a
@@ -68,9 +71,37 @@
       >
         <div class="flex items-center">
           <lucide-angular [img]="ArrowRight"></lucide-angular>
-          <h3 class="text-lg font-semibold">Ver todos os equipamentos</h3>
+          <h3 class="md:text-lg text-xs font-semibold">Ver todos os equipamentos</h3>
         </div>
       </a>
     </div>
+  </div>
+</section>
+
+<section class="bg-base-200 py-10 md:py-20">
+  <h2 class="text-4xl font-extrabold text-primary text-center">Instagram</h2>
+  <div class="w-[960px] mx-auto py-10 text-center px-2 hidden md:block">
+    <!-- SnapWidget -->
+    <iframe
+      src="https://snapwidget.com/embed/1112079"
+      class="snapwidget-widget"
+      allowtransparency="true"
+      frameborder="0"
+      scrolling="no"
+      style="border: none; overflow: hidden; width: 960px; height: 1058px"
+      title="Instagram"
+    ></iframe>
+  </div>
+  <div class="w-[320px] mx-auto py-10 text-center px-2 md:hidden block">
+    <!-- SnapWidget -->
+    <iframe
+      src="https://snapwidget.com/embed/1112069"
+      class="snapwidget-widget"
+      allowtransparency="true"
+      frameborder="0"
+      scrolling="no"
+      style="border: none; overflow: hidden; width: 320px; height: 1587px"
+      title="Instagram"
+    ></iframe>
   </div>
 </section>
