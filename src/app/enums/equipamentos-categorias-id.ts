@@ -5,9 +5,8 @@ export enum EquipamentosCategoriasId {
   Compactacao_e_Solo = 4,
   Concretagem = 5,
   Corte_e_Demolicao = 6,
-  Demolicao = 7,
-  Ferramentas_Eletricas = 8,
-  Motores_e_Geradores = 9,
-  Reboque_e_Transporte = 10,
-  Diversos = 11,
+  Ferramentas_Eletricas = 7,
+  Motores_e_Geradores = 8,
+  Reboque_e_Transporte = 9,
+  Diversos = 10,
 }

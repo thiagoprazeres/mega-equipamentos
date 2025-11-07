@@ -360,7 +360,7 @@ export const equipamentosData: Equipamento[] = [
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Leveza • Precisão • Fácil operação',
     equipamentoCategoria: equipamentosCategoriasData.find(
-      (e) => e.id === EquipamentosCategoriasId.Demolicao
+      (e) => e.id === EquipamentosCategoriasId.Corte_e_Demolicao
     )!,
   },
   {
@@ -373,7 +373,7 @@ export const equipamentosData: Equipamento[] = [
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Potência equilibrada • Ergonômico • Confiável',
     equipamentoCategoria: equipamentosCategoriasData.find(
-      (e) => e.id === EquipamentosCategoriasId.Demolicao
+      (e) => e.id === EquipamentosCategoriasId.Corte_e_Demolicao
     )!,
   },
   {
@@ -386,7 +386,7 @@ export const equipamentosData: Equipamento[] = [
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Potência equilibrada • Ergonômico • Confiável',
     equipamentoCategoria: equipamentosCategoriasData.find(
-      (e) => e.id === EquipamentosCategoriasId.Demolicao
+      (e) => e.id === EquipamentosCategoriasId.Corte_e_Demolicao
     )!,
   },
   {
@@ -399,7 +399,7 @@ export const equipamentosData: Equipamento[] = [
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Durabilidade • Alta força • Desempenho superior',
     equipamentoCategoria: equipamentosCategoriasData.find(
-      (e) => e.id === EquipamentosCategoriasId.Demolicao
+      (e) => e.id === EquipamentosCategoriasId.Corte_e_Demolicao
     )!,
   },
   {
@@ -412,7 +412,7 @@ export const equipamentosData: Equipamento[] = [
     periodoDeLocacao: 'Diária, Semanal, Quinzenal e Mensal.',
     diferenciais: 'Força superior • Robustez • Alto rendimento',
     equipamentoCategoria: equipamentosCategoriasData.find(
-      (e) => e.id === EquipamentosCategoriasId.Demolicao
+      (e) => e.id === EquipamentosCategoriasId.Corte_e_Demolicao
     )!,
   },
   {

@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { equipamentosCategoriasData } from '../../data/equipamentos-categorias-data';
 import { EquipamentoCategoria } from '../../interfaces/equipamento-categoria';
+import { LucideIconData } from 'lucide-angular';
 import { LucideAngularModule, Shield, Clock, Wrench, Drill, TrendingUp, ArrowRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [LucideAngularModule, CommonModule, RouterLink],
+  imports: [LucideAngularModule, CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
 })
