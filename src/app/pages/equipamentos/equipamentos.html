@@ -17,6 +17,46 @@
     <h2 class="text-4xl font-semibold my-10 text-center text-primary">
       Locação de equipamentos para construção civil
     </h2>
+    <div class="join w-full px-2">
+      <div class="w-full">
+        <label class="input input-sm md:input-md lg:input-lg validator join-item w-full">
+          <lucide-angular [img]="Search" class="h-[1em] opacity-50"></lucide-angular>
+          <input
+            type="search"
+            placeholder="Pesquisa equipamentos ou categorias"
+            [value]="query"
+            (input)="onInput($any($event.target).value)"
+            required
+          />
+        </label>
+      </div>
+      <button
+        class="btn btn-neutral btn-sm md:btn-md lg:btn-lg join-item"
+        (click)="onSelect(suggestions[0])"
+        [disabled]="!suggestions.length"
+      >
+        Procurar
+      </button>
+    </div>
+
+    @if (suggestions.length) {
+    <div
+      class="absolute z-20 mt-2 bg-base-100 border border-base-300 rounded-box shadow"
+    >
+      <ul class="menu menu-xs md:menu-sm lg:menu-md">
+        @for (s of suggestions; track s.slug) {
+        <li>
+          <button class="justify-start gap-2" (click)="onSelect(s)">
+            <span class="badge badge-ghost">{{
+              s.kind === 'categoria' ? 'Categoria' : 'Equipamento'
+            }}</span>
+            <span>{{ s.label }}</span>
+          </button>
+        </li>
+        }
+      </ul>
+    </div>
+    }
     <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left px-2">
       @for (c of categorias; track c.slug) {
       <a
