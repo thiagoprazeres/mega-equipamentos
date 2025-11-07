@@ -83,7 +83,7 @@ export const equipamentosData: Equipamento[] = [
     id: 6,
     nome: 'Plataforma Metálica',
     slug: 'plataforma-metalica',
-    avatar: 'https://casadoconstrutor.com.br/sites/default/files/2025-04/Andaime-Retr%C3%A1til.jpg',
+    avatar: 'https://http2.mlstatic.com/D_NQ_NP_2X_689863-MLB40694690033_022020-F.webp',
     descricao: 'Piso metálico antiderrapante para circulação segura nas torres de andaime.',
     aplicacao: 'Serviços em altura, pintura, acabamento.',
     tipoDeServico: 'Apoio e circulação.',
@@ -97,8 +97,7 @@ export const equipamentosData: Equipamento[] = [
     id: 7,
     nome: 'Barra Diagonal',
     slug: 'barra-diagonal',
-    avatar:
-      'https://galpaodalocacao.com.br/wp-content/webp-express/webp-images/uploads/2023/11/destaque-1.jpg.webp',
+    avatar: 'https://quifabra.com.br/wp-content/uploads/2022/02/diagonal.jpg',
     descricao: 'Travamento estrutural para garantir rigidez e segurança das torres.',
     aplicacao: 'Torres e fachadas de andaime.',
     tipoDeServico: 'Reforço estrutural.',
