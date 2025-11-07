@@ -3,7 +3,7 @@ import { EquipamentoCategoria } from "./equipamento-categoria";
 export interface Equipamento {
     id: number;
     nome: string;
-    foto?: string;
+    avatar?: string;
     slug: string;
     descricao: string;
     aplicacao: string;

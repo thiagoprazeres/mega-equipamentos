@@ -38,7 +38,8 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Soil Compaction',
     slug: 'compactacao-e-solo',
     icone: 'icones/Compactacao_e_Solo.png',
-    avatar: '/imagens/equipamentos/placa-vibratoria.jpg',
+    avatar:
+      'https://www.transobra.com.br/wp-content/uploads/2023/12/07A-O-que-e-compactacao_IMG-DESTAQUE-Qualidade-02.jpg',
     objetivo: 'Garantir estabilidade e resistência do solo antes da concretagem e pavimentação.',
   },
   {
@@ -65,7 +66,8 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     nome: 'Ferramentas Elétricas',
     name: 'Power Tools',
     slug: 'ferramentas-eletricas',
-    icone: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDIwMCIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWRyaWxsLWljb24gbHVjaWRlLWRyaWxsIj48cGF0aCBkPSJNMTAgMThhMSAxIDAgMCAxIDEgMXYyYTEgMSAwIDAgMS0xIDFINWEzIDMgMCAwIDEtMy0zIDEgMSAwIDAgMSAxLTF6Ii8+PHBhdGggZD0iTTEzIDEwSDRhMiAyIDAgMCAxLTItMlY0YTIgMiAwIDAgMSAyLTJoOWExIDEgMCAwIDEgMSAxdjZhMSAxIDAgMCAxLTEgMWwtLjgxIDMuMjQyYTEgMSAwIDAgMS0uOTcuNzU4SDgiLz48cGF0aCBkPSJNMTQgNGgzYTEgMSAwIDAgMSAxIDF2MmExIDEgMCAwIDEtMSAxaC0zIi8+PHBhdGggZD0iTTE4IDZoNCIvPjxwYXRoIGQ9Im01IDEwLTIgOCIvPjxwYXRoIGQ9Im03IDE4IDItOCIvPjwvc3ZnPg==',
+    icone:
+      'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDIwMCIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWRyaWxsLWljb24gbHVjaWRlLWRyaWxsIj48cGF0aCBkPSJNMTAgMThhMSAxIDAgMCAxIDEgMXYyYTEgMSAwIDAgMS0xIDFINWEzIDMgMCAwIDEtMy0zIDEgMSAwIDAgMSAxLTF6Ii8+PHBhdGggZD0iTTEzIDEwSDRhMiAyIDAgMCAxLTItMlY0YTIgMiAwIDAgMSAyLTJoOWExIDEgMCAwIDEgMSAxdjZhMSAxIDAgMCAxLTEgMWwtLjgxIDMuMjQyYTEgMSAwIDAgMS0uOTcuNzU4SDgiLz48cGF0aCBkPSJNMTQgNGgzYTEgMSAwIDAgMSAxIDF2MmExIDEgMCAwIDEtMSAxaC0zIi8+PHBhdGggZD0iTTE4IDZoNCIvPjxwYXRoIGQ9Im01IDEwLTIgOCIvPjxwYXRoIGQ9Im03IDE4IDItOCIvPjwvc3ZnPg==',
     avatar:
       'https://conecta.fg.com.br/wp-content/uploads/2023/12/37_Aprenda_como_escolher_o_n%C3%ADvel_a_laser_ideal_para_seu_trabalho_blog.png',
     objetivo: 'Equipamentos de precisão e acabamento para marcenaria, instalação e manutenção.',
@@ -85,8 +87,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Trailers and Transport',
     slug: 'reboque-e-transporte',
     icone: 'icones/Reboque.png',
-    avatar:
-      'https://images.pexels.com/photos/188679/pexels-photo-188679.jpeg?w=800&h=600&auto=compress',
+    avatar: '/imagens/equipamentos/Reboque_e_Transporte/Reboque_e_Transporte.jpeg',
     objetivo: 'Soluções logísticas seguras para transporte de materiais e equipamentos.',
   },
   {
@@ -95,8 +96,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Miscellaneous',
     slug: 'diversos',
     icone: 'icones/Diversos.png',
-    avatar:
-      'https://www.c3equipamentos.com.br/images/Blog/diadamulher-americandaimes-1200x800.webp',
+    avatar: 'imagens/equipamentos/Diversos/container-almoxarifado-1-50-x-3-00-x-2-00-m.jpeg',
     objetivo: 'Apoio à estrutura e organização do canteiro de obras.',
   },
 ];

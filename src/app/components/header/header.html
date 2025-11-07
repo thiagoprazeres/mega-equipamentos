@@ -18,7 +18,7 @@
       <div class="navbar-start">
         <a href="/" routerLink="/">
           <img
-            src="logo-mega-equipamentos-branca.png"
+            src="logo-mega-equipamentos-branca-48px.png"
             alt="Mega Equipamentos"
             class="h-auto md:h-12 w-auto"
           />
@@ -26,12 +26,22 @@
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal gap-1 font-medium text-base">
-          <li><a href="/" routerLink="/">Home</a></li>
-          <li><a href="/quem-somos" routerLink="/quem-somos">Quem Somos</a></li>
-          <li><a href="/equipamentos" routerLink="/equipamentos">Equipamentos</a></li>
-          <li><a href="/como-alugar" routerLink="/como-alugar">Como Alugar</a></li>
+          <li><a href="/" routerLink="/" routerLinkActive="active">Home</a></li>
+          <li>
+            <a href="/quem-somos" routerLink="/quem-somos" routerLinkActive="active">Quem Somos</a>
+          </li>
+          <li>
+            <a href="/equipamentos" routerLink="/equipamentos" routerLinkActive="active"
+              >Equipamentos</a
+            >
+          </li>
+          <li>
+            <a href="/como-alugar" routerLink="/como-alugar" routerLinkActive="active"
+              >Como Alugar</a
+            >
+          </li>
           <!-- <li><a href="/blog" routerLink="/blog">Blog</a></li> -->
-          <li><a href="/contato" routerLink="/contato">Contato</a></li>
+          <li><a href="/contato" routerLink="/contato" routerLinkActive="active">Contato</a></li>
         </ul>
       </div>
       <div class="navbar-end hidden lg:flex">
@@ -42,7 +52,7 @@
       </div>
       <div class="navbar-end lg:hidden">
         <details class="dropdown dropdown-end">
-          <summary class="btn btn-ghost">
+          <summary class="btn btn-ghost" #summary>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -60,12 +70,46 @@
           <ul
             class="menu dropdown-content bg-base-100 text-primary rounded-box z-1 mt-2 w-52 p-2 shadow"
           >
-            <li><a href="/" routerLink="/">Home</a></li>
-            <li><a href="/quem-somos" routerLink="/quem-somos">Quem Somos</a></li>
-            <li><a href="/equipamentos" routerLink="/equipamentos">Equipamentos</a></li>
-            <li><a href="/como-alugar" routerLink="/como-alugar">Como Alugar</a></li>
+            <li>
+              <a href="/" routerLink="/" (click)="handleClick()" routerLinkActive="active">Home</a>
+            </li>
+            <li>
+              <a
+                href="/quem-somos"
+                routerLink="/quem-somos"
+                (click)="handleClick()"
+                routerLinkActive="active"
+                >Quem Somos</a
+              >
+            </li>
+            <li>
+              <a
+                href="/equipamentos"
+                routerLink="/equipamentos"
+                (click)="handleClick()"
+                routerLinkActive="active"
+                >Equipamentos</a
+              >
+            </li>
+            <li>
+              <a
+                href="/como-alugar"
+                routerLink="/como-alugar"
+                (click)="handleClick()"
+                routerLinkActive="active"
+                >Como Alugar</a
+              >
+            </li>
             <!-- <li><a routerLink="/blog">Blog</a></li> -->
-            <li><a href="/contato" routerLink="/contato">Contato</a></li>
+            <li>
+              <a
+                href="/contato"
+                routerLink="/contato"
+                (click)="handleClick()"
+                routerLinkActive="active"
+                >Contato</a
+              >
+            </li>
           </ul>
         </details>
       </div>

@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule, PhoneCall } from 'lucide-angular';
 
 @Component({
@@ -11,4 +11,9 @@ import { LucideAngularModule, PhoneCall } from 'lucide-angular';
 })
 export class Header {
   readonly PhoneCall = PhoneCall;
+  @ViewChild('summary') summary!: ElementRef<HTMLElement>;
+
+  handleClick() {
+    this.summary.nativeElement.click();
+  }
 }
