@@ -17,7 +17,7 @@
     <h2 class="text-4xl font-semibold my-10 text-center text-primary">
       Locação de equipamentos para construção civil
     </h2>
-    <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+    <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left px-2">
       @for (c of categorias; track c.slug) {
       <a
         class="card bg-primary text-primary-content shadow-md hover:shadow-lg transition-shadow"
@@ -29,19 +29,8 @@
         </figure>
 
         <div class="card-body">
-          <div class="flex gap-6">
-            <div>
-              <!-- <lucide-angular [img]="c.icone" class="w-16 h-16 text-secondary"></lucide-angular> -->
-            </div>
-            <div>
-              <h3 class="card-title text-lg">{{ c.nome }}</h3>
-              <p class="text-sm opacity-80">{{ c.objetivo }}</p>
-            </div>
-          </div>
-
-          <!-- <div class="flex items-center gap-2">
-            
-          </div> -->
+          <h3 class="card-title text-lg">{{ c.nome }}</h3>
+          <p class="text-sm opacity-80">{{ c.objetivo }}</p>
         </div>
       </a>
       }
