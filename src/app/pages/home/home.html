@@ -2,13 +2,13 @@
   id="hero"
   class="bg-[url('/imagens/crop-architect-opening-blueprint.webp')] bg-cover bg-center"
 >
-  <div class="bg-linear-to-r from-primary to-[#3679D2]/10 pt-20">
+  <div class="bg-linear-to-r from-primary to-[#3679D2]/70 md:to-[#3679D2]/10 pt-20">
     <div class="container mx-auto text-primary-content py-10 px-2">
       <div class="lg:max-w-1/2 mr-0">
-        <h1 class="text-4xl lg:text-5xl font-extrabold">
+        <h1 class="text-3xl lg:text-5xl font-extrabold">
           Equipamentos de confiança para obras sem interrupção
         </h1>
-        <p class="mt-4 text-xl">
+        <p class="mt-4 text-base md:text-xl">
           Locação diária, semanal, quinzenal e mensal. Entrega rápida em Caruaru e região.
         </p>
         <a
@@ -23,8 +23,8 @@
       <div
         class="py-5 text-center border-white/30 border btn-light bg-white/10 backdrop-blur-sm rounded-4xl mt-8 shadow-lg opacity-90 px-2"
       >
-        <h2 class="text-4xl font-semibold">Por que escolher a Mega</h2>
-        <p class="text-xl mb-6 font-extralight">
+        <h2 class="text-2xl font-semibold md:text-4xl">Por que escolher a Mega</h2>
+        <p class="text-base md:text-xl mb-6 font-extralight">
           A Mega Equipamentos é a sua parceira ideal para projetos de construção e obras.
         </p>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
@@ -32,10 +32,10 @@
           <div class="text-center md:px-5">
             <lucide-angular
               [img]="diferencial.icone"
-              class="my-icon w-16 h-16 mx-auto mb-4"
+              class="my-icon w-12 h-12 md:w-16 md:h-16 mx-auto mb-4"
             ></lucide-angular>
-            <h3 class="text-lg font-semibold">{{ diferencial.titulo }}</h3>
-            <p class="text-base">{{ diferencial.descricao }}</p>
+            <h3 class="text-base font-semibold md:text-lg">{{ diferencial.titulo }}</h3>
+            <p class="text-sm md:text-base">{{ diferencial.descricao }}</p>
           </div>
           }
         </div>
@@ -68,9 +68,9 @@
       }
       <a
         routerLink="/equipamentos"
-        class="px-2 py-1 rounded-4xl flex flex-col items-center justify-center w-48 h-48"
+        class="px-2 py-1 rounded-4xl flex flex-col items-center justify-center md:w-full md:h-48 w-full h-32 col-span-2"
       >
-        <div class="flex items-center">
+        <div class="flex items-center gap-2">
           <lucide-angular [img]="ArrowRight"></lucide-angular>
           <h3 class="md:text-lg text-xs font-semibold">Ver todos os equipamentos</h3>
         </div>
