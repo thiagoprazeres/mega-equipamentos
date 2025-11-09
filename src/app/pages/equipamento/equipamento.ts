@@ -1,46 +1,45 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { equipamentosData } from '../../data/equipamentos-data';
-import { equipamentosCategoriasData } from '../../data/equipamentos-categorias-data';
 import { Equipamento } from '../../interfaces/equipamento';
 import { EquipamentoCategoria } from '../../interfaces/equipamento-categoria';
 import { Title, Meta } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-equipamentos-categoria',
+  selector: 'app-equipamento',
   standalone: true,
   imports: [CommonModule, RouterLink, LucideAngularModule],
-  templateUrl: './equipamentos-categoria.html',
-  styleUrl: './equipamentos-categoria.css',
+  templateUrl: './equipamento.html',
+  styleUrl: './equipamento.css',
 })
-export class EquipamentosCategoriaPage {
-  categoria!: EquipamentoCategoria;
-  itens: Equipamento[] = [];
-  slug: string = '';
+export class EquipamentoPage {
+  equipamento!: Equipamento | undefined;
+  categoria!: EquipamentoCategoria | undefined;
+  categoriaSlug = '';
 
   constructor(private route: ActivatedRoute, private title: Title, private meta: Meta) {
+    const categoriaSlug = this.route.snapshot.paramMap.get('categoriaSlug') || '';
     const slug = this.route.snapshot.paramMap.get('slug') || '';
-    this.slug = slug;
-    const cat = equipamentosCategoriasData.find((c) => c.slug === slug);
-    this.categoria = cat || equipamentosCategoriasData[0];
-    this.itens = equipamentosData.filter(
-      (e) => e.equipamentoCategoria.slug === this.categoria.slug
-    );
 
-    const nome = this.categoria?.nome || 'Equipamentos';
-    let desc = (this.categoria?.objetivo || 'Locação de equipamentos').replace(/\s+/g, ' ').trim();
+    this.categoriaSlug = categoriaSlug;
+    this.equipamento = equipamentosData.find((e) => e.slug === slug);
+    this.categoria = this.equipamento?.equipamentoCategoria;
+
+    const nome = this.equipamento?.nome || 'Equipamento';
+    let desc = (this.equipamento?.descricao || 'Locação de equipamentos').replace(/\s+/g, ' ').trim();
     if (desc.length > 160) {
       desc = (desc.slice(0, 157).trimEnd() + '...');
     }
-    const img = this.categoria?.avatar || 'https://megaequip.com.br/images/logo-capa.png';
-    const url = `https://megaequip.com.br/equipamentos/${slug}`;
+    const img =
+      this.equipamento?.avatar || this.categoria?.avatar || 'https://megaequip.com.br/images/logo-capa.png';
+    const url = `https://megaequip.com.br/equipamentos/${categoriaSlug}/${slug}`;
 
-    this.title.setTitle(`Equipamentos - ${nome}`);
+    this.title.setTitle(`${nome} — ${this.categoria?.nome || 'Mega Equipamentos'}`);
 
     this.meta.updateTag({ name: 'description', content: desc });
-    this.meta.updateTag({ property: 'og:type', content: 'website' });
+    this.meta.updateTag({ property: 'og:type', content: 'product' });
     this.meta.updateTag({ property: 'og:url', content: url });
     this.meta.updateTag({ property: 'og:title', content: nome });
     this.meta.updateTag({ property: 'og:description', content: desc });
@@ -53,10 +52,11 @@ export class EquipamentosCategoriaPage {
     this.meta.updateTag({ name: 'twitter:image', content: img });
   }
 
-  whatsappHref(e: Equipamento): string {
+  whatsappHref(): string {
+    if (!this.equipamento) return 'https://wa.me/5581985555943';
     const msg =
       'Olá! 👋 Sou da Mega Equipamentos. Recebi sua mensagem pelo site. Equipamento: ' +
-      e.nome +
+      this.equipamento.nome +
       ' | Período: (diária/semanal/quinzenal/mensal)';
     const encoded = encodeURIComponent(msg);
     return `https://wa.me/5581985555943?text=${encoded}`;
