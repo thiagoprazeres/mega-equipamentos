@@ -696,8 +696,8 @@ export const equipamentosData: Equipamento[] = [
   },
   {
     id: 52,
-    nome: 'Carretinha 1,60 × 3,00 m (1 eixo)',
-    slug: 'carretinha-1-60-x-3-00-m-1-eixo',
+    nome: 'Reboque 1,60 × 3,00 m (1 eixo)',
+    slug: 'reboque-1-60-x-3-00-m-1-eixo',
     avatar: 'https://http2.mlstatic.com/D_NQ_NP_2X_600666-MLB93848265857_092025-F.webp',
     descricao: 'Plataforma ampla para máquinas e materiais maiores; piso com chapa antiderrapante.',
     aplicacao: 'Betoneiras, compactadores e cargas médias.',
