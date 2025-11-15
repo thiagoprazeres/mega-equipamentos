@@ -28,12 +28,16 @@ export class EquipamentoPage {
     this.categoria = this.equipamento?.equipamentoCategoria;
 
     const nome = this.equipamento?.nome || 'Equipamento';
-    let desc = (this.equipamento?.descricao || 'Locação de equipamentos').replace(/\s+/g, ' ').trim();
+    let desc = (this.equipamento?.descricao || 'Locação de equipamentos')
+      .replace(/\s+/g, ' ')
+      .trim();
     if (desc.length > 160) {
-      desc = (desc.slice(0, 157).trimEnd() + '...');
+      desc = desc.slice(0, 157).trimEnd() + '...';
     }
     const img =
-      this.equipamento?.avatar || this.categoria?.avatar || 'https://megaequip.com.br/images/logo-capa.png';
+      this.equipamento?.avatar ||
+      this.categoria?.avatar ||
+      'https://megaequip.com.br/images/logo-capa.png';
     const url = `https://megaequip.com.br/equipamentos/${categoriaSlug}/${slug}`;
 
     this.title.setTitle(`${nome} — ${this.categoria?.nome || 'Mega Equipamentos'}`);
@@ -55,11 +59,10 @@ export class EquipamentoPage {
   whatsappHref(): string {
     if (!this.equipamento) return 'https://wa.me/5581985555943';
     const msg =
-      'Olá! 👋 Sou da Mega Equipamentos. Recebi sua mensagem pelo site. Equipamento: ' +
+      'Olá! 👋 Estrou entrando em contato pelo site da Mega Equipamentos. Gostaria de solicitar um orçamento para locação de ' +
       this.equipamento.nome +
-      ' | Período: (diária/semanal/quinzenal/mensal)';
+      ' com o periodo de locação: (diária/semanal/quinzenal/mensal).';
     const encoded = encodeURIComponent(msg);
     return `https://wa.me/5581985555943?text=${encoded}`;
   }
 }
-

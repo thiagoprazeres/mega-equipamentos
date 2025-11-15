@@ -681,9 +681,9 @@ export const equipamentosData: Equipamento[] = [
   },
   {
     id: 51,
-    nome: 'Carretinha 1,20 × 1,80 m (1 eixo)',
-    slug: 'carretinha-1-20-x-1-80-m-1-eixo',
-    avatar: '/imagens/equipamentos/Reboque_e_Transporte/carretinha-1-20-x-1-80-m-1-eixo.png',
+    nome: 'Reboque 1,20 × 1,80 m (1 eixo)',
+    slug: 'reboque-1-20-x-1-80-m-1-eixo',
+    avatar: '/imagens/equipamentos/Reboque_e_Transporte/reboque-1-20-x-1-80-m-1-eixo.png',
     descricao:
       'Estrutura metálica reforçada para transporte leve; engate padrão e iluminação traseira.',
     aplicacao: 'Ferramentas, materiais e pequenos equipamentos.',
