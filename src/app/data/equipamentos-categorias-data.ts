@@ -28,6 +28,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Structural Shoring',
     slug: 'escoramento-de-estruturas',
     icone: 'icones/Escoramento_de_Estruturas.png',
+    video: 'videos/escoramento-de-estruturas.mp4',
     avatar:
       'https://images.pexels.com/photos/585419/pexels-photo-585419.jpeg?w=800&h=600&auto=compress&cs=tinysrgb',
     objetivo: 'Sustentação temporária de lajes, vigas e pilares durante concretagens.',

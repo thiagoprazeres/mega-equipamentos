@@ -1,8 +1,12 @@
-<section *ngIf="equipamento as e" class="min-h-[60vh]">
+@if(equipamento){
+<section class="min-h-[60vh]">
   <section
     id="hero"
     class="bg-cover bg-center"
-    [ngStyle]="{ backgroundImage: 'url(' + (e.avatar || categoria?.avatar) + ')' }"
+    [ngStyle]="{
+      backgroundImage:
+        'url(' + (equipamento.avatar || equipamento.equipamentoCategoria.avatar) + ')'
+    }"
   >
     <div class="bg-linear-to-r from-primary to-[#3679D2]/10 pt-20">
       <div class="container mx-auto text-primary-content py-14 px-2">
@@ -16,30 +20,29 @@
                 <li>
                   <a [routerLink]="['/equipamentos', categoriaSlug]">{{ categoria?.nome }}</a>
                 </li>
-                <li class="opacity-70">{{ e.nome }}</li>
+                <li class="opacity-70">{{ equipamento.nome }}</li>
               </ul>
             </div>
-            <h1 class="text-4xl lg:text-5xl font-extrabold">{{ e.nome }}</h1>
-            <p class="mt-1 text-xl">{{ e.descricao }}</p>
+            <h1 class="text-4xl lg:text-5xl font-extrabold">{{ equipamento.nome }}</h1>
+            <p class="mt-1 text-xl">{{ equipamento.descricao }}</p>
           </div>
         </div>
       </div>
     </div>
   </section>
-
   <section class="container mx-auto py-10 grid grid-cols-1 md:grid-cols-4 gap-8 px-2">
-    <img [src]="e.avatar" class="w-full rounded-4xl" />
+    <img [src]="equipamento.avatar" class="w-full rounded-4xl" />
     <div class="md:col-span-2 space-y-4">
       <div class="prose">
         <h2 class="text-2xl font-extrabold mb-3">Informações do equipamento</h2>
         <h3 class="text-xl font-bold">Aplicação</h3>
-        <p class="text-lg mb-3">{{ e.aplicacao }}</p>
+        <p class="text-lg mb-3">{{ equipamento.aplicacao }}</p>
         <h3 class="text-xl font-bold">Serviço</h3>
-        <p class="text-lg mb-3">{{ e.tipoDeServico }}</p>
+        <p class="text-lg mb-3">{{ equipamento.tipoDeServico }}</p>
         <h3 class="text-xl font-bold">Período de Locação</h3>
-        <p class="text-lg mb-3">{{ e.periodoDeLocacao }}</p>
+        <p class="text-lg mb-3">{{ equipamento.periodoDeLocacao }}</p>
         <h3 class="text-xl font-bold">Diferenciais</h3>
-        <p class="text-lg">{{ e.diferenciais }}</p>
+        <p class="text-lg">{{ equipamento.diferenciais }}</p>
       </div>
     </div>
     <aside class="md:col-span-1">
@@ -51,7 +54,7 @@
             [href]="whatsappHref()"
             target="_blank"
             rel="noopener noreferrer"
-            [title]="`Pedir orçamento de ${e.nome}`"
+            [title]="`Pedir orçamento de ${equipamento.nome}`"
           >
             <svg
               fill="currentColor"
@@ -76,10 +79,19 @@
         </div>
       </div>
     </aside>
+    @if(equipamento.video){
+    <div
+      class="w-full h-auto object-cover rounded-lg shadow-lg cursor-pointer md:overflow-hidden md:outline-4 md:outline-offset-2 md:outline-secondary mb-8 mt-10"
+    >
+      <video #videoStory [src]="equipamento.video" muted autoplay controls class="w-full"></video>
+    </div>
+    }
   </section>
 </section>
 
-<section *ngIf="!equipamento" class="container mx-auto py-20">
+} @else {
+<section class="container mx-auto py-20">
   <h1 class="text-2xl font-bold">Equipamento não encontrado</h1>
   <a class="link link-primary" [routerLink]="['/equipamentos', categoriaSlug]">Voltar</a>
 </section>
+}

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { equipamentosCategoriasData } from '../../data/equipamentos-categorias-data';
@@ -14,6 +14,8 @@ import { equipamentosData } from '../../data/equipamentos-data';
   styleUrl: './equipamentos.css',
 })
 export class EquipamentosPage {
+  @ViewChild('videoStory') videoStory!: ElementRef<HTMLVideoElement>;
+
   Search = Search;
   categorias = equipamentosCategoriasData;
   itens = equipamentosData;
@@ -72,5 +74,9 @@ export class EquipamentosPage {
     // limpar após navegação
     this.query = '';
     this.suggestions = [];
+  }
+
+  playAndGoFullscreen() {
+    this.videoStory.nativeElement.requestFullscreen();
   }
 }

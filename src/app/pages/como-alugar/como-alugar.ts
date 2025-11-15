@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Mail } from 'lucide-angular';
 
@@ -11,4 +11,10 @@ import { LucideAngularModule, Mail } from 'lucide-angular';
 })
 export class ComoAlugarPage {
   readonly Mail = Mail;
+
+  @ViewChild('videoStory') videoStory!: ElementRef<HTMLVideoElement>;
+
+  playAndGoFullscreen() {
+    this.videoStory.nativeElement.requestFullscreen();
+  }
 }

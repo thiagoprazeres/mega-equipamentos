@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -16,6 +16,8 @@ import { Title, Meta } from '@angular/platform-browser';
   styleUrl: './equipamentos-categoria.css',
 })
 export class EquipamentosCategoriaPage {
+
+  @ViewChild('videoStory') videoStory!: ElementRef<HTMLVideoElement>;
   categoria!: EquipamentoCategoria;
   itens: Equipamento[] = [];
   slug: string = '';
@@ -60,6 +62,10 @@ export class EquipamentosCategoriaPage {
       ' | Período: (diária/semanal/quinzenal/mensal)';
     const encoded = encodeURIComponent(msg);
     return `https://wa.me/5581985555943?text=${encoded}`;
+  }
+
+  playAndGoFullscreen() {
+    this.videoStory.nativeElement.requestFullscreen();
   }
 }
 

@@ -256,6 +256,7 @@ export const equipamentosData: Equipamento[] = [
     nome: 'Compactador de Solo (Sapo)',
     slug: 'compactador-de-solo-sapo',
     avatar: 'https://casadoconstrutor.com.br/sites/default/files/2024-05/compactador-de-solo02.jpg',
+    video: 'videos/compactador-de-solo-sapo.mp4',
     descricao:
       'Compactador de percussão para valas, fundações e áreas confinadas; motor de alto rendimento.',
     aplicacao: 'Solo argiloso, bases de calçadas e fundações.',

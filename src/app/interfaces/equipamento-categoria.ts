@@ -5,5 +5,6 @@ export interface EquipamentoCategoria {
   name: string;
   icone: string;
   avatar: string;
+  video?: string;
   objetivo: string;
 }

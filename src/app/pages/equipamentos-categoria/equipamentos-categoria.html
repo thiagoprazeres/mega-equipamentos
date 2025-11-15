@@ -28,6 +28,20 @@
 </section>
 
 <section class="container mx-auto py-10 space-y-6">
+  @if(categoria.video){
+    <div
+    class="w-48 h-48 object-cover mx-auto rounded-full shadow-lg cursor-pointer overflow-hidden outline-4 outline-offset-2 outline-secondary mb-8"
+    (click)="playAndGoFullscreen()"
+  >
+    <video
+      #videoStory
+      [src]="categoria.video"
+      muted
+      autoplay
+      class="w-full"
+    ></video>
+  </div>
+  }
   <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
     @for(e of itens; track e.id){
     <a
