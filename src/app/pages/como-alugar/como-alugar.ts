@@ -15,6 +15,7 @@ export class ComoAlugarPage {
   @ViewChild('videoStory') videoStory!: ElementRef<HTMLVideoElement>;
 
   playAndGoFullscreen() {
+    this.videoStory.nativeElement.play();
     this.videoStory.nativeElement.requestFullscreen();
   }
 }

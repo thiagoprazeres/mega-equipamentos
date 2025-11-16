@@ -16,7 +16,6 @@ import { Title, Meta } from '@angular/platform-browser';
   styleUrl: './equipamentos-categoria.css',
 })
 export class EquipamentosCategoriaPage {
-
   @ViewChild('videoStory') videoStory!: ElementRef<HTMLVideoElement>;
   categoria!: EquipamentoCategoria;
   itens: Equipamento[] = [];
@@ -34,7 +33,7 @@ export class EquipamentosCategoriaPage {
     const nome = this.categoria?.nome || 'Equipamentos';
     let desc = (this.categoria?.objetivo || 'Locação de equipamentos').replace(/\s+/g, ' ').trim();
     if (desc.length > 160) {
-      desc = (desc.slice(0, 157).trimEnd() + '...');
+      desc = desc.slice(0, 157).trimEnd() + '...';
     }
     const img = this.categoria?.avatar || 'https://megaequip.com.br/images/logo-capa.png';
     const url = `https://megaequip.com.br/equipamentos/${slug}`;
@@ -65,7 +64,7 @@ export class EquipamentosCategoriaPage {
   }
 
   playAndGoFullscreen() {
+    this.videoStory.nativeElement.play();
     this.videoStory.nativeElement.requestFullscreen();
   }
 }
-

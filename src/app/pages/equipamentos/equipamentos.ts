@@ -77,6 +77,7 @@ export class EquipamentosPage {
   }
 
   playAndGoFullscreen() {
+    this.videoStory.nativeElement.play();
     this.videoStory.nativeElement.requestFullscreen();
   }
 }
