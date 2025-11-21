@@ -54,15 +54,6 @@ export class EquipamentosCategoriaPage {
     this.meta.updateTag({ name: 'twitter:image', content: img });
   }
 
-  whatsappHref(e: Equipamento): string {
-    const msg =
-      'Olá! 👋 Sou da Mega Equipamentos. Recebi sua mensagem pelo site. Equipamento: ' +
-      e.nome +
-      ' | Período: (diária/semanal/quinzenal/mensal)';
-    const encoded = encodeURIComponent(msg);
-    return `https://wa.me/5581985555943?text=${encoded}`;
-  }
-
   playAndGoFullscreen() {
     this.videoStory.nativeElement.play();
     this.videoStory.nativeElement.requestFullscreen();
