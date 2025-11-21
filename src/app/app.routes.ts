@@ -6,7 +6,6 @@ import { EquipamentosPage } from './pages/equipamentos/equipamentos';
 import { EquipamentosCategoriaPage } from './pages/equipamentos-categoria/equipamentos-categoria';
 import { EquipamentoPage } from './pages/equipamento/equipamento';
 import { ComoAlugarPage } from './pages/como-alugar/como-alugar';
-import { BlogPage } from './pages/blog/blog';
 import { ContatoPage } from './pages/contato/contato';
 import { equipamentosCategoriasData } from './data/equipamentos-categorias-data';
 import { equipamentosData } from './data/equipamentos-data';
@@ -37,8 +36,6 @@ export const routes: Routes = [
     },
   },
   { path: 'como-alugar', component: ComoAlugarPage, title: 'Como Alugar' },
-  { path: 'blog', component: BlogPage, title: 'Blog' },
   { path: 'contato', component: ContatoPage, title: 'Contato' },
   { path: '**', redirectTo: '' },
 ];
-
