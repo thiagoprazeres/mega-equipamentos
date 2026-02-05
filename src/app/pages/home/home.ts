@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { equipamentosCategoriasData } from '../../data/equipamentos-categorias-data';
 import { EquipamentoCategoria } from '../../interfaces/equipamento-categoria';
@@ -9,7 +9,7 @@ import { LucideAngularModule, Shield, Clock, Wrench, Drill, TrendingUp, ArrowRig
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [LucideAngularModule, CommonModule, RouterLink, LucideAngularModule],
+  imports: [LucideAngularModule, RouterLink, LucideAngularModule],
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
 })

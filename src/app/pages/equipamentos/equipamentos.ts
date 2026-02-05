@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router, RouterLink } from '@angular/router';
 import { equipamentosCategoriasData } from '../../data/equipamentos-categorias-data';
 import { Equipamento } from '../../interfaces/equipamento';
@@ -9,12 +9,11 @@ import { equipamentosData } from '../../data/equipamentos-data';
 @Component({
   selector: 'app-equipamentos',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [RouterLink, LucideAngularModule],
   templateUrl: './equipamentos.html',
   styleUrl: './equipamentos.css',
 })
 export class EquipamentosPage {
-  @ViewChild('videoStory') videoStory!: ElementRef<HTMLVideoElement>;
 
   Search = Search;
   categorias = equipamentosCategoriasData;
@@ -74,10 +73,5 @@ export class EquipamentosPage {
     // limpar após navegação
     this.query = '';
     this.suggestions = [];
-  }
-
-  playAndGoFullscreen() {
-    this.videoStory.nativeElement.play();
-    this.videoStory.nativeElement.requestFullscreen();
   }
 }

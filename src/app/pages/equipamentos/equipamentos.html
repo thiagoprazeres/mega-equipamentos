@@ -14,12 +14,6 @@
 
 <section class="container mx-auto py-10 space-y-6 mb-10">
   <section>
-    <div
-      class="w-48 h-48 object-cover mx-auto flex items-center rounded-full shadow-lg cursor-pointer overflow-hidden outline-4 outline-offset-2 outline-secondary mb-4"
-      (click)="playAndGoFullscreen()"
-    >
-      <video #videoStory src="videos/comprar-ou-alugar.mp4" class="w-full"></video>
-    </div>
     <h2 class="text-4xl font-semibold my-10 text-center text-primary">
       Locação de equipamentos para construção civil
     </h2>
@@ -46,37 +40,37 @@
     </div>
 
     @if (suggestions.length) {
-    <div class="absolute z-20 mt-2 bg-base-100 border border-base-300 rounded-box shadow">
-      <ul class="menu menu-xs md:menu-sm lg:menu-md">
-        @for (s of suggestions; track s.slug) {
-        <li>
-          <button class="justify-start gap-2" (click)="onSelect(s)">
-            <span class="badge badge-ghost">{{
-              s.kind === 'categoria' ? 'Categoria' : 'Equipamento'
-            }}</span>
-            <span>{{ s.label }}</span>
-          </button>
-        </li>
-        }
-      </ul>
-    </div>
+      <div class="absolute z-20 mt-2 bg-base-100 border border-base-300 rounded-box shadow">
+        <ul class="menu menu-xs md:menu-sm lg:menu-md">
+          @for (s of suggestions; track s.slug) {
+            <li>
+              <button class="justify-start gap-2" (click)="onSelect(s)">
+                <span class="badge badge-ghost">{{
+                  s.kind === 'categoria' ? 'Categoria' : 'Equipamento'
+                }}</span>
+                <span>{{ s.label }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
     }
     <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left px-2">
       @for (c of categorias; track c.slug) {
-      <a
-        class="card bg-primary text-primary-content shadow-md hover:shadow-lg transition-shadow"
-        [routerLink]="['/equipamentos', c.slug]"
-        [attr.aria-label]="c.nome"
-      >
-        <figure class="bg-primary h-48">
-          <img [src]="c.avatar" [alt]="c.nome" class="w-full h-full object-cover" />
-        </figure>
+        <a
+          class="card bg-primary text-primary-content shadow-md hover:shadow-lg transition-shadow"
+          [routerLink]="['/equipamentos', c.slug]"
+          [attr.aria-label]="c.nome"
+        >
+          <figure class="bg-primary h-48">
+            <img [src]="c.avatar" [alt]="c.nome" class="w-full h-full object-cover" />
+          </figure>
 
-        <div class="card-body">
-          <h3 class="card-title text-lg">{{ c.nome }}</h3>
-          <p class="text-sm opacity-80">{{ c.objetivo }}</p>
-        </div>
-      </a>
+          <div class="card-body">
+            <h3 class="card-title text-lg">{{ c.nome }}</h3>
+            <p class="text-sm opacity-80">{{ c.objetivo }}</p>
+          </div>
+        </a>
       }
     </div>
   </section>
