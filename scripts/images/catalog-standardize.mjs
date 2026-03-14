@@ -22,6 +22,9 @@ const MANIFEST_FILE = path.join(REPORTS_ROOT, 'manifest.json');
 const DRY_RUN_MANIFEST_FILE = path.join(REPORTS_ROOT, 'manifest.dry-run.json');
 const FINAL_PUBLIC_ROOT = path.join(PUBLIC_DIR, 'imagens/equipamentos/catalogo');
 const FINAL_WEB_ROOT = '/imagens/equipamentos/catalogo';
+const MEGA_LOGO_COLOR_PATH = path.join(PUBLIC_DIR, 'logo-mega-equipamentos.png');
+const MEGA_LOGO_WHITE_PATH = path.join(PUBLIC_DIR, 'logo-mega-equipamentos-branca.png');
+const MEGA_LOGO_BLACK_PATH = path.join(PUBLIC_DIR, 'logo-mega-equipamentos-preto.png');
 const TARGET_WIDTH = 1536;
 const TARGET_HEIGHT = 1024;
 const TARGET_SIZE = `${TARGET_WIDTH}x${TARGET_HEIGHT}`;
@@ -55,6 +58,29 @@ const EDIT_PROMPT = [
   'Nao transforme a foto em render 3D ou ilustracao.',
   `Saida horizontal ${TARGET_SIZE}, pronta para catalogo web.`,
 ].join(' ');
+
+function shouldApplyMegaBranding(equipamento) {
+  // Verifica se o equipamento pertence às categorias que usam branding
+  return equipamento.equipamentoCategoria?.id === 9 || // Reboque_e_Transporte
+         equipamento.equipamentoCategoria?.id === 10;  // Diversos
+}
+
+function getMegaBrandingPrompt(equipamento) {
+  if (!shouldApplyMegaBranding(equipamento)) {
+    return 'Nao adicione nenhuma marca legivel ou logotipo novo.';
+  }
+  
+  const categoriaNome = equipamento.equipamentoCategoria?.nome || '';
+  let target = '';
+  
+  if (equipamento.equipamentoCategoria?.id === 9) {
+    target = 'painel lateral ou tampa traseira do reboque';
+  } else if (equipamento.equipamentoCategoria?.id === 10) {
+    target = 'lateral principal do container ou modulo de apoio';
+  }
+  
+  return `Aplique a logo Mega Equipamentos como adesivo fisico plausivel no ${target}. A logo deve parecer vinil colado na superficie do equipamento, com perspectiva, luz e desgaste natural; nunca como overlay, watermark ou grafismo solto.`;
+}
 
 loadLocalEnvFiles();
 
@@ -405,6 +431,7 @@ function buildManifestItem(equipamento, previousManifestItem, gitHeadCatalogItem
     slug: equipamento.slug,
     nome: equipamento.nome,
     categoriaSlug: equipamento.equipamentoCategoria.slug,
+    categoriaId: equipamento.equipamentoCategoria.id,
     sourceType,
     originalSource: preferredSource,
     currentAvatar: equipamento.avatar,
@@ -740,7 +767,7 @@ async function tryOpenAIEdit({
             content: [
               {
                 type: 'input_text',
-                text: `${EDIT_PROMPT} Equipamento: ${item.nome}. Categoria: ${item.categoriaSlug}.`,
+                text: `${EDIT_PROMPT} ${getMegaBrandingPrompt(item)} Equipamento: ${item.nome}. Categoria: ${item.categoriaSlug}.`,
               },
               {
                 type: 'input_image',
