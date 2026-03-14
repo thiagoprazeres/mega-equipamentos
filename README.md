@@ -104,6 +104,9 @@ npm run images:categories -- --mode=all --only-remote
 
 # Reprocessa apenas categorias que ficaram em sharp fallback
 npm run images:categories -- --mode=all --only-fallback
+
+# Processa apenas uma categoria específica por ID
+npm run images:categories -- --mode=all --categoria-id=3 --dry-run
 ```
 
 Opções disponíveis:
@@ -113,6 +116,7 @@ Opções disponíveis:
 - `--only-remote`
 - `--only-local`
 - `--only-fallback`
+- `--categoria-id=<id>`
 - `--dry-run`
 
 Saídas do pipeline:

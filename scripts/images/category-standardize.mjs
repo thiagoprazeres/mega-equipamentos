@@ -194,6 +194,7 @@ function parseArgs(argv) {
     responseModel: DEFAULT_RESPONSE_MODEL,
     imageModel: DEFAULT_IMAGE_MODEL,
     reviewModel: DEFAULT_REVIEW_MODEL,
+    categoriaId: null,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -239,6 +240,17 @@ function parseArgs(argv) {
       options.limit = Number.parseInt(argv[index + 1], 10);
       index += 1;
     }
+
+    if (arg.startsWith('--categoria-id=')) {
+      options.categoriaId = Number.parseInt(arg.split('=')[1], 10);
+      continue;
+    }
+
+    if (arg === '--categoria-id') {
+      options.categoriaId = Number.parseInt(argv[index + 1], 10);
+      index += 1;
+      continue;
+    }
   }
 
   return options;
@@ -260,6 +272,10 @@ function validateOptions(options) {
 
   if (options.limit !== null && (!Number.isInteger(options.limit) || options.limit < 1)) {
     throw new Error('O valor de --limit precisa ser um inteiro maior que zero.');
+  }
+
+  if (options.categoriaId !== null && (!Number.isInteger(options.categoriaId) || options.categoriaId < 1)) {
+    throw new Error('O valor de --categoria-id precisa ser um inteiro maior que zero.');
   }
 }
 
@@ -412,6 +428,10 @@ function selectCategories(categories, options, previousManifestIndex = new Map()
 
     if (!categoryCoverConfigBySlug.has(categoria.slug)) {
       return false;
+    }
+
+    if (options.categoriaId !== null) {
+      return categoria.id === options.categoriaId;
     }
 
     if (options.onlyFallback) {
