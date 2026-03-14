@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { HomePage } from './pages/home/home';
 import { QuemSomosPage } from './pages/quem-somos/quem-somos';
 import { EquipamentosPage } from './pages/equipamentos/equipamentos';
-import { ConsultorVirtualPage } from './pages/consultor-virtual/consultor-virtual';
+// import { ConsultorVirtualPage } from './pages/consultor-virtual/consultor-virtual';
 import { EquipamentosCategoriaPage } from './pages/equipamentos-categoria/equipamentos-categoria';
 import { EquipamentoPage } from './pages/equipamento/equipamento';
 import { ComoAlugarPage } from './pages/como-alugar/como-alugar';
@@ -15,7 +15,7 @@ export const routes: Routes = [
   { path: '', component: HomePage },
   { path: 'quem-somos', component: QuemSomosPage, title: 'Quem Somos' },
   { path: 'equipamentos', component: EquipamentosPage, title: 'Equipamentos' },
-  { path: 'consultor-virtual', component: ConsultorVirtualPage, title: 'Consultor Virtual' },
+  // { path: 'consultor-virtual', component: ConsultorVirtualPage, title: 'Consultor Virtual' },
   {
     path: 'equipamentos/:categoriaSlug/:slug',
     component: EquipamentoPage,

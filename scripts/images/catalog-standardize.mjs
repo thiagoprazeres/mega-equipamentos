@@ -47,6 +47,7 @@ const COMPILER_OPTIONS = {
 const EDIT_PROMPT = [
   'Padronize esta foto de produto para um catalogo B2B de locacao da construcao civil.',
   'Preserve exatamente o equipamento real da imagem de referencia.',
+  'Se houver um objeto circulado na imagem, extraia apenas esse objeto.',
   'Nao altere modelo, formato, quantidade de pecas, cor principal, marca ou proporcoes.',
   'Melhore apenas nitidez, exposicao e limpeza visual.',
   'Recorte e centralize o equipamento em fundo neutro claro de estudio.',
@@ -130,6 +131,7 @@ function parseArgs(argv) {
     onlyFallback: false,
     dryRun: false,
     imageModel: process.env.OPENAI_IMAGE_MODEL || DEFAULT_IMAGE_MODEL,
+    equipamentoId: null,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -176,6 +178,17 @@ function parseArgs(argv) {
       index += 1;
       continue;
     }
+
+    if (arg.startsWith('--equipamento-id=')) {
+      options.equipamentoId = Number.parseInt(arg.split('=')[1], 10);
+      continue;
+    }
+
+    if (arg === '--equipamento-id') {
+      options.equipamentoId = Number.parseInt(argv[index + 1], 10);
+      index += 1;
+      continue;
+    }
   }
 
   return options;
@@ -197,6 +210,10 @@ function validateOptions(options) {
 
   if (options.limit !== null && (!Number.isInteger(options.limit) || options.limit < 1)) {
     throw new Error('O valor de --limit precisa ser um inteiro maior que zero.');
+  }
+
+  if (options.equipamentoId !== null && (!Number.isInteger(options.equipamentoId) || options.equipamentoId < 1)) {
+    throw new Error('O valor de --equipamento-id precisa ser um inteiro maior que zero.');
   }
 }
 
@@ -330,6 +347,10 @@ function selectEquipment(catalog, options, previousManifestIndex = new Map()) {
   let filtered = catalog.filter((equipamento) => {
     const previousManifestItem = previousManifestIndex.get(equipamento.id);
     const artifactState = inspectImageArtifacts(equipamento);
+
+    if (options.equipamentoId !== null) {
+      return equipamento.id === options.equipamentoId;
+    }
 
     if (options.onlyFallback) {
       const pendingFallbackRetry =

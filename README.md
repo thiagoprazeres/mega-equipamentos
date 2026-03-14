@@ -64,6 +64,9 @@ npm run images:catalog -- --mode=all --only-fallback
 
 # Limita o lote para validação inicial
 npm run images:catalog -- --mode=all --limit=5 --dry-run
+
+# Processa apenas um equipamento específico por ID
+npm run images:catalog -- --mode=all --equipamento-id=14 --dry-run
 ```
 
 Opções disponíveis:
@@ -73,6 +76,7 @@ Opções disponíveis:
 - `--only-remote`
 - `--only-local`
 - `--only-fallback`
+- `--equipamento-id=<id>`
 - `--dry-run`
 
 Saídas do pipeline:
