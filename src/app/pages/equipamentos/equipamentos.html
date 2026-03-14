@@ -1,9 +1,9 @@
 <section id="hero" class="bg-[url('/imagens/fachada.webp')] bg-cover bg-center">
   <div class="bg-linear-to-r from-primary to-[#3679D2]/10 pt-20">
-    <div class="container mx-auto text-primary-content py-20 px-2 flex">
-      <div class="lg:max-w-1/2 mr-0">
+    <div class="container mx-auto px-2 py-20 text-primary-content">
+      <div class="max-w-4xl">
         <h1 class="text-5xl lg:text-6xl font-extrabold">Equipamentos</h1>
-        <p class="mt-4 text-2xl">
+        <p class="mt-4 text-xl md:text-2xl">
           Catálogo completo com equipamentos para todas as etapas da sua obra. Locação diária,
           semanal, quinzenal e mensal.
         </p>
@@ -12,87 +12,144 @@
   </div>
 </section>
 
-<section class="container mx-auto py-10 space-y-6 mb-10">
-  <section>
-    <h2 class="text-4xl font-semibold my-10 text-center text-primary">
-      Locação de equipamentos para construção civil
-    </h2>
-    <div class="join w-full px-2">
-      <div class="w-full">
-        <label class="input input-sm md:input-md lg:input-lg validator join-item w-full">
-          <lucide-angular [img]="Search" class="h-[1em] opacity-50"></lucide-angular>
-          <input
-            type="search"
-            placeholder="Pesquisa equipamentos ou categorias"
-            [value]="query"
-            (input)="onInput($any($event.target).value)"
-            required
-          />
-        </label>
+<section class="container mx-auto px-2 py-10">
+  <div class="mx-auto max-w-6xl space-y-10">
+    <section class="space-y-6">
+      <div class="text-center">
+        <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Catálogo Mega</p>
+        <h2 class="mt-2 text-4xl font-semibold text-primary">
+          Locação de equipamentos para construção civil
+        </h2>
+        <p class="mx-auto mt-4 max-w-3xl text-base leading-7 text-base-content/75 md:text-lg">
+          Busque por categoria ou por equipamento e navegue direto para a página certa.
+        </p>
       </div>
-      <button
-        class="btn btn-neutral btn-sm md:btn-md lg:btn-lg join-item"
-        (click)="onSelect(suggestions[0])"
-        [disabled]="!suggestions.length"
-      >
-        Procurar
-      </button>
-    </div>
 
-    @if (suggestions.length) {
-      <div class="absolute z-20 mt-2 bg-base-100 border border-base-300 rounded-box shadow">
-        <ul class="menu menu-xs md:menu-sm lg:menu-md">
-          @for (s of suggestions; track s.slug) {
-            <li>
-              <button class="justify-start gap-2" (click)="onSelect(s)">
-                <span class="badge badge-ghost">{{
-                  s.kind === 'categoria' ? 'Categoria' : 'Equipamento'
-                }}</span>
-                <span>{{ s.label }}</span>
-              </button>
-            </li>
+      <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div class="relative">
+          <form class="join w-full" (submit)="onSubmit($event)">
+            <div class="w-full">
+              <label class="input input-md md:input-lg validator join-item w-full">
+                <lucide-angular [img]="Search" class="h-[1em] opacity-50"></lucide-angular>
+                <input
+                  type="search"
+                  placeholder="Pesquise equipamentos ou categorias"
+                  [value]="query"
+                  (input)="onInput($any($event.target).value)"
+                  (blur)="clearSuggestions()"
+                  required
+                />
+              </label>
+            </div>
+            <button
+              class="btn btn-neutral btn-md md:btn-lg join-item"
+              type="submit"
+              [disabled]="!suggestions.length"
+            >
+              Procurar
+            </button>
+          </form>
+
+          @if (suggestions.length) {
+            <div
+              class="search-suggestions absolute z-20 mt-2 w-full rounded-box border border-base-300 bg-base-100 shadow-xl"
+            >
+              <ul class="menu menu-sm">
+                @for (suggestion of suggestions; track suggestion.kind + '-' + suggestion.slug) {
+                  <li>
+                    <button class="justify-start gap-3 py-3" (mousedown)="onSelect(suggestion)">
+                      <span class="badge badge-ghost">
+                        {{ suggestion.kind === 'categoria' ? 'Categoria' : 'Equipamento' }}
+                      </span>
+                      <span>{{ suggestion.label }}</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            </div>
           }
-        </ul>
-      </div>
-    }
-    <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left px-2">
-      @for (c of categorias; track c.slug) {
-        <a
-          class="card bg-primary text-primary-content shadow-md hover:shadow-lg transition-shadow"
-          [routerLink]="['/equipamentos', c.slug]"
-          [attr.aria-label]="c.nome"
-        >
-          <figure class="bg-primary h-48">
-            <img [src]="c.avatar" [alt]="c.nome" class="w-full h-full object-cover" />
-          </figure>
+        </div>
 
-          <div class="card-body">
-            <h3 class="card-title text-lg">{{ c.nome }}</h3>
-            <p class="text-sm opacity-80">{{ c.objetivo }}</p>
+        <aside class="rounded-[1.75rem] border border-base-300 bg-base-100 p-5 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div
+              class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"
+            >
+              <lucide-angular [img]="MessageCircleMore" class="h-5 w-5"></lucide-angular>
+            </div>
+            <div>
+              <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Atendimento guiado</p>
+              <h3 class="text-xl font-extrabold text-primary">Prefere ajuda para escolher?</h3>
+            </div>
           </div>
-        </a>
-      }
-    </div>
-  </section>
-</section>
 
-<section class="py-16 md:py-24 bg-muted">
-  <div class="container mx-auto px-4">
-    <div class="max-w-3xl mx-auto text-center">
-      <h2 class="text-3xl md:text-4xl font-heading font-bold mb-4">
-        Não encontrou o equipamento que precisa?
-      </h2>
-      <p class="text-lg text-muted-foreground mb-8">
-        Entre em contato conosco! Temos diversos outros equipamentos disponíveis e nossa equipe terá
-        prazer em ajudar você a encontrar a solução ideal.
+          <p class="mt-4 text-sm leading-6 text-base-content/75">
+            Fale com o consultor virtual da Mega Equipamentos e receba recomendações comerciais com
+            base no catálogo real.
+          </p>
+
+          <a class="btn btn-primary mt-5 w-full" routerLink="/consultor-virtual">
+            Conversar com o consultor virtual
+          </a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="space-y-5">
+      <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Categorias</p>
+          <h2 class="text-3xl font-extrabold text-primary">Explore o catálogo</h2>
+        </div>
+        <p class="max-w-2xl text-base text-base-content/70">
+          Navegue por categoria e encontre a solução certa para acesso, concretagem, demolição,
+          energia, pintura e muito mais.
+        </p>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        @for (categoria of categorias; track categoria.slug) {
+          <a
+            class="categoria-card card border border-base-300 bg-primary text-primary-content shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+            [routerLink]="['/equipamentos', categoria.slug]"
+            [attr.aria-label]="categoria.nome"
+          >
+            <figure class="h-56 bg-primary">
+              <img
+                [src]="categoria.avatarCard || categoria.avatar"
+                [alt]="categoria.nome"
+                class="h-full w-full object-cover"
+              />
+            </figure>
+
+            <div class="card-body">
+              <h3 class="card-title text-xl">{{ categoria.nome }}</h3>
+              <p class="text-sm leading-6 opacity-85">{{ categoria.objetivo }}</p>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+
+    <section class="rounded-[2rem] bg-base-200 px-6 py-10 text-center">
+      <h2 class="text-3xl font-extrabold text-primary">Não encontrou o equipamento que precisa?</h2>
+      <p class="mx-auto mt-4 max-w-3xl text-base leading-7 text-base-content/75">
+        Nosso time pode te orientar na escolha ideal para a etapa da sua obra, prazo de locação e
+        melhor combinação de equipamentos.
       </p>
-      <a
-        href="https://wa.me/5581985555943?text=Olá!%20Gostaria%20de%20informações%20sobre%20equipamentos."
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn btn-primary text-secondary"
-        >Falar com Nossa Equipe</a
-      >
-    </div>
+      <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+        <a class="btn btn-primary" routerLink="/consultor-virtual">
+          Falar com o consultor virtual
+        </a>
+        <a
+          href="https://wa.me/5581985555943?text=Olá!%20Gostaria%20de%20informações%20sobre%20equipamentos."
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-outline"
+        >
+          Falar com nossa equipe
+        </a>
+      </div>
+    </section>
   </div>
 </section>

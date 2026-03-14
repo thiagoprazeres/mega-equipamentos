@@ -1,0 +1,12 @@
+.search-suggestions {
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+.categoria-card img {
+  transition: transform 200ms ease;
+}
+
+.categoria-card:hover img {
+  transform: scale(1.03);
+}

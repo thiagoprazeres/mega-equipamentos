@@ -21,13 +21,17 @@ export class EquipamentosCategoriaPage {
   itens: Equipamento[] = [];
   slug: string = '';
 
-  constructor(private route: ActivatedRoute, private title: Title, private meta: Meta) {
+  constructor(
+    private route: ActivatedRoute,
+    private title: Title,
+    private meta: Meta,
+  ) {
     const slug = this.route.snapshot.paramMap.get('slug') || '';
     this.slug = slug;
     const cat = equipamentosCategoriasData.find((c) => c.slug === slug);
     this.categoria = cat || equipamentosCategoriasData[0];
     this.itens = equipamentosData.filter(
-      (e) => e.equipamentoCategoria.slug === this.categoria.slug
+      (e) => e.equipamentoCategoria.slug === this.categoria.slug,
     );
 
     const nome = this.categoria?.nome || 'Equipamentos';
@@ -35,7 +39,10 @@ export class EquipamentosCategoriaPage {
     if (desc.length > 160) {
       desc = desc.slice(0, 157).trimEnd() + '...';
     }
-    const img = this.categoria?.avatar || 'https://megaequip.com.br/images/logo-capa.png';
+    const img =
+      this.categoria?.avatarHero ||
+      this.categoria?.avatar ||
+      'https://megaequip.com.br/images/logo-capa.png';
     const url = `https://megaequip.com.br/equipamentos/${slug}`;
 
     this.title.setTitle(`Equipamentos - ${nome}`);

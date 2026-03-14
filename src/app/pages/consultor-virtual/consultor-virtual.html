@@ -1,0 +1,181 @@
+<section id="hero" class="bg-[url('/imagens/fachada.webp')] bg-cover bg-center">
+  <div class="bg-linear-to-r from-primary to-[#3679D2]/10 pt-20">
+    <div class="container mx-auto px-2 py-20 text-primary-content">
+      <div class="max-w-3xl">
+        <div class="badge badge-secondary badge-lg text-primary font-semibold mb-4">
+          Consultor virtual
+        </div>
+        <h1 class="text-5xl lg:text-6xl font-extrabold">Consultor Virtual</h1>
+        <p class="mt-4 text-xl md:text-2xl">
+          Converse de forma natural. Você pode mandar nome, WhatsApp, cidade e situação da obra aos
+          poucos que o consultor vai conduzindo o atendimento.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container mx-auto px-2 py-10">
+  <div class="mx-auto max-w-6xl">
+    <section class="overflow-hidden rounded-[2rem] border border-base-300 bg-base-100 shadow-xl">
+      <div class="bg-primary text-primary-content p-6 md:p-8">
+        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div class="max-w-3xl">
+            <div class="flex items-center gap-3">
+              <div
+                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary text-primary"
+              >
+                <lucide-angular [img]="Sparkles" class="h-6 w-6"></lucide-angular>
+              </div>
+              <div>
+                <p class="text-sm uppercase tracking-[0.3em] text-secondary">Mega Equipamentos</p>
+                <h2 class="text-3xl font-extrabold">Consultor para sua obra</h2>
+              </div>
+            </div>
+            <p class="mt-4 text-lg text-primary-content/85">
+              A conversa acontece em fluxo livre: o consultor entende sua necessidade, qualifica o
+              atendimento e só então indica os equipamentos mais adequados.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-0 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <div class="border-r-0 lg:border-r lg:border-base-300">
+          @if (networkNotice()) {
+            <div
+              class="border-b border-warning/30 bg-warning/10 px-5 py-3 text-sm text-warning-content"
+            >
+              {{ networkNotice() }}
+            </div>
+          }
+
+          <div #chatScroller class="consultor-thread bg-base-200/50 p-4 md:p-6">
+            @for (message of messages(); track trackByTurn($index, message)) {
+              <div class="mb-5">
+                <div
+                  class="chat"
+                  [class.chat-start]="message.role === 'assistant'"
+                  [class.chat-end]="message.role === 'user'"
+                >
+                  <div
+                    class="chat-header mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-base-content/55"
+                  >
+                    {{ message.role === 'assistant' ? 'Mega Equipamentos' : 'Você' }}
+                  </div>
+
+                  <div
+                    class="chat-bubble consultor-bubble"
+                    [class.chat-bubble-primary]="message.role === 'assistant' && !message.pending"
+                    [class.chat-bubble-secondary]="message.role === 'user'"
+                    [class.chat-bubble-neutral]="message.pending"
+                    [class.consultor-bubble-error]="message.error"
+                  >
+                    @if (message.pending) {
+                      <span class="inline-flex items-center gap-2">
+                        <span class="loading loading-dots loading-sm"></span>
+                        Entendendo sua necessidade...
+                      </span>
+                    } @else {
+                      <p class="consultor-message-text">
+                        @for (
+                          segment of contentSegments(message);
+                          track trackBySegment($index, segment)
+                        ) {
+                          @if (segment.href) {
+                            <a
+                              class="consultor-inline-link"
+                              [href]="segment.href"
+                              [routerLink]="segment.href"
+                            >
+                              {{ segment.text }}
+                            </a>
+                          } @else {
+                            <span>{{ segment.text }}</span>
+                          }
+                        }
+                      </p>
+                    }
+                  </div>
+                </div>
+
+                @if (message.showQuoteCta && message.whatsappHref) {
+                  <div class="mt-4 flex justify-center">
+                    <a
+                      class="btn btn-secondary"
+                      [href]="message.whatsappHref"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Solicitar orçamento no WhatsApp
+                    </a>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <form class="border-t border-base-300 bg-base-100 p-4 md:p-6" (submit)="onSubmit($event)">
+            <div class="flex flex-wrap gap-2">
+              @for (prompt of quickPrompts; track prompt) {
+                <button
+                  type="button"
+                  class="btn btn-xs btn-outline btn-medium"
+                  (click)="useQuickPrompt(prompt)"
+                  [disabled]="isSending()"
+                >
+                  {{ prompt }}
+                </button>
+              }
+            </div>
+
+            <div class="mt-4">
+              <label class="sr-only" for="consultor-mensagem">Descreva a sua necessidade</label>
+              <textarea
+                id="consultor-mensagem"
+                class="textarea textarea-bordered h-28 w-full text-base leading-7"
+                placeholder="Ex.: Sou Thiago, meu WhatsApp é (81) 98555-5943, estou em Caruaru e preciso concretar uma laje."
+                [value]="draft()"
+                (input)="onDraftInput($any($event.target).value)"
+                (keydown)="onComposerKeydown($event)"
+              ></textarea>
+            </div>
+
+            <div class="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <button
+                class="btn btn-primary"
+                type="submit"
+                [disabled]="isSending() || !draft().trim()"
+              >
+                <lucide-angular [img]="SendHorizontal" class="h-4 w-4"></lucide-angular>
+                Enviar mensagem
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <aside class="border-t border-base-300 bg-base-100/70 p-5 lg:border-t-0">
+          <div class="rounded-3xl bg-base-200/70 p-5">
+            <div class="flex items-center gap-3">
+              <div
+                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"
+              >
+                <lucide-angular [img]="MessageCircleMore" class="h-5 w-5"></lucide-angular>
+              </div>
+              <div>
+                <h3 class="font-extrabold text-primary">Dicas para conversar</h3>
+                <p class="text-sm text-base-content/65">Quanto mais contexto, melhor a indicação.</p>
+              </div>
+            </div>
+
+            <ul class="mt-4 space-y-3 text-sm leading-6 text-base-content/75">
+              <li>Se preferir, mande os dados aos poucos que o consultor guarda o contexto.</li>
+              <li>Explique o serviço, o problema da obra ou a etapa que você vai executar.</li>
+              <li>Se quiser, já informe prazo de locação, urgência ou condição de uso.</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+</section>

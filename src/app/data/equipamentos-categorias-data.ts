@@ -8,9 +8,10 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Access and Elevation',
     slug: 'acesso-e-elevacao',
     icone: 'icones/Acesso_e_Elevacao.png',
-    avatar: 'https://images.pexels.com/photos/34581859/pexels-photo-34581859.jpeg',
-    objetivo:
-      'Facilitar o acesso e o transporte vertical de materiais e profissionais em diferentes níveis de obra, com equipamentos seguros e de alta performance.',
+    avatar: '/imagens/categorias/acesso-e-elevacao/hero.webp',
+    avatarHero: '/imagens/categorias/acesso-e-elevacao/hero.webp',
+    avatarCard: '/imagens/categorias/acesso-e-elevacao/card.webp',
+    objetivo: 'Facilitar o acesso e o transporte vertical de materiais e profissionais em diferentes níveis de obra, com equipamentos seguros e de alta performance.',
   },
   {
     id: EquipamentosCategoriasId.Andaimes,
@@ -18,9 +19,10 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Scaffolding',
     slug: 'andaimes',
     icone: 'icones/Andaime.png',
-    avatar: '/imagens/equipamentos/andaimes.jpg',
-    objetivo:
-      'Oferecer sistemas de andaimes modulares, seguros e de fácil montagem para serviços em altura.',
+    avatar: '/imagens/categorias/andaimes/hero.webp',
+    avatarHero: '/imagens/categorias/andaimes/hero.webp',
+    avatarCard: '/imagens/categorias/andaimes/card.webp',
+    objetivo: 'Oferecer sistemas de andaimes modulares, seguros e de fácil montagem para serviços em altura.',
   },
   {
     id: EquipamentosCategoriasId.Escoramento_de_Estruturas,
@@ -29,8 +31,9 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     slug: 'escoramento-de-estruturas',
     icone: 'icones/Escoramento_de_Estruturas.png',
     video: 'videos/escoramento-de-estruturas.mp4',
-    avatar:
-      'https://images.pexels.com/photos/585419/pexels-photo-585419.jpeg?w=800&h=600&auto=compress&cs=tinysrgb',
+    avatar: '/imagens/categorias/escoramento-de-estruturas/hero.webp',
+    avatarHero: '/imagens/categorias/escoramento-de-estruturas/hero.webp',
+    avatarCard: '/imagens/categorias/escoramento-de-estruturas/card.webp',
     objetivo: 'Sustentação temporária de lajes, vigas e pilares durante concretagens.',
   },
   {
@@ -39,8 +42,9 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Soil Compaction',
     slug: 'compactacao-e-solo',
     icone: 'icones/Compactacao_e_Solo.png',
-    avatar:
-      'https://www.transobra.com.br/wp-content/uploads/2023/12/07A-O-que-e-compactacao_IMG-DESTAQUE-Qualidade-02.jpg',
+    avatar: '/imagens/categorias/compactacao-e-solo/hero.webp',
+    avatarHero: '/imagens/categorias/compactacao-e-solo/hero.webp',
+    avatarCard: '/imagens/categorias/compactacao-e-solo/card.webp',
     objetivo: 'Garantir estabilidade e resistência do solo antes da concretagem e pavimentação.',
   },
   {
@@ -49,7 +53,9 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Concreting',
     slug: 'concretagem',
     icone: 'icones/Concretagem.png',
-    avatar: '/imagens/equipamentos/concretagem.png',
+    avatar: '/imagens/categorias/concretagem/hero.webp',
+    avatarHero: '/imagens/categorias/concretagem/hero.webp',
+    avatarCard: '/imagens/categorias/concretagem/card.webp',
     objetivo: 'Mistura e adensamento do concreto com eficiência e qualidade.',
   },
   {
@@ -58,19 +64,20 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Cutting and Demolition',
     slug: 'corte-e-demolicao',
     icone: 'icones/Corte_e_Demolicao.png',
-    avatar: '/imagens/equipamentos/martelete-demolidor.jpg',
-    objetivo:
-      'Fornecer marteletes de diversos portes para demolições leves a pesadas de concretos e alvenarias.',
+    avatar: '/imagens/categorias/corte-e-demolicao/hero.webp',
+    avatarHero: '/imagens/categorias/corte-e-demolicao/hero.webp',
+    avatarCard: '/imagens/categorias/corte-e-demolicao/card.webp',
+    objetivo: 'Fornecer marteletes de diversos portes para demolições leves a pesadas de concretos e alvenarias.',
   },
   {
     id: EquipamentosCategoriasId.Ferramentas_Eletricas,
     nome: 'Ferramentas Elétricas',
     name: 'Power Tools',
     slug: 'ferramentas-eletricas',
-    icone:
-      'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDIwMCIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWRyaWxsLWljb24gbHVjaWRlLWRyaWxsIj48cGF0aCBkPSJNMTAgMThhMSAxIDAgMCAxIDEgMXYyYTEgMSAwIDAgMS0xIDFINWEzIDMgMCAwIDEtMy0zIDEgMSAwIDAgMSAxLTF6Ii8+PHBhdGggZD0iTTEzIDEwSDRhMiAyIDAgMCAxLTItMlY0YTIgMiAwIDAgMSAyLTJoOWExIDEgMCAwIDEgMSAxdjZhMSAxIDAgMCAxLTEgMWwtLjgxIDMuMjQyYTEgMSAwIDAgMS0uOTcuNzU4SDgiLz48cGF0aCBkPSJNMTQgNGgzYTEgMSAwIDAgMSAxIDF2MmExIDEgMCAwIDEtMSAxaC0zIi8+PHBhdGggZD0iTTE4IDZoNCIvPjxwYXRoIGQ9Im01IDEwLTIgOCIvPjxwYXRoIGQ9Im03IDE4IDItOCIvPjwvc3ZnPg==',
-    avatar:
-      'https://conecta.fg.com.br/wp-content/uploads/2023/12/37_Aprenda_como_escolher_o_n%C3%ADvel_a_laser_ideal_para_seu_trabalho_blog.png',
+    icone: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDIwMCIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWRyaWxsLWljb24gbHVjaWRlLWRyaWxsIj48cGF0aCBkPSJNMTAgMThhMSAxIDAgMCAxIDEgMXYyYTEgMSAwIDAgMS0xIDFINWEzIDMgMCAwIDEtMy0zIDEgMSAwIDAgMSAxLTF6Ii8+PHBhdGggZD0iTTEzIDEwSDRhMiAyIDAgMCAxLTItMlY0YTIgMiAwIDAgMSAyLTJoOWExIDEgMCAwIDEgMSAxdjZhMSAxIDAgMCAxLTEgMWwtLjgxIDMuMjQyYTEgMSAwIDAgMS0uOTcuNzU4SDgiLz48cGF0aCBkPSJNMTQgNGgzYTEgMSAwIDAgMSAxIDF2MmExIDEgMCAwIDEtMSAxaC0zIi8+PHBhdGggZD0iTTE4IDZoNCIvPjxwYXRoIGQ9Im01IDEwLTIgOCIvPjxwYXRoIGQ9Im03IDE4IDItOCIvPjwvc3ZnPg==',
+    avatar: '/imagens/categorias/ferramentas-eletricas/hero.webp',
+    avatarHero: '/imagens/categorias/ferramentas-eletricas/hero.webp',
+    avatarCard: '/imagens/categorias/ferramentas-eletricas/card.webp',
     objetivo: 'Equipamentos de precisão e acabamento para marcenaria, instalação e manutenção.',
   },
   {
@@ -79,7 +86,9 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Engines and Generators',
     slug: 'motores-e-geradores',
     icone: 'icones/Motores_e_Geradores.png',
-    avatar: 'https://conecta.fg.com.br/wp-content/uploads/2020/05/05_Usos_Geradores.png',
+    avatar: '/imagens/categorias/motores-e-geradores/hero.webp',
+    avatarHero: '/imagens/categorias/motores-e-geradores/hero.webp',
+    avatarCard: '/imagens/categorias/motores-e-geradores/card.webp',
     objetivo: 'Energia, compressão e bombeamento para obras e serviços gerais.',
   },
   {
@@ -88,7 +97,9 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Trailers and Transport',
     slug: 'reboque-e-transporte',
     icone: 'icones/Reboque.png',
-    avatar: '/imagens/equipamentos/Reboque_e_Transporte/Reboque_e_Transporte.jpeg',
+    avatar: '/imagens/categorias/reboque-e-transporte/hero.webp',
+    avatarHero: '/imagens/categorias/reboque-e-transporte/hero.webp',
+    avatarCard: '/imagens/categorias/reboque-e-transporte/card.webp',
     objetivo: 'Soluções logísticas seguras para transporte de materiais e equipamentos.',
   },
   {
@@ -97,7 +108,9 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
     name: 'Miscellaneous',
     slug: 'diversos',
     icone: 'icones/Diversos.png',
-    avatar: 'imagens/equipamentos/Diversos/container-almoxarifado-1-50-x-3-00-x-2-00-m.jpeg',
+    avatar: '/imagens/categorias/diversos/hero.webp',
+    avatarHero: '/imagens/categorias/diversos/hero.webp',
+    avatarCard: '/imagens/categorias/diversos/card.webp',
     objetivo: 'Apoio à estrutura e organização do canteiro de obras.',
   },
 ];

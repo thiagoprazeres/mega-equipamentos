@@ -26,14 +26,14 @@
         </p>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
           @for (diferencial of diferenciais; track $index) {
-          <div class="text-center md:px-5">
-            <lucide-angular
-              [img]="diferencial.icone"
-              class="my-icon w-12 h-12 md:w-16 md:h-16 mx-auto mb-4"
-            ></lucide-angular>
-            <h3 class="text-base font-semibold md:text-lg">{{ diferencial.titulo }}</h3>
-            <p class="text-sm md:text-base">{{ diferencial.descricao }}</p>
-          </div>
+            <div class="text-center md:px-5">
+              <lucide-angular
+                [img]="diferencial.icone"
+                class="my-icon w-12 h-12 md:w-16 md:h-16 mx-auto mb-4"
+              ></lucide-angular>
+              <h3 class="text-base font-semibold md:text-lg">{{ diferencial.titulo }}</h3>
+              <p class="text-sm md:text-base">{{ diferencial.descricao }}</p>
+            </div>
           }
         </div>
       </div>
@@ -50,26 +50,34 @@
 
     <div class="mt-8 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
       @for (c of categorias; track $index) {
-      <a
-        class="bg-[#0050A5] text-primary-content px-2 py-1 rounded-4xl flex flex-col items-center justify-center md:w-full md:h-48 w-full h-32"
-        [routerLink]="['/equipamentos', c.slug]"
-        [attr.aria-label]="c.nome"
-      >
-        <!-- <lucide-angular
-          [img]="c.icone"
-          class="md:w-24 md:h-24 w-16 h-16 text-secondary"
-        ></lucide-angular> -->
-        <img [src]="c.icone" class="md:w-24 md:h-24 w-16 h-16 text-secondary" />
-        <p class="text-center md:text-xl text-base">{{ c.nome }}</p>
-      </a>
+        <a
+          class="group relative overflow-hidden rounded-4xl text-primary-content md:w-full md:h-48 w-full h-32"
+          [routerLink]="['/equipamentos', c.slug]"
+          [attr.aria-label]="c.nome"
+        >
+          <img
+            [src]="c.avatarCard || c.avatar"
+            [alt]="c.nome"
+            class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div
+            class="absolute inset-0 bg-linear-to-b from-primary/25 via-primary/55 to-primary"
+          ></div>
+          <div
+            class="relative flex h-full flex-col items-center justify-center px-3 py-2 text-center"
+          >
+            <img [src]="c.icone" class="md:w-24 md:h-24 w-16 h-16 text-secondary drop-shadow-md" />
+            <p class="md:text-xl text-base font-semibold">{{ c.nome }}</p>
+          </div>
+        </a>
       }
       <a
-        routerLink="/equipamentos"
+        routerLink="/consultor-virtual"
         class="px-2 py-1 rounded-4xl flex flex-col items-center justify-center md:w-full md:h-48 w-full h-32 col-span-2"
       >
         <div class="flex items-center gap-2">
           <lucide-angular [img]="ArrowRight"></lucide-angular>
-          <h3 class="md:text-lg text-sm font-semibold">Ver todos os equipamentos</h3>
+          <h3 class="md:text-lg text-sm font-semibold">Converse com nosso consultor virtual</h3>
         </div>
       </a>
     </div>

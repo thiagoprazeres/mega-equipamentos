@@ -1,0 +1,26 @@
+.consultor-thread {
+  max-height: 42rem;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.consultor-bubble {
+  max-width: min(44rem, 100%);
+}
+
+.consultor-bubble-error {
+  background: color-mix(in oklab, var(--fallback-er, #dc2626) 12%, white);
+  color: inherit;
+}
+
+.consultor-message-text {
+  white-space: pre-wrap;
+  line-height: 1.75;
+}
+
+.consultor-inline-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
