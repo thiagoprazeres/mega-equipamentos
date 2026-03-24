@@ -12,20 +12,17 @@ import { equipamentosCategoriasData } from './data/equipamentos-categorias-data'
 import { equipamentosData } from './data/equipamentos-data';
 
 export const routes: Routes = [
-  { path: '', component: HomePage },
-  { path: 'quem-somos', component: QuemSomosPage, title: 'Quem Somos' },
-  { path: 'equipamentos', component: EquipamentosPage, title: 'Equipamentos' },
-  // { path: 'consultor-virtual', component: ConsultorVirtualPage, title: 'Consultor Virtual' },
+  { path: '', component: HomePage, title: 'Mega Equipamentos | Locação de Equipamentos para Obras em Caruaru' },
+  { path: 'quem-somos', component: QuemSomosPage, title: 'Quem Somos | Mega Equipamentos' },
+  { path: 'equipamentos', component: EquipamentosPage, title: 'Catálogo de Equipamentos | Mega Equipamentos' },
+  // { path: 'consultor-virtual', component: ConsultorVirtualPage, title: 'Consultor Virtual | Mega Equipamentos' },
   {
     path: 'equipamentos/:categoriaSlug/:slug',
     component: EquipamentoPage,
     title: (route) => {
       const slug = route.params['slug'];
       const e = equipamentosData.find((it) => it.slug === slug);
-      if (e) {
-        return `${e.nome} — ${e.equipamentoCategoria.nome}`;
-      }
-      return 'Equipamento';
+      return e ? `${e.nome} para Locação em Caruaru | Mega Equipamentos` : 'Equipamento | Mega Equipamentos';
     },
   },
   {
@@ -34,10 +31,10 @@ export const routes: Routes = [
     title: (route) => {
       const slug = route.params['slug'];
       const categoria = equipamentosCategoriasData.find((c) => c.slug === slug);
-      return categoria ? `Equipamentos - ${categoria.nome}` : 'Equipamentos';
+      return categoria ? `Locação de ${categoria.nome} em Caruaru | Mega Equipamentos` : 'Equipamentos | Mega Equipamentos';
     },
   },
-  { path: 'como-alugar', component: ComoAlugarPage, title: 'Como Alugar' },
-  { path: 'contato', component: ContatoPage, title: 'Contato' },
+  { path: 'como-alugar', component: ComoAlugarPage, title: 'Como Alugar | Mega Equipamentos' },
+  { path: 'contato', component: ContatoPage, title: 'Contato | Mega Equipamentos' },
   { path: '**', redirectTo: '' },
 ];

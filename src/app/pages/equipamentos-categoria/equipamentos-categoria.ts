@@ -35,7 +35,8 @@ export class EquipamentosCategoriaPage {
     );
 
     const nome = this.categoria?.nome || 'Equipamentos';
-    let desc = (this.categoria?.objetivo || 'Locação de equipamentos').replace(/\s+/g, ' ').trim();
+    const objetivo = (this.categoria?.objetivo || '').replace(/\s+/g, ' ').trim();
+    let desc = `Alugue ${nome} em Caruaru com a Mega Equipamentos. ${objetivo}`.trim();
     if (desc.length > 160) {
       desc = desc.slice(0, 157).trimEnd() + '...';
     }
@@ -45,7 +46,7 @@ export class EquipamentosCategoriaPage {
       'https://megaequip.com.br/images/logo-capa.png';
     const url = `https://megaequip.com.br/equipamentos/${slug}`;
 
-    this.title.setTitle(`Equipamentos - ${nome}`);
+    this.title.setTitle(`Locação de ${nome} em Caruaru | Mega Equipamentos`);
 
     this.meta.updateTag({ name: 'description', content: desc });
     this.meta.updateTag({ property: 'og:type', content: 'website' });

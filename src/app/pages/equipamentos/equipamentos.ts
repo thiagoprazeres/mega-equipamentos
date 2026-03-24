@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule, MessageCircleMore, Search } from 'lucide-angular';
 
@@ -28,7 +29,25 @@ export class EquipamentosPage {
   protected query = '';
   protected suggestions: SearchSuggestion[] = [];
 
-  constructor(private readonly router: Router) {}
+  constructor(private readonly router: Router, title: Title, meta: Meta) {
+    const pageTitle = 'Catálogo de Equipamentos | Mega Equipamentos';
+    const desc = 'Catálogo completo de equipamentos para locação em Caruaru: andaimes, escoras metálicas, betoneiras, compactadores, marteletes, ferramentas elétricas, geradores e muito mais.';
+    const url = 'https://megaequip.com.br/equipamentos';
+    const img = 'https://megaequip.com.br/imagens/logo-capa.png';
+
+    title.setTitle(pageTitle);
+    meta.updateTag({ name: 'description', content: desc });
+    meta.updateTag({ property: 'og:type', content: 'website' });
+    meta.updateTag({ property: 'og:url', content: url });
+    meta.updateTag({ property: 'og:title', content: pageTitle });
+    meta.updateTag({ property: 'og:description', content: desc });
+    meta.updateTag({ property: 'og:image', content: img });
+    meta.updateTag({ property: 'og:locale', content: 'pt_BR' });
+    meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
+    meta.updateTag({ name: 'twitter:title', content: pageTitle });
+    meta.updateTag({ name: 'twitter:description', content: desc });
+    meta.updateTag({ name: 'twitter:image', content: img });
+  }
 
   protected onInput(value: string) {
     this.query = value;

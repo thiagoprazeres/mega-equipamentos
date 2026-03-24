@@ -40,9 +40,14 @@ export class EquipamentoPage {
       'https://megaequip.com.br/images/logo-capa.png';
     const url = `https://megaequip.com.br/equipamentos/${categoriaSlug}/${slug}`;
 
-    this.title.setTitle(`${nome} — ${this.categoria?.nome || 'Mega Equipamentos'}`);
+    const aplicacao = this.equipamento?.aplicacao || '';
+    const enrichedDesc = aplicacao
+      ? `${desc} Ideal para: ${aplicacao}`.slice(0, 160)
+      : desc;
 
-    this.meta.updateTag({ name: 'description', content: desc });
+    this.title.setTitle(`${nome} para Locação em Caruaru | Mega Equipamentos`);
+
+    this.meta.updateTag({ name: 'description', content: enrichedDesc });
     this.meta.updateTag({ property: 'og:type', content: 'product' });
     this.meta.updateTag({ property: 'og:url', content: url });
     this.meta.updateTag({ property: 'og:title', content: nome });
