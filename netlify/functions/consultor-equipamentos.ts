@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Handler } from '@netlify/functions';
-import OpenAI from 'openai';
+import { GoogleGenAI, Type, Schema } from '@google/genai';
 
 import {
   buildConsultorAiPromptPayload,
@@ -14,46 +14,40 @@ import type {
   ConsultorEquipamentosResponse,
 } from '../../src/app/features/consultor-equipamentos/consultor-equipamentos.types';
 
-const RESPONSE_SCHEMA = {
-  type: 'object',
-  additionalProperties: false,
+const RESPONSE_SCHEMA: Schema = {
+  type: Type.OBJECT,
   properties: {
-    answer: { type: 'string' },
+    answer: { type: Type.STRING },
     selectedEquipmentIds: {
-      type: 'array',
-      minItems: 0,
-      maxItems: 5,
-      items: { type: 'integer' },
+      type: Type.ARRAY,
+      items: { type: Type.INTEGER },
     },
     itemReasons: {
-      type: 'array',
-      minItems: 0,
-      maxItems: 5,
+      type: Type.ARRAY,
       items: {
-        type: 'object',
-        additionalProperties: false,
+        type: Type.OBJECT,
         properties: {
-          equipmentId: { type: 'integer' },
-          reason: { type: 'string' },
+          equipmentId: { type: Type.INTEGER },
+          reason: { type: Type.STRING },
         },
         required: ['equipmentId', 'reason'],
       },
     },
     followUpQuestion: {
-      anyOf: [{ type: 'string' }, { type: 'null' }],
+      type: Type.STRING,
+      nullable: true,
     },
-    showQuoteCta: { type: 'boolean' },
-    whatsappPrefill: { type: 'string' },
+    showQuoteCta: { type: Type.BOOLEAN },
+    whatsappPrefill: { type: Type.STRING },
   },
   required: [
     'answer',
     'selectedEquipmentIds',
     'itemReasons',
-    'followUpQuestion',
     'showQuoteCta',
     'whatsappPrefill',
   ],
-} as const;
+};
 
 const DEVELOPER_PROMPT = `Você é o consultor virtual da Mega Equipamentos, empresa de locação de equipamentos para obras em Caruaru e região.
 
@@ -85,8 +79,27 @@ Formato:
 loadLocalEnvForDevelopment();
 
 export const handler: Handler = async (event) => {
+  const allowedOrigin = process.env.ALLOWED_ORIGIN;
+  const origin = event.headers.origin || event.headers.referer || '';
+
+  // CORS Preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 204,
+      headers: {
+        'Access-Control-Allow-Origin': allowedOrigin || '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    };
+  }
+
   if (event.httpMethod !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
+  }
+
+  if (allowedOrigin && !origin.includes(allowedOrigin) && !origin.includes('localhost')) {
+    return jsonResponse({ error: 'Unauthorized request origin' }, 403);
   }
 
   const payload = parsePayload(event.body);
@@ -101,66 +114,67 @@ export const handler: Handler = async (event) => {
     return jsonResponse({ error: 'Invalid request payload' }, 400);
   }
 
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const apiKey = process.env.GEMINI_API_KEY?.trim() || process.env.OPENAI_API_KEY?.trim();
 
   if (!apiKey) {
-    return jsonResponse({ error: 'A chave da OpenAI não está configurada para o consultor.' }, 503);
+    return jsonResponse({ error: 'A chave da API de Inteligência Artificial não está configurada.' }, 503);
   }
 
   try {
-    const client = new OpenAI({ apiKey });
-    const response = await client.responses.create(
+    const ai = new GoogleGenAI({ apiKey });
+    
+    const contents = [
+      ...request.history.map((message) => ({
+        role: message.role === 'user' ? 'user' : 'model',
+        parts: [{ text: message.content }],
+      })),
       {
-        model: process.env.OPENAI_MODEL || 'gpt-5-nano',
-        instructions: DEVELOPER_PROMPT,
-        reasoning: {
-          effort: 'minimal',
-        },
-        input: [
-          ...request.history.map((message) => ({
-            role: message.role,
-            content: message.content,
-          })),
-          {
-            role: 'user' as const,
-            content: JSON.stringify(buildConsultorAiPromptPayload(request)),
-          },
-        ],
-        max_output_tokens: 1200,
-        text: {
-          verbosity: 'low',
-          format: {
-            type: 'json_schema',
-            name: 'consultor_mega_equipamentos',
-            description:
-              'Resposta estruturada do consultor virtual da Mega Equipamentos usando o catálogo completo.',
-            strict: true,
-            schema: RESPONSE_SCHEMA,
-          },
-        },
+        role: 'user',
+        parts: [{ text: JSON.stringify(buildConsultorAiPromptPayload(request)) }],
       },
-      { timeout: 15000 }
-    );
+    ];
 
-    const parsedResponse = parseModelOutput(response.output_text);
+    const generatePromise = ai.models.generateContent({
+      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+      contents: contents,
+      config: {
+        systemInstruction: DEVELOPER_PROMPT,
+        temperature: 0.2,
+        responseMimeType: 'application/json',
+        responseSchema: RESPONSE_SCHEMA,
+      },
+    });
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('NETLIFY_TIMEOUT')), 8500);
+    });
+
+    const response = await Promise.race([generatePromise, timeoutPromise]);
+    const parsedResponse = parseModelOutput(response.text);
     const normalizedResponse = normalizeConsultorResponse(parsedResponse, request);
 
     if (!normalizedResponse) {
       return jsonResponse({ error: 'A IA retornou uma resposta inválida.' }, 502);
     }
 
-    return jsonResponse(normalizedResponse);
-  } catch (error) {
+    return jsonResponse(normalizedResponse, 200, allowedOrigin);
+  } catch (error: any) {
     console.error('consultor-equipamentos function failed', error);
+    
+    if (error.message === 'NETLIFY_TIMEOUT') {
+      return jsonResponse({ error: 'A análise da IA demorou muito e foi interrompida (Timeout). Tente simplificar a requisição.' }, 504, allowedOrigin);
+    }
+    
     return jsonResponse(
       { error: 'A IA ficou indisponível no momento. Tente novamente em instantes.' },
-      502
+      502,
+      allowedOrigin
     );
   }
 };
 
 function loadLocalEnvForDevelopment() {
-  if (process.env.OPENAI_API_KEY) {
+  if (process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY) {
     return;
   }
 
@@ -206,13 +220,21 @@ function parseModelOutput(outputText: string): Partial<ConsultorEquipamentosResp
   }
 }
 
-function jsonResponse(body: object, statusCode = 200) {
+function jsonResponse(body: object, statusCode = 200, allowedOrigin?: string) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+  };
+  
+  if (allowedOrigin) {
+    headers['Access-Control-Allow-Origin'] = allowedOrigin;
+  } else {
+    headers['Access-Control-Allow-Origin'] = '*';
+  }
+
   return {
     statusCode,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store',
-    },
+    headers,
     body: JSON.stringify(body),
   };
 }
