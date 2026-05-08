@@ -65,5 +65,12 @@
     "karma-jasmine-html-reporter": "~2.2.0",
     "postcss": "^8.5.14",
     "typescript": "~6.0.3"
+  },
+  "overrides": {
+    "@angular/core": "$@angular/core",
+    "@angular/common": "$@angular/common",
+    "@angular/forms": "$@angular/forms",
+    "@angular/router": "$@angular/router",
+    "@angular/platform-browser": "$@angular/platform-browser"
   }
 }
