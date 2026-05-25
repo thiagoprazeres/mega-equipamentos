@@ -1,0 +1,259 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div class="space-y-3">
+        <a class="btn btn-ghost w-fit" routerLink="/gestor/contratos">
+          <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
+          Contratos
+        </a>
+        <div>
+          <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+          <h1 class="text-3xl font-extrabold text-primary md:text-4xl">{{ pageTitle }}</h1>
+        </div>
+      </div>
+      <button class="btn btn-ghost w-fit" type="button" (click)="signOut()">
+        <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+        Sair
+      </button>
+    </div>
+
+    <nav class="tabs tabs-box w-fit">
+      <a class="tab" routerLink="/gestor/equipamentos">Equipamentos</a>
+      <a class="tab" routerLink="/gestor/clientes">Clientes</a>
+      <a class="tab" routerLink="/gestor/vendedores">Vendedores</a>
+      <a class="tab tab-active" routerLink="/gestor/contratos">Contratos</a>
+      <a class="tab" routerLink="/gestor/empresa">Empresa</a>
+    </nav>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else if (loadFailed) {
+      <div class="rounded-box border border-base-300 bg-base-100 p-6">
+        <a class="btn btn-primary" routerLink="/gestor/contratos">Voltar para contratos</a>
+      </div>
+    } @else {
+      <form class="space-y-6 rounded-box border border-base-300 bg-base-100 p-5" [formGroup]="form" (submit)="saveContract()">
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Cliente</span>
+            <select class="select select-bordered w-full" formControlName="customerId">
+              <option [ngValue]="0">Selecione um cliente</option>
+              @for (customer of customers; track customer.id) {
+                <option [ngValue]="customer.id">{{ customer.nome }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Vendedor</span>
+            <select class="select select-bordered w-full" formControlName="sellerId">
+              <option [ngValue]="0">Selecione um vendedor</option>
+              @for (seller of sellers; track seller.id) {
+                <option [ngValue]="seller.id">{{ seller.nome }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Status</span>
+            <select class="select select-bordered w-full" formControlName="status">
+              @for (option of statusOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Período da locação</span>
+            <select
+              class="select select-bordered w-full"
+              formControlName="billingPeriod"
+              (change)="changeContractBillingPeriod()"
+            >
+              @for (option of periodOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Data de início</span>
+            <input
+              class="input input-bordered w-full"
+              type="date"
+              formControlName="startDate"
+              (input)="syncEndDateFromRentalPeriod()"
+              (change)="syncEndDateFromRentalPeriod()"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Término previsto automático</span>
+            <input
+              class="input input-bordered w-full bg-base-200"
+              type="date"
+              formControlName="endDate"
+              readonly
+              aria-readonly="true"
+            />
+            <span class="text-xs text-base-content/60">
+              Calculado pela data de início + período da locação.
+            </span>
+          </label>
+
+          <label class="flex flex-col gap-1.5 md:col-span-2">
+            <span class="text-sm font-semibold text-base-content/80">Local de entrega/uso</span>
+            <input
+              class="input input-bordered w-full"
+              formControlName="deliveryAddress"
+              (input)="syncWorksiteAddressFromDelivery()"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1.5 md:col-span-2">
+            <span class="text-sm font-semibold text-base-content/80">Endereço da obra</span>
+            <input
+              class="input input-bordered w-full"
+              formControlName="worksiteAddress"
+              (input)="markWorksiteAddressTouched()"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1.5 md:col-span-2">
+            <span class="text-sm font-semibold text-base-content/80">Valor do frete</span>
+            <input
+              class="input input-bordered w-full"
+              inputmode="decimal"
+              formControlName="shipping"
+              [maskito]="currencyMask"
+            />
+          </label>
+        </div>
+
+        <section class="rounded-box border border-base-300 p-4">
+          <h2 class="text-lg font-bold text-primary">Equipamentos</h2>
+
+          <div class="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_8rem_auto] md:items-end" [formGroup]="itemForm">
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Equipamento</span>
+              <select class="select select-bordered w-full" formControlName="equipmentId">
+                <option [ngValue]="0">Selecione</option>
+                @for (equipment of equipments; track equipment.id) {
+                  <option [ngValue]="equipment.id">{{ equipment.nome }}</option>
+                }
+              </select>
+              <span class="text-xs text-base-content/60">
+                {{ selectedEquipmentStockLabel() }} | {{ selectedEquipmentPriceLabel() }} no período
+              </span>
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Qtd.</span>
+              <input
+                class="input input-bordered w-full"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                formControlName="quantity"
+              />
+            </label>
+
+            <button class="btn btn-primary" type="button" (click)="addItem()">
+              <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
+              Adicionar
+            </button>
+          </div>
+
+          <div class="mt-4 overflow-x-auto">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Equipamento</th>
+                  <th>Qtd.</th>
+                  <th>Unitário</th>
+                  <th>Total</th>
+                  <th class="text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of contractItems; track $index) {
+                  <tr>
+                    <td>{{ item.equipmentName }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ formatMoney(item.unitPriceCents) }}</td>
+                    <td>{{ formatMoney(item.totalPriceCents) }}</td>
+                    <td>
+                      <div class="flex justify-end">
+                        <button class="btn btn-square btn-ghost btn-sm" type="button" (click)="removeItem($index)">
+                          <lucide-angular [img]="Trash2" class="h-4 w-4"></lucide-angular>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="py-5 text-center text-base-content/60">
+                      Nenhum equipamento adicionado.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-right text-base-content/75 font-medium">Subtotal</td>
+                  <td class="text-base-content/75 font-medium">{{ formatMoney(contractSubtotal()) }}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td colspan="3" class="text-right text-base-content/75 font-medium">Frete</td>
+                  <td class="text-base-content/75 font-medium">{{ form.controls.shipping.value }}</td>
+                  <td></td>
+                </tr>
+                <tr class="border-t border-base-content/20">
+                  <td colspan="3" class="text-right font-bold text-base">Total Geral</td>
+                  <td class="font-bold text-base text-primary">{{ formatMoney(contractTotal()) }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Observações</span>
+            <textarea class="textarea textarea-bordered h-28 w-full" formControlName="notes"></textarea>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Condições do contrato</span>
+            <textarea class="textarea textarea-bordered h-28 w-full" formControlName="terms"></textarea>
+          </label>
+        </div>
+
+        <div class="flex flex-wrap justify-end gap-2">
+          <a class="btn btn-ghost" routerLink="/gestor/contratos">Cancelar</a>
+          <button class="btn btn-primary" type="submit" [disabled]="saving">
+            @if (saving) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              <lucide-angular [img]="Save" class="h-4 w-4"></lucide-angular>
+            }
+            Salvar
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</section>
