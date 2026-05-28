@@ -33,33 +33,46 @@
         <input
           class="grow"
           type="search"
-          placeholder="Buscar por número, cliente, vendedor, documento ou contato"
+          placeholder="Buscar por nº do contrato, CPF/CNPJ, cliente, vendedor, contato ou equipamento"
           [value]="query"
           (input)="query = $any($event.target).value"
         />
       </label>
 
-      <div role="tablist" class="tabs tabs-box w-fit">
-        <button
-          role="tab"
-          type="button"
-          class="tab"
-          [class.tab-active]="selectedStatus === 'all'"
-          (click)="setStatus('all')"
+      <div class="flex flex-wrap gap-2">
+        <select
+          class="select select-bordered w-full md:w-48"
+          [value]="selectedPeriod"
+          (change)="setPeriod($any($event.target).value)"
         >
-          Todos
-        </button>
-        @for (option of statusOptions; track option.value) {
+          <option value="all">Todos os períodos</option>
+          @for (option of periodOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+
+        <div role="tablist" class="tabs tabs-box w-fit">
           <button
             role="tab"
             type="button"
             class="tab"
-            [class.tab-active]="selectedStatus === option.value"
-            (click)="setStatus(option.value)"
+            [class.tab-active]="selectedStatus === 'all'"
+            (click)="setStatus('all')"
           >
-            {{ option.label }}
+            Todos
           </button>
-        }
+          @for (option of statusOptions; track option.value) {
+            <button
+              role="tab"
+              type="button"
+              class="tab"
+              [class.tab-active]="selectedStatus === option.value"
+              (click)="setStatus(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
       </div>
     </section>
 

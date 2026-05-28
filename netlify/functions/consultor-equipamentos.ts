@@ -4,6 +4,7 @@ import type { Handler } from '@netlify/functions';
 import { GoogleGenAI, Type, Schema } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
 
+import { getSupabaseAnonKey, getSupabaseUrl } from '../../src/server/runtime-config';
 import {
   buildConsultorAiPromptPayload,
   createConsultorRequest,
@@ -155,7 +156,7 @@ export const handler: Handler = async (event) => {
     });
 
     const response = await Promise.race([generatePromise, timeoutPromise]);
-    const parsedResponse = parseModelOutput(response.text);
+    const parsedResponse = parseModelOutput(response.text ?? '');
     const normalizedResponse = normalizeConsultorResponse(parsedResponse, request, catalog);
 
     if (!normalizedResponse) {
@@ -179,9 +180,9 @@ export const handler: Handler = async (event) => {
 };
 
 async function getLiveConsultorCatalog(): Promise<ConsultorCatalogItem[]> {
-  const supabaseUrl = process.env.SUPABASE_URL?.trim();
+  const supabaseUrl = getSupabaseUrl();
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY?.trim();
+  const supabaseAnonKey = getSupabaseAnonKey();
 
   if (!supabaseUrl || (!supabaseServiceRoleKey && !supabaseAnonKey)) {
     return getConsultorCatalogItems();
@@ -214,7 +215,7 @@ async function getLiveConsultorCatalog(): Promise<ConsultorCatalogItem[]> {
     const pricesByEquipmentId = new Map((prices ?? []).map((item) => [item.equipment_id, item] as const));
 
     return equipments
-      .map((equipment) => {
+      .map((equipment): ConsultorCatalogItem | null => {
         const category = categoriesById.get(equipment.category_id);
 
         if (!category) {

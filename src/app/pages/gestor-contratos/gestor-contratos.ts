@@ -75,6 +75,7 @@ export class GestorContratosPage implements OnInit {
   protected contracts: RentalContract[] = [];
   protected query = '';
   protected selectedStatus: RentalContractStatus | 'all' = 'all';
+  protected selectedPeriod: RentalBillingPeriod | 'all' = 'all';
   protected loading = false;
   protected exportingContractId: number | null = null;
   protected exportingDeliveryReceiptId: number | null = null;
@@ -103,6 +104,7 @@ export class GestorContratosPage implements OnInit {
   protected filteredContracts(): RentalContract[] {
     const filtered = this.contracts.filter((contract) => {
       const matchesStatus = this.selectedStatus === 'all' || contract.status === this.selectedStatus;
+      const matchesPeriod = this.selectedPeriod === 'all' || contract.billingPeriod === this.selectedPeriod;
       const matchesQuery = matchesSearchQuery(this.query, [
         contract.id,
         contract.contractNumber,
@@ -123,11 +125,13 @@ export class GestorContratosPage implements OnInit {
         contract.startDate,
         contract.endDate,
         this.periodLabel(contract.billingPeriod),
+        this.rentalDurationLabel(contract),
         this.statusLabel(contract.status),
         formatCurrencyCents(contract.totalCents),
+        ...contract.items.map((item) => item.equipmentName),
       ]);
 
-      return matchesStatus && matchesQuery;
+      return matchesStatus && matchesPeriod && matchesQuery;
     });
 
     return sortBy(filtered, (contract) => this.contractSortValue(contract), this.sortDirection);
@@ -157,6 +161,10 @@ export class GestorContratosPage implements OnInit {
 
   protected setStatus(status: RentalContractStatus | 'all') {
     this.selectedStatus = status;
+  }
+
+  protected setPeriod(period: RentalBillingPeriod | 'all') {
+    this.selectedPeriod = period;
   }
 
   protected async exportPdf(contract: RentalContract) {
@@ -240,11 +248,15 @@ export class GestorContratosPage implements OnInit {
   }
 
   protected contractPeriodWithBilling(contract: RentalContract): string {
-    return `${this.periodLabel(contract.billingPeriod)} | ${this.contractPeriod(contract)}`;
+    return `${this.rentalDurationLabel(contract)} | ${this.contractPeriod(contract)}`;
   }
 
   protected periodLabel(period: RentalBillingPeriod): string {
     return this.periodOptions.find((option) => option.value === period)?.label ?? period;
+  }
+
+  protected rentalDurationLabel(contract: RentalContract): string {
+    return formatRentalDuration(contract.billingPeriod, contract.rentalPeriodCount);
   }
 
   protected statusLabel(status: RentalContractStatus): string {
@@ -359,6 +371,24 @@ function withTimeout<Result>(promise: Promise<Result>, timeoutMs: number): Promi
 function formatDate(value: string): string {
   const [year, month, day] = value.split('-');
   return year && month && day ? `${day}/${month}/${year}` : value;
+}
+
+function formatRentalDuration(period: RentalBillingPeriod, countValue: unknown): string {
+  const count = normalizeRentalPeriodCount(countValue);
+  const units: Record<RentalBillingPeriod, [string, string]> = {
+    daily: ['diária', 'diárias'],
+    weekly: ['semana', 'semanas'],
+    fortnightly: ['quinzena', 'quinzenas'],
+    monthly: ['mês', 'meses'],
+  };
+  const [singular, plural] = units[period];
+
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function normalizeRentalPeriodCount(value: unknown): number {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? Math.max(1, Math.trunc(numberValue)) : 1;
 }
 
 function contractNumberSortValue(value: string): number | string {

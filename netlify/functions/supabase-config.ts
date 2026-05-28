@@ -1,8 +1,10 @@
 import type { Handler } from '@netlify/functions';
 
+import { getSupabaseAnonKey, getSupabaseUrl } from '../../src/server/runtime-config';
+
 export const handler: Handler = async () => {
-  const supabaseUrl = process.env.SUPABASE_URL?.trim();
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY?.trim();
+  const supabaseUrl = getSupabaseUrl();
+  const supabaseAnonKey = getSupabaseAnonKey();
 
   if (!supabaseUrl || !supabaseAnonKey) {
     return {

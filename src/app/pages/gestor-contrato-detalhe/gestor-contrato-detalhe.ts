@@ -68,6 +68,10 @@ export class GestorContratoDetalhePage implements OnInit {
     return PERIOD_LABELS[period];
   }
 
+  protected rentalDurationLabel(contract: RentalContract): string {
+    return formatRentalDuration(contract.billingPeriod, contract.rentalPeriodCount);
+  }
+
   protected statusLabel(status: RentalContractStatus): string {
     return STATUS_LABELS[status];
   }
@@ -80,4 +84,22 @@ export class GestorContratoDetalhePage implements OnInit {
     const [year, month, day] = value.split('-');
     return year && month && day ? `${day}/${month}/${year}` : value;
   }
+}
+
+function formatRentalDuration(period: RentalBillingPeriod, countValue: unknown): string {
+  const count = normalizeRentalPeriodCount(countValue);
+  const units: Record<RentalBillingPeriod, [string, string]> = {
+    daily: ['diária', 'diárias'],
+    weekly: ['semana', 'semanas'],
+    fortnightly: ['quinzena', 'quinzenas'],
+    monthly: ['mês', 'meses'],
+  };
+  const [singular, plural] = units[period];
+
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function normalizeRentalPeriodCount(value: unknown): number {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? Math.max(1, Math.trunc(numberValue)) : 1;
 }

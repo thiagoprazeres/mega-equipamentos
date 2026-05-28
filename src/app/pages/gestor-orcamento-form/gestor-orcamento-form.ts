@@ -34,6 +34,7 @@ import {
   formatCurrencyCents,
   parseCurrencyToCents,
 } from '../../utils/prices';
+import { matchesSearchQuery } from '../../utils/search';
 
 const QUOTE_FORM_LOAD_TIMEOUT_MS = 6500;
 type PriceCentsField =
@@ -132,15 +133,19 @@ export class GestorOrcamentoFormPage implements OnInit {
     customerId: [0],
     sellerId: [0],
     billingPeriod: ['daily' as RentalBillingPeriod, Validators.required],
+    rentalPeriodCount: [1, [Validators.required, Validators.min(1)]],
     startDate: [todayInputValue(), Validators.required],
     validUntil: [dateInputValue(addDays(new Date(), 7))],
     deliveryAddress: [''],
     worksiteAddress: [''],
     shipping: [centsToDecimalInput(0), Validators.required],
+    discount: [centsToDecimalInput(0), Validators.required],
+    surcharge: [centsToDecimalInput(0), Validators.required],
     notes: [''],
     status: ['draft' as RentalQuoteStatus, Validators.required],
   });
   protected readonly itemForm = this.formBuilder.nonNullable.group({
+    equipmentQuery: [''],
     equipmentId: [0, [Validators.required, Validators.min(1)]],
     quantity: [1, [Validators.required, Validators.min(1)]],
   });
@@ -170,6 +175,10 @@ export class GestorOrcamentoFormPage implements OnInit {
     this.repriceQuoteItemsForBillingPeriod(this.form.controls.billingPeriod.value);
   }
 
+  protected changeQuoteRentalPeriodCount() {
+    this.repriceQuoteItemsForBillingPeriod(this.form.controls.billingPeriod.value);
+  }
+
   protected addItem() {
     if (this.itemForm.invalid) {
       this.itemForm.markAllAsTouched();
@@ -193,6 +202,7 @@ export class GestorOrcamentoFormPage implements OnInit {
     }
 
     const billingPeriod = this.form.controls.billingPeriod.value;
+    const rentalPeriodCount = this.currentRentalPeriodCount();
     const unitPriceCents = equipment.precos?.[PRICE_FIELD_BY_PERIOD[billingPeriod]] ?? 0;
     const assetValueCents = Math.max(0, Math.trunc(Number(equipment.assetValueCents) || 0));
     this.quoteItems = [
@@ -203,13 +213,14 @@ export class GestorOrcamentoFormPage implements OnInit {
         quantity,
         billingPeriod,
         unitPriceCents,
-        totalPriceCents: quantity * unitPriceCents,
+        totalPriceCents: quantity * unitPriceCents * rentalPeriodCount,
         assetValueCents,
         sortOrder: this.quoteItems.length + 1,
       },
     ];
     this.errorMessage = '';
     this.itemForm.reset({
+      equipmentQuery: '',
       equipmentId: 0,
       quantity: 1,
     });
@@ -238,8 +249,41 @@ export class GestorOrcamentoFormPage implements OnInit {
     return formatCurrencyCents(equipment.precos[PRICE_FIELD_BY_PERIOD[period]] ?? 0);
   }
 
+  protected filteredEquipmentOptions(): Equipamento[] {
+    const query = this.itemForm.controls.equipmentQuery.value;
+    return [...this.equipments]
+      .filter((equipment) =>
+        matchesSearchQuery(query, [
+          equipment.codigoInterno,
+          equipment.codigo,
+          equipment.equipamentoCategoria.codigo,
+          equipment.equipamentoCategoria.nome,
+          equipment.nome,
+          equipment.nomeTecnico,
+          equipment.slug,
+        ])
+      )
+      .sort(compareEquipmentByInternalCode);
+  }
+
+  protected equipmentOptionLabel(equipment: Equipamento): string {
+    const code = equipment.codigoInterno || equipment.codigo || String(equipment.id);
+    const category = equipment.equipamentoCategoria.codigo
+      ? ` | ${equipment.equipamentoCategoria.codigo} - ${equipment.equipamentoCategoria.nome}`
+      : '';
+
+    return `${code} - ${equipment.nome}${category}`;
+  }
+
   protected periodLabel(period: RentalBillingPeriod): string {
     return this.periodOptions.find((option) => option.value === period)?.label ?? period;
+  }
+
+  protected rentalDurationLabel(): string {
+    return formatRentalDuration(
+      this.form.controls.billingPeriod.value,
+      this.currentRentalPeriodCount()
+    );
   }
 
   protected formatMoney(value: number): string {
@@ -251,11 +295,24 @@ export class GestorOrcamentoFormPage implements OnInit {
   }
 
   protected quoteTotal(): number {
-    return this.quoteSubtotal() + this.quoteShipping();
+    return rentalTotalCents(
+      this.quoteSubtotal(),
+      this.quoteShipping(),
+      this.quoteDiscount(),
+      this.quoteSurcharge()
+    );
   }
 
   protected quoteShipping(): number {
     return parseCurrencyToCents(this.form.controls.shipping.value);
+  }
+
+  protected quoteDiscount(): number {
+    return parseCurrencyToCents(this.form.controls.discount.value);
+  }
+
+  protected quoteSurcharge(): number {
+    return parseCurrencyToCents(this.form.controls.surcharge.value);
   }
 
   protected async saveQuote() {
@@ -283,6 +340,7 @@ export class GestorOrcamentoFormPage implements OnInit {
         customer,
         seller,
         billingPeriod: value.billingPeriod,
+        rentalPeriodCount: normalizeRentalPeriodCount(value.rentalPeriodCount),
         startDate: value.startDate,
         validUntil: value.validUntil,
         deliveryAddress: value.deliveryAddress,
@@ -291,6 +349,8 @@ export class GestorOrcamentoFormPage implements OnInit {
         status: value.status,
         items: this.itemsForQuoteBillingPeriod(value.billingPeriod),
         shippingCents: parseCurrencyToCents(value.shipping),
+        discountCents: parseCurrencyToCents(value.discount),
+        surchargeCents: parseCurrencyToCents(value.surcharge),
       };
 
       await this.quoteService.saveQuote(payload);
@@ -366,13 +426,21 @@ export class GestorOrcamentoFormPage implements OnInit {
       customerId: 0,
       sellerId: this.sellers[0]?.id ?? 0,
       billingPeriod: 'daily',
+      rentalPeriodCount: 1,
       startDate: todayInputValue(),
       validUntil: dateInputValue(addDays(new Date(), 7)),
       deliveryAddress: '',
       worksiteAddress: '',
       shipping: centsToDecimalInput(0),
+      discount: centsToDecimalInput(0),
+      surcharge: centsToDecimalInput(0),
       notes: '',
       status: 'draft',
+    });
+    this.itemForm.reset({
+      equipmentQuery: '',
+      equipmentId: 0,
+      quantity: 1,
     });
   }
 
@@ -383,13 +451,21 @@ export class GestorOrcamentoFormPage implements OnInit {
       customerId: quote.customerId ?? 0,
       sellerId: quote.sellerId ?? 0,
       billingPeriod: quote.billingPeriod,
+      rentalPeriodCount: normalizeRentalPeriodCount(quote.rentalPeriodCount),
       startDate: quote.startDate,
       validUntil: quote.validUntil ?? '',
       deliveryAddress: quote.deliveryAddress ?? '',
       worksiteAddress: quote.worksiteAddress ?? '',
       shipping: centsToDecimalInput(quote.shippingCents),
+      discount: centsToDecimalInput(quote.discountCents ?? 0),
+      surcharge: centsToDecimalInput(quote.surchargeCents ?? 0),
       notes: quote.notes ?? '',
       status: quote.status,
+    });
+    this.itemForm.reset({
+      equipmentQuery: '',
+      equipmentId: 0,
+      quantity: 1,
     });
   }
 
@@ -398,6 +474,7 @@ export class GestorOrcamentoFormPage implements OnInit {
   }
 
   private itemsForQuoteBillingPeriod(billingPeriod: RentalBillingPeriod): RentalQuoteItem[] {
+    const rentalPeriodCount = this.currentRentalPeriodCount();
     return this.quoteItems.map((item, index) => {
       const equipment = this.equipments.find((candidate) => candidate.id === item.equipmentId);
       const unitPriceCents =
@@ -409,10 +486,14 @@ export class GestorOrcamentoFormPage implements OnInit {
         billingPeriod,
         quantity,
         unitPriceCents,
-        totalPriceCents: unitPriceCents * quantity,
+        totalPriceCents: unitPriceCents * quantity * rentalPeriodCount,
         sortOrder: index + 1,
       };
     });
+  }
+
+  private currentRentalPeriodCount(): number {
+    return normalizeRentalPeriodCount(this.form.controls.rentalPeriodCount.value);
   }
 }
 
@@ -447,6 +528,51 @@ function addDays(value: Date, days: number): Date {
   const result = new Date(value);
   result.setDate(result.getDate() + days);
   return result;
+}
+
+function rentalTotalCents(
+  subtotalCents: number,
+  shippingCents: number,
+  discountCents: number,
+  surchargeCents: number
+): number {
+  return Math.max(0, subtotalCents + shippingCents - discountCents + surchargeCents);
+}
+
+function normalizeRentalPeriodCount(value: unknown): number {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? Math.max(1, Math.trunc(numberValue)) : 1;
+}
+
+function formatRentalDuration(period: RentalBillingPeriod, countValue: unknown): string {
+  const count = normalizeRentalPeriodCount(countValue);
+  const units: Record<RentalBillingPeriod, [string, string]> = {
+    daily: ['diária', 'diárias'],
+    weekly: ['semana', 'semanas'],
+    fortnightly: ['quinzena', 'quinzenas'],
+    monthly: ['mês', 'meses'],
+  };
+  const [singular, plural] = units[period];
+
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function compareEquipmentByInternalCode(left: Equipamento, right: Equipamento): number {
+  return equipmentCodeSortValue(left).localeCompare(equipmentCodeSortValue(right), 'pt-BR', {
+    numeric: true,
+    sensitivity: 'base',
+  });
+}
+
+function equipmentCodeSortValue(equipment: Equipamento): string {
+  const categoryCode = equipment.equipamentoCategoria.codigo;
+  const equipmentCode = equipment.codigo;
+
+  if (categoryCode && equipmentCode) {
+    return `${categoryCode}.${equipmentCode}`;
+  }
+
+  return equipment.codigoInterno || equipmentCode || equipment.nome;
 }
 
 function dateInputValue(value: Date): string {

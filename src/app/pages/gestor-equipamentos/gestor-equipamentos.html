@@ -33,7 +33,7 @@
         <input
           class="grow"
           type="search"
-          placeholder="Buscar por código interno, nome ou slug"
+          placeholder="Buscar por código interno, categoria, nome comercial ou nome técnico"
           [value]="query"
           (input)="query = $any($event.target).value"
         />
@@ -46,7 +46,7 @@
       >
         <option value="">Todas as categorias</option>
         @for (category of categories; track category.id) {
-          <option [value]="category.slug">{{ category.nome }}</option>
+          <option [value]="category.slug">{{ category.codigo }} - {{ category.nome }}</option>
         }
       </select>
     </section>
@@ -154,7 +154,7 @@
                       </div>
                     </div>
                   </td>
-                  <td>{{ equipment.equipamentoCategoria.nome }}</td>
+                  <td>{{ equipment.equipamentoCategoria.codigo }} - {{ equipment.equipamentoCategoria.nome }}</td>
                   <td>{{ priceLabel(equipment) }}</td>
                   <td class="text-sm">{{ commercialSummary(equipment) }}</td>
                   <td>

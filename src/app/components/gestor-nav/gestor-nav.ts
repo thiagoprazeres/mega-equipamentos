@@ -22,12 +22,16 @@ interface GestorNavItem {
   standalone: true,
   imports: [RouterLink, RouterLinkActive, LucideAngularModule],
   template: `
-    <nav class="tabs tabs-box w-fit max-w-full overflow-x-auto" aria-label="Menu da área gestora">
+    <nav
+      class="flex max-w-full flex-wrap gap-2 rounded-box border border-base-300 bg-base-100 p-2 shadow-sm"
+      aria-label="Menu da área gestora"
+    >
       @for (item of navItems; track item.route) {
         <a
-          class="tab gap-2 whitespace-nowrap"
-          routerLinkActive="tab-active"
+          class="btn btn-ghost btn-sm justify-start gap-2 whitespace-nowrap"
+          routerLinkActive="btn-active"
           [routerLink]="item.route"
+          [routerLinkActiveOptions]="{ exact: false }"
         >
           <lucide-angular [img]="item.icon" class="h-4 w-4"></lucide-angular>
           {{ item.label }}

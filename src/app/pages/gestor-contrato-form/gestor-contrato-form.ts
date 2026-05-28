@@ -40,6 +40,7 @@ import {
   parseCurrencyToCents,
   digitsToCurrencyInput,
 } from '../../utils/prices';
+import { matchesSearchQuery } from '../../utils/search';
 
 const CONTRACT_FORM_LOAD_TIMEOUT_MS = 6500;
 type PriceCentsField =
@@ -132,6 +133,7 @@ export class GestorContratoFormPage implements OnInit {
   protected saving = false;
   protected editingContract: RentalContract | null = null;
   protected worksiteAddressTouched = false;
+  protected endDateTouched = false;
   protected errorMessage = '';
   protected successMessage = '';
 
@@ -139,16 +141,20 @@ export class GestorContratoFormPage implements OnInit {
     customerId: [0, [Validators.required, Validators.min(1)]],
     sellerId: [0, [Validators.required, Validators.min(1)]],
     billingPeriod: ['daily' as RentalBillingPeriod, Validators.required],
+    rentalPeriodCount: [1, [Validators.required, Validators.min(1)]],
     startDate: [todayInputValue(), Validators.required],
     endDate: [''],
     deliveryAddress: [''],
     worksiteAddress: [''],
     shipping: [centsToDecimalInput(6000), Validators.required],
+    discount: [centsToDecimalInput(0), Validators.required],
+    surcharge: [centsToDecimalInput(0), Validators.required],
     notes: [''],
     terms: [DEFAULT_CONTRACT_TERMS],
     status: ['draft' as RentalContractStatus, Validators.required],
   });
   protected readonly itemForm = this.formBuilder.nonNullable.group({
+    equipmentQuery: [''],
     equipmentId: [0, [Validators.required, Validators.min(1)]],
     quantity: [1, [Validators.required, Validators.min(1)]],
   });
@@ -191,13 +197,35 @@ export class GestorContratoFormPage implements OnInit {
     this.worksiteAddressTouched = true;
   }
 
-  protected syncEndDateFromRentalPeriod() {
+  protected syncEndDateFromRentalPeriod(force = false) {
+    if (this.endDateTouched && !force) {
+      return;
+    }
+
     this.form.controls.endDate.setValue(
-      calculateRentalEndDate(this.form.controls.startDate.value, this.form.controls.billingPeriod.value)
+      calculateRentalEndDate(
+        this.form.controls.startDate.value,
+        this.form.controls.billingPeriod.value,
+        this.currentRentalPeriodCount()
+      )
     );
   }
 
+  protected markEndDateTouched() {
+    this.endDateTouched = true;
+  }
+
+  protected useAutomaticEndDate() {
+    this.endDateTouched = false;
+    this.syncEndDateFromRentalPeriod(true);
+  }
+
   protected changeContractBillingPeriod() {
+    this.repriceContractItemsForBillingPeriod(this.form.controls.billingPeriod.value);
+    this.syncEndDateFromRentalPeriod();
+  }
+
+  protected changeContractRentalPeriodCount() {
     this.repriceContractItemsForBillingPeriod(this.form.controls.billingPeriod.value);
     this.syncEndDateFromRentalPeriod();
   }
@@ -225,6 +253,7 @@ export class GestorContratoFormPage implements OnInit {
     }
 
     const billingPeriod = this.form.controls.billingPeriod.value;
+    const rentalPeriodCount = this.currentRentalPeriodCount();
     const unitPriceCents = equipment.precos?.[PRICE_FIELD_BY_PERIOD[billingPeriod]] ?? 0;
     const assetValueCents = Math.max(0, Math.trunc(Number(equipment.assetValueCents) || 0));
     this.contractItems = [
@@ -235,13 +264,14 @@ export class GestorContratoFormPage implements OnInit {
         quantity,
         billingPeriod,
         unitPriceCents,
-        totalPriceCents: quantity * unitPriceCents,
+        totalPriceCents: quantity * unitPriceCents * rentalPeriodCount,
         assetValueCents,
         sortOrder: this.contractItems.length + 1,
       },
     ];
     this.errorMessage = '';
     this.itemForm.reset({
+      equipmentQuery: '',
       equipmentId: 0,
       quantity: 1,
     });
@@ -270,8 +300,41 @@ export class GestorContratoFormPage implements OnInit {
     return formatCurrencyCents(equipment.precos[PRICE_FIELD_BY_PERIOD[period]] ?? 0);
   }
 
+  protected filteredEquipmentOptions(): Equipamento[] {
+    const query = this.itemForm.controls.equipmentQuery.value;
+    return [...this.equipments]
+      .filter((equipment) =>
+        matchesSearchQuery(query, [
+          equipment.codigoInterno,
+          equipment.codigo,
+          equipment.equipamentoCategoria.codigo,
+          equipment.equipamentoCategoria.nome,
+          equipment.nome,
+          equipment.nomeTecnico,
+          equipment.slug,
+        ])
+      )
+      .sort(compareEquipmentByInternalCode);
+  }
+
+  protected equipmentOptionLabel(equipment: Equipamento): string {
+    const code = equipment.codigoInterno || equipment.codigo || String(equipment.id);
+    const category = equipment.equipamentoCategoria.codigo
+      ? ` | ${equipment.equipamentoCategoria.codigo} - ${equipment.equipamentoCategoria.nome}`
+      : '';
+
+    return `${code} - ${equipment.nome}${category}`;
+  }
+
   protected periodLabel(period: RentalBillingPeriod): string {
     return this.periodOptions.find((option) => option.value === period)?.label ?? period;
+  }
+
+  protected rentalDurationLabel(): string {
+    return formatRentalDuration(
+      this.form.controls.billingPeriod.value,
+      this.currentRentalPeriodCount()
+    );
   }
 
   protected formatMoney(value: number): string {
@@ -283,9 +346,24 @@ export class GestorContratoFormPage implements OnInit {
   }
 
   protected contractTotal(): number {
-    const subtotal = this.contractSubtotal();
-    const shippingValue = parseCurrencyToCents(this.form.controls.shipping.value);
-    return subtotal + shippingValue;
+    return rentalTotalCents(
+      this.contractSubtotal(),
+      this.contractShipping(),
+      this.contractDiscount(),
+      this.contractSurcharge()
+    );
+  }
+
+  protected contractShipping(): number {
+    return parseCurrencyToCents(this.form.controls.shipping.value);
+  }
+
+  protected contractDiscount(): number {
+    return parseCurrencyToCents(this.form.controls.discount.value);
+  }
+
+  protected contractSurcharge(): number {
+    return parseCurrencyToCents(this.form.controls.surcharge.value);
   }
 
   protected async saveContract() {
@@ -299,7 +377,9 @@ export class GestorContratoFormPage implements OnInit {
       return;
     }
 
-    this.syncEndDateFromRentalPeriod();
+    if (!this.form.controls.endDate.value) {
+      this.syncEndDateFromRentalPeriod(true);
+    }
 
     const value = this.form.getRawValue();
     const customer = this.customers.find((item) => item.id === Number(value.customerId));
@@ -325,6 +405,7 @@ export class GestorContratoFormPage implements OnInit {
         customer,
         seller,
         billingPeriod: value.billingPeriod,
+        rentalPeriodCount: normalizeRentalPeriodCount(value.rentalPeriodCount),
         startDate: value.startDate,
         endDate: value.endDate,
         deliveryAddress: value.deliveryAddress,
@@ -334,6 +415,8 @@ export class GestorContratoFormPage implements OnInit {
         status: value.status,
         items: this.itemsForContractBillingPeriod(value.billingPeriod),
         shippingCents: parseCurrencyToCents(value.shipping),
+        discountCents: parseCurrencyToCents(value.discount),
+        surchargeCents: parseCurrencyToCents(value.surcharge),
       };
 
       await this.rentalContractService.saveContract(payload);
@@ -413,20 +496,25 @@ export class GestorContratoFormPage implements OnInit {
     this.editingContract = null;
     this.contractItems = [];
     this.worksiteAddressTouched = false;
+    this.endDateTouched = false;
     this.form.reset({
       customerId: 0,
       sellerId: 0,
       billingPeriod: 'daily',
+      rentalPeriodCount: 1,
       startDate: todayInputValue(),
       endDate: '',
       deliveryAddress: '',
       worksiteAddress: '',
       shipping: centsToDecimalInput(6000),
+      discount: centsToDecimalInput(0),
+      surcharge: centsToDecimalInput(0),
       notes: '',
       terms: normalizeContractTerms(contractTerms),
       status: 'draft',
     });
     this.itemForm.reset({
+      equipmentQuery: '',
       equipmentId: 0,
       quantity: 1,
     });
@@ -443,27 +531,39 @@ export class GestorContratoFormPage implements OnInit {
     this.worksiteAddressTouched = Boolean(
       contract.worksiteAddress && contract.worksiteAddress !== (contract.deliveryAddress ?? '')
     );
+    this.endDateTouched =
+      Boolean(contract.endDate) &&
+      contract.endDate !==
+        calculateRentalEndDate(
+          contract.startDate,
+          contract.billingPeriod,
+          normalizeRentalPeriodCount(contract.rentalPeriodCount)
+        );
     this.form.reset({
       customerId: contract.customerId,
       sellerId: contract.sellerId ?? 0,
       billingPeriod: contract.billingPeriod,
+      rentalPeriodCount: normalizeRentalPeriodCount(contract.rentalPeriodCount),
       startDate: contract.startDate,
       endDate: contract.endDate ?? '',
       deliveryAddress: contract.deliveryAddress ?? '',
       worksiteAddress: contract.worksiteAddress ?? contract.deliveryAddress ?? '',
       shipping: centsToDecimalInput(contract.shippingCents ?? 6000),
+      discount: centsToDecimalInput(contract.discountCents ?? 0),
+      surcharge: centsToDecimalInput(contract.surchargeCents ?? 0),
       notes: contract.notes ?? '',
       terms: contract.terms || DEFAULT_CONTRACT_TERMS,
       status: contract.status,
     });
-    this.syncEndDateFromRentalPeriod();
     this.itemForm.reset({
+      equipmentQuery: '',
       equipmentId: 0,
       quantity: 1,
     });
   }
 
   private repriceContractItemsForBillingPeriod(billingPeriod: RentalBillingPeriod) {
+    const rentalPeriodCount = this.currentRentalPeriodCount();
     this.contractItems = this.contractItems.map((item) => {
       const equipment = this.equipments.find((candidate) => candidate.id === item.equipmentId);
       const unitPriceCents = equipment?.precos?.[PRICE_FIELD_BY_PERIOD[billingPeriod]] ?? item.unitPriceCents;
@@ -472,18 +572,23 @@ export class GestorContratoFormPage implements OnInit {
         ...item,
         billingPeriod,
         unitPriceCents,
-        totalPriceCents: item.quantity * unitPriceCents,
+        totalPriceCents: item.quantity * unitPriceCents * rentalPeriodCount,
       };
     });
   }
 
   private itemsForContractBillingPeriod(billingPeriod: RentalBillingPeriod): RentalContractItem[] {
+    const rentalPeriodCount = this.currentRentalPeriodCount();
     return this.contractItems.map((item) => ({
       ...item,
       billingPeriod,
       assetValueCents: this.itemAssetValue(item),
-      totalPriceCents: item.quantity * item.unitPriceCents,
+      totalPriceCents: item.quantity * item.unitPriceCents * rentalPeriodCount,
     }));
+  }
+
+  private currentRentalPeriodCount(): number {
+    return normalizeRentalPeriodCount(this.form.controls.rentalPeriodCount.value);
   }
 
   private itemAssetValue(item: RentalContractItem): number {
@@ -523,7 +628,11 @@ function todayInputValue(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function calculateRentalEndDate(startDate: string, billingPeriod: RentalBillingPeriod): string {
+function calculateRentalEndDate(
+  startDate: string,
+  billingPeriod: RentalBillingPeriod,
+  rentalPeriodCount: number
+): string {
   if (!startDate) {
     return '';
   }
@@ -535,9 +644,10 @@ function calculateRentalEndDate(startDate: string, billingPeriod: RentalBillingP
   }
 
   const date = new Date(year, month - 1, day);
+  const periodCount = normalizeRentalPeriodCount(rentalPeriodCount);
 
   if (billingPeriod === 'monthly') {
-    return addMonths(date, 1);
+    return addMonths(date, periodCount);
   }
 
   const daysByPeriod: Record<Exclude<RentalBillingPeriod, 'monthly'>, number> = {
@@ -545,9 +655,54 @@ function calculateRentalEndDate(startDate: string, billingPeriod: RentalBillingP
     weekly: 7,
     fortnightly: 15,
   };
-  date.setDate(date.getDate() + daysByPeriod[billingPeriod]);
+  date.setDate(date.getDate() + daysByPeriod[billingPeriod] * periodCount);
 
   return dateInputValue(date);
+}
+
+function rentalTotalCents(
+  subtotalCents: number,
+  shippingCents: number,
+  discountCents: number,
+  surchargeCents: number
+): number {
+  return Math.max(0, subtotalCents + shippingCents - discountCents + surchargeCents);
+}
+
+function normalizeRentalPeriodCount(value: unknown): number {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? Math.max(1, Math.trunc(numberValue)) : 1;
+}
+
+function formatRentalDuration(period: RentalBillingPeriod, countValue: unknown): string {
+  const count = normalizeRentalPeriodCount(countValue);
+  const units: Record<RentalBillingPeriod, [string, string]> = {
+    daily: ['diária', 'diárias'],
+    weekly: ['semana', 'semanas'],
+    fortnightly: ['quinzena', 'quinzenas'],
+    monthly: ['mês', 'meses'],
+  };
+  const [singular, plural] = units[period];
+
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function compareEquipmentByInternalCode(left: Equipamento, right: Equipamento): number {
+  return equipmentCodeSortValue(left).localeCompare(equipmentCodeSortValue(right), 'pt-BR', {
+    numeric: true,
+    sensitivity: 'base',
+  });
+}
+
+function equipmentCodeSortValue(equipment: Equipamento): string {
+  const categoryCode = equipment.equipamentoCategoria.codigo;
+  const equipmentCode = equipment.codigo;
+
+  if (categoryCode && equipmentCode) {
+    return `${categoryCode}.${equipmentCode}`;
+  }
+
+  return equipment.codigoInterno || equipmentCode || equipment.nome;
 }
 
 function addMonths(date: Date, months: number): string {

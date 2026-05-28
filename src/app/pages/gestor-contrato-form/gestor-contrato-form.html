@@ -68,7 +68,7 @@
           </label>
 
           <label class="flex flex-col gap-1.5">
-            <span class="text-sm font-semibold text-base-content/80">Período da locação</span>
+            <span class="text-sm font-semibold text-base-content/80">Tabela de preço</span>
             <select
               class="select select-bordered w-full"
               formControlName="billingPeriod"
@@ -78,6 +78,21 @@
                 <option [ngValue]="option.value">{{ option.label }}</option>
               }
             </select>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Qtd. de períodos</span>
+            <input
+              class="input input-bordered w-full"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              step="1"
+              formControlName="rentalPeriodCount"
+              (input)="changeContractRentalPeriodCount()"
+              (change)="changeContractRentalPeriodCount()"
+            />
+            <span class="text-xs text-base-content/60">{{ rentalDurationLabel() }}</span>
           </label>
 
           <label class="flex flex-col gap-1.5">
@@ -92,17 +107,21 @@
           </label>
 
           <label class="flex flex-col gap-1.5">
-            <span class="text-sm font-semibold text-base-content/80">Término previsto automático</span>
+            <span class="text-sm font-semibold text-base-content/80">Término previsto</span>
             <input
-              class="input input-bordered w-full bg-base-200"
+              class="input input-bordered w-full"
               type="date"
               formControlName="endDate"
-              readonly
-              aria-readonly="true"
+              (input)="markEndDateTouched()"
             />
-            <span class="text-xs text-base-content/60">
-              Calculado pela data de início + período da locação.
-            </span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs text-base-content/60">
+                Calculado pela data de início + quantidade de períodos. Ajuste manualmente quando cair em fim de semana.
+              </span>
+              <button class="btn btn-ghost btn-xs" type="button" (click)="useAutomaticEndDate()">
+                Recalcular
+              </button>
+            </div>
           </label>
 
           <label class="flex flex-col gap-1.5 md:col-span-2">
@@ -123,12 +142,32 @@
             />
           </label>
 
-          <label class="flex flex-col gap-1.5 md:col-span-2">
+          <label class="flex flex-col gap-1.5">
             <span class="text-sm font-semibold text-base-content/80">Valor do frete</span>
             <input
               class="input input-bordered w-full"
               inputmode="decimal"
               formControlName="shipping"
+              [maskito]="currencyMask"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Desconto</span>
+            <input
+              class="input input-bordered w-full"
+              inputmode="decimal"
+              formControlName="discount"
+              [maskito]="currencyMask"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Acréscimo</span>
+            <input
+              class="input input-bordered w-full"
+              inputmode="decimal"
+              formControlName="surcharge"
               [maskito]="currencyMask"
             />
           </label>
@@ -140,14 +179,20 @@
           <div class="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_8rem_auto] md:items-end" [formGroup]="itemForm">
             <label class="flex flex-col gap-1.5">
               <span class="text-sm font-semibold text-base-content/80">Equipamento</span>
+              <input
+                class="input input-bordered w-full"
+                type="search"
+                formControlName="equipmentQuery"
+                placeholder="Filtrar por código interno, categoria ou nome"
+              />
               <select class="select select-bordered w-full" formControlName="equipmentId">
                 <option [ngValue]="0">Selecione</option>
-                @for (equipment of equipments; track equipment.id) {
-                  <option [ngValue]="equipment.id">{{ equipment.nome }}</option>
+                @for (equipment of filteredEquipmentOptions(); track equipment.id) {
+                  <option [ngValue]="equipment.id">{{ equipmentOptionLabel(equipment) }}</option>
                 }
               </select>
               <span class="text-xs text-base-content/60">
-                {{ selectedEquipmentStockLabel() }} | {{ selectedEquipmentPriceLabel() }} no período
+                {{ selectedEquipmentStockLabel() }} | {{ selectedEquipmentPriceLabel() }} por período
               </span>
             </label>
 
@@ -175,7 +220,7 @@
                 <tr>
                   <th>Equipamento</th>
                   <th>Qtd.</th>
-                  <th>Unitário</th>
+                  <th>Unit./período</th>
                   <th>Total</th>
                   <th class="text-right">Ações</th>
                 </tr>
@@ -211,7 +256,17 @@
                 </tr>
                 <tr>
                   <td colspan="3" class="text-right text-base-content/75 font-medium">Frete</td>
-                  <td class="text-base-content/75 font-medium">{{ form.controls.shipping.value }}</td>
+                  <td class="text-base-content/75 font-medium">{{ formatMoney(contractShipping()) }}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td colspan="3" class="text-right text-base-content/75 font-medium">Desconto</td>
+                  <td class="text-base-content/75 font-medium">- {{ formatMoney(contractDiscount()) }}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td colspan="3" class="text-right text-base-content/75 font-medium">Acréscimo</td>
+                  <td class="text-base-content/75 font-medium">{{ formatMoney(contractSurcharge()) }}</td>
                   <td></td>
                 </tr>
                 <tr class="border-t border-base-content/20">

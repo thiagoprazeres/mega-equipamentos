@@ -58,6 +58,7 @@ export class GestorOrcamentosPage implements OnInit {
   protected quotes: RentalQuote[] = [];
   protected query = '';
   protected selectedStatus: RentalQuoteStatus | 'all' = 'all';
+  protected selectedPeriod: RentalBillingPeriod | 'all' = 'all';
   protected loading = false;
   protected exportingQuoteId: number | null = null;
   protected errorMessage = '';
@@ -81,6 +82,7 @@ export class GestorOrcamentosPage implements OnInit {
   protected filteredQuotes(): RentalQuote[] {
     const filtered = this.quotes.filter((quote) => {
       const matchesStatus = this.selectedStatus === 'all' || quote.status === this.selectedStatus;
+      const matchesPeriod = this.selectedPeriod === 'all' || quote.billingPeriod === this.selectedPeriod;
       const matchesQuery = matchesSearchQuery(this.query, [
         quote.id,
         quote.quoteNumber,
@@ -96,11 +98,13 @@ export class GestorOrcamentosPage implements OnInit {
         quote.startDate,
         quote.validUntil,
         this.periodLabel(quote.billingPeriod),
+        this.rentalDurationLabel(quote),
         this.statusLabel(quote.status),
         formatCurrencyCents(quote.totalCents),
+        ...quote.items.map((item) => item.equipmentName),
       ]);
 
-      return matchesStatus && matchesQuery;
+      return matchesStatus && matchesPeriod && matchesQuery;
     });
 
     return sortBy(filtered, (quote) => this.quoteSortValue(quote), this.sortDirection);
@@ -132,6 +136,10 @@ export class GestorOrcamentosPage implements OnInit {
     this.selectedStatus = status;
   }
 
+  protected setPeriod(period: RentalBillingPeriod | 'all') {
+    this.selectedPeriod = period;
+  }
+
   protected async exportPdf(quote: RentalQuote) {
     this.exportingQuoteId = quote.id;
 
@@ -148,6 +156,10 @@ export class GestorOrcamentosPage implements OnInit {
 
   protected periodLabel(period: RentalBillingPeriod): string {
     return this.periodOptions.find((option) => option.value === period)?.label ?? period;
+  }
+
+  protected rentalDurationLabel(quote: RentalQuote): string {
+    return formatRentalDuration(quote.billingPeriod, quote.rentalPeriodCount);
   }
 
   protected statusLabel(status: RentalQuoteStatus): string {
@@ -262,6 +274,24 @@ function withTimeout<Result>(promise: Promise<Result>, timeoutMs: number): Promi
       }
     );
   });
+}
+
+function formatRentalDuration(period: RentalBillingPeriod, countValue: unknown): string {
+  const count = normalizeRentalPeriodCount(countValue);
+  const units: Record<RentalBillingPeriod, [string, string]> = {
+    daily: ['diária', 'diárias'],
+    weekly: ['semana', 'semanas'],
+    fortnightly: ['quinzena', 'quinzenas'],
+    monthly: ['mês', 'meses'],
+  };
+  const [singular, plural] = units[period];
+
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function normalizeRentalPeriodCount(value: unknown): number {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? Math.max(1, Math.trunc(numberValue)) : 1;
 }
 
 function quoteNumberSortValue(value: string): number | string {

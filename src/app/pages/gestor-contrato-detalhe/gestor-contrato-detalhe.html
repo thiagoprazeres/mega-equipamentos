@@ -44,7 +44,7 @@
         </div>
         <div class="rounded-box border border-base-300 bg-base-100 p-4">
           <p class="text-xs uppercase text-base-content/60">Período</p>
-          <p class="mt-1 text-xl font-bold">{{ periodLabel(contract.billingPeriod) }}</p>
+          <p class="mt-1 text-xl font-bold">{{ rentalDurationLabel(contract) }}</p>
         </div>
         <div class="rounded-box border border-base-300 bg-base-100 p-4">
           <p class="text-xs uppercase text-base-content/60">Total</p>
@@ -67,7 +67,7 @@
           <dl class="mt-4 grid gap-3">
             <div><dt class="font-semibold">Vendedor</dt><dd class="text-base-content/70">{{ contract.sellerName || '-' }}</dd></div>
             <div><dt class="font-semibold">Contato do vendedor</dt><dd class="text-base-content/70">{{ contract.sellerPhone || contract.sellerEmail || '-' }}</dd></div>
-            <div><dt class="font-semibold">Período da locação</dt><dd class="text-base-content/70">{{ periodLabel(contract.billingPeriod) }}</dd></div>
+            <div><dt class="font-semibold">Período da locação</dt><dd class="text-base-content/70">{{ rentalDurationLabel(contract) }}</dd></div>
             <div><dt class="font-semibold">Local de entrega/uso</dt><dd class="text-base-content/70">{{ contract.deliveryAddress || 'A combinar' }}</dd></div>
             <div><dt class="font-semibold">Endereço da obra</dt><dd class="text-base-content/70">{{ contract.worksiteAddress || contract.deliveryAddress || 'A combinar' }}</dd></div>
             <div><dt class="font-semibold">Observações</dt><dd class="whitespace-pre-line text-base-content/70">{{ contract.notes || '-' }}</dd></div>
@@ -83,7 +83,7 @@
               <tr>
                 <th>Equipamento</th>
                 <th>Qtd.</th>
-                <th>Unitário</th>
+                <th>Unit./período</th>
                 <th>Total</th>
               </tr>
             </thead>
@@ -98,6 +98,22 @@
               }
             </tbody>
             <tfoot>
+              <tr>
+                <td colspan="3" class="text-right text-base-content/70">Subtotal</td>
+                <td>{{ formatMoney(contract.subtotalCents) }}</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-right text-base-content/70">Frete</td>
+                <td>{{ formatMoney(contract.shippingCents) }}</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-right text-base-content/70">Desconto</td>
+                <td>- {{ formatMoney(contract.discountCents) }}</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-right text-base-content/70">Acréscimo</td>
+                <td>{{ formatMoney(contract.surchargeCents) }}</td>
+              </tr>
               <tr>
                 <td colspan="3" class="text-right font-bold">Total</td>
                 <td class="font-bold">{{ formatMoney(contract.totalCents) }}</td>

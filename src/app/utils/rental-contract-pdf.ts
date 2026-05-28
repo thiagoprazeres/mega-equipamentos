@@ -25,6 +25,28 @@ const PERIOD_LABELS: Record<RentalBillingPeriod, string> = {
   monthly: 'Mensal',
 };
 
+function rentalDurationLabel(value: Pick<RentalContract, 'billingPeriod' | 'rentalPeriodCount'>): string {
+  return formatRentalDuration(value.billingPeriod, value.rentalPeriodCount);
+}
+
+function formatRentalDuration(period: RentalBillingPeriod, countValue: unknown): string {
+  const count = normalizeRentalPeriodCount(countValue);
+  const units: Record<RentalBillingPeriod, [string, string]> = {
+    daily: ['diária', 'diárias'],
+    weekly: ['semana', 'semanas'],
+    fortnightly: ['quinzena', 'quinzenas'],
+    monthly: ['mês', 'meses'],
+  };
+  const [singular, plural] = units[period];
+
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function normalizeRentalPeriodCount(value: unknown): number {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? Math.max(1, Math.trunc(numberValue)) : 1;
+}
+
 export async function exportRentalContractPdf(
   contract: RentalContract,
   companyProfile?: CompanyProfile
@@ -48,26 +70,22 @@ export async function exportDeliveryReceiptPdf(
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const company = companyProfile ?? DEFAULT_COMPANY_PROFILE;
+  const logoDataUrl = await loadImageDataUrl('/logo-mega-equipamentos-preto.png');
   const marginX = 48;
-  let y = 52;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text('COMPROVANTE DE ENTREGA', marginX, y);
-  doc.setFontSize(11);
-  doc.text(`Locação nº ${contract.contractNumber}`, marginX, y + 22);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  drawCompanyHeader(doc, company, 370, y);
-  y += 68;
+  let y = drawOperationalHeader(
+    doc,
+    'COMPROVANTE DE ENTREGA',
+    `Locação nº ${contract.contractNumber}`,
+    company,
+    logoDataUrl
+  );
 
   y = sectionTitle(doc, 'Entrega', marginX, y);
   y = paragraph(
     doc,
     [
       `Data de emissão: ${formatDateTime(new Date())}`,
-      `Período da locação: ${PERIOD_LABELS[contract.billingPeriod]}`,
+      `Período da locação: ${rentalDurationLabel(contract)}`,
       `Data de início da locação: ${formatDate(contract.startDate)}`,
       `Local de entrega/uso: ${contract.deliveryAddress || 'A combinar'}`,
       `Endereço da obra: ${formatWorksiteAddress(contract)}`,
@@ -126,26 +144,22 @@ export async function exportReturnReceiptPdf(
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const company = companyProfile ?? DEFAULT_COMPANY_PROFILE;
+  const logoDataUrl = await loadImageDataUrl('/logo-mega-equipamentos-preto.png');
   const marginX = 48;
-  let y = 52;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text('COMPROVANTE DE DEVOLUÇÃO', marginX, y);
-  doc.setFontSize(11);
-  doc.text(`Locação nº ${contract.contractNumber}`, marginX, y + 22);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  drawCompanyHeader(doc, company, 370, y);
-  y += 68;
+  let y = drawOperationalHeader(
+    doc,
+    'COMPROVANTE DE DEVOLUÇÃO',
+    `Locação nº ${contract.contractNumber}`,
+    company,
+    logoDataUrl
+  );
 
   y = sectionTitle(doc, 'Devolução', marginX, y);
   y = paragraph(
     doc,
     [
       `Data de emissão: ${formatDateTime(new Date())}`,
-      `Período da locação: ${PERIOD_LABELS[contract.billingPeriod]}`,
+      `Período da locação: ${rentalDurationLabel(contract)}`,
       `Início da locação: ${formatDate(contract.startDate)}`,
       `Término previsto: ${contract.endDate ? formatDate(contract.endDate) : 'Não informado'}`,
       `Local de uso/retirada: ${contract.deliveryAddress || 'A combinar'}`,
@@ -211,18 +225,8 @@ export async function exportInvoicePdf(
   const company = companyProfile ?? DEFAULT_COMPANY_PROFILE;
   const marginX = 48;
   const issuedAt = new Date();
-  let y = 52;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text('FATURA', marginX, y);
-  doc.setFontSize(11);
-  doc.text(`FAT-${contract.contractNumber}`, marginX, y + 22);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  drawCompanyHeader(doc, company, 370, y);
-  y += 68;
+  const logoDataUrl = await loadImageDataUrl('/logo-mega-equipamentos-preto.png');
+  let y = drawOperationalHeader(doc, 'FATURA', `FAT-${contract.contractNumber}`, company, logoDataUrl);
 
   y = sectionTitle(doc, 'Dados da fatura', marginX, y);
   y = paragraph(
@@ -231,7 +235,7 @@ export async function exportInvoicePdf(
       `Locação nº: ${contract.contractNumber}`,
       `Emissão: ${formatDateTime(issuedAt)}`,
       `Vencimento: ${formatDateTime(issuedAt)}`,
-      `Período da locação: ${PERIOD_LABELS[contract.billingPeriod]}`,
+      `Período da locação: ${rentalDurationLabel(contract)}`,
       `Vigência: ${formatContractPeriod(contract)}`,
       `Endereço da obra: ${formatWorksiteAddress(contract)}`,
       `Vendedor: ${contract.sellerName || 'Não informado'}${contract.sellerPhone ? ` | ${contract.sellerPhone}` : ''}`,
@@ -256,13 +260,7 @@ export async function exportInvoicePdf(
   y = sectionTitle(doc, 'Itens faturados', marginX, y + 10);
   y = drawItemsTable(doc, contract.items, marginX, y);
 
-  y += 12;
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.text(`Subtotal: ${formatCurrencyCents(contract.subtotalCents)}`, 390, y);
-  y += 17;
-  doc.text(`Total: ${formatCurrencyCents(contract.totalCents)}`, 410, y);
-  y += 28;
+  y = drawFinancialSummary(doc, contract, marginX, y + 12);
 
   y = sectionTitle(doc, 'Pagamento', marginX, y);
   y = paragraph(
@@ -301,18 +299,8 @@ export async function exportQuotePdf(
   const marginX = 48;
   const issuedAt = new Date();
   const validUntil = addDays(issuedAt, 7);
-  let y = 52;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text('ORÇAMENTO', marginX, y);
-  doc.setFontSize(11);
-  doc.text(`ORC-${contract.contractNumber}`, marginX, y + 22);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  drawCompanyHeader(doc, company, 370, y);
-  y += 68;
+  const logoDataUrl = await loadImageDataUrl('/logo-mega-equipamentos-preto.png');
+  let y = drawOperationalHeader(doc, 'ORÇAMENTO', `ORC-${contract.contractNumber}`, company, logoDataUrl);
 
   y = sectionTitle(doc, 'Dados do orçamento', marginX, y);
   y = paragraph(
@@ -321,7 +309,7 @@ export async function exportQuotePdf(
       `Referência: Locação nº ${contract.contractNumber}`,
       `Emissão: ${formatDateTime(issuedAt)}`,
       `Validade: ${formatDateOnly(validUntil)}`,
-      `Período da locação: ${PERIOD_LABELS[contract.billingPeriod]}`,
+      `Período da locação: ${rentalDurationLabel(contract)}`,
       `Vigência estimada: ${formatContractPeriod(contract)}`,
       `Local de entrega/uso: ${contract.deliveryAddress || 'A combinar'}`,
       `Endereço da obra: ${formatWorksiteAddress(contract)}`,
@@ -347,15 +335,7 @@ export async function exportQuotePdf(
   y = sectionTitle(doc, 'Itens orçados', marginX, y + 10);
   y = drawItemsTable(doc, contract.items, marginX, y);
 
-  y += 12;
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.text(`Subtotal: ${formatCurrencyCents(contract.subtotalCents)}`, 390, y);
-  y += 17;
-  doc.text(`Frete: ${formatCurrencyCents(contract.shippingCents ?? 0)}`, 407, y);
-  y += 17;
-  doc.text(`Total: ${formatCurrencyCents(contract.totalCents)}`, 410, y);
-  y += 28;
+  y = drawFinancialSummary(doc, contract, marginX, y + 12);
 
   y = sectionTitle(doc, 'Condições comerciais', marginX, y);
   y = paragraph(
@@ -394,18 +374,8 @@ export async function exportStandaloneQuotePdf(
   const company = companyProfile ?? DEFAULT_COMPANY_PROFILE;
   const marginX = 48;
   const issuedAt = new Date();
-  let y = 52;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text('ORÇAMENTO', marginX, y);
-  doc.setFontSize(11);
-  doc.text(quote.quoteNumber, marginX, y + 22);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  drawCompanyHeader(doc, company, 370, y);
-  y += 68;
+  const logoDataUrl = await loadImageDataUrl('/logo-mega-equipamentos-preto.png');
+  let y = drawOperationalHeader(doc, 'ORÇAMENTO', quote.quoteNumber, company, logoDataUrl);
 
   y = sectionTitle(doc, 'Dados do orçamento', marginX, y);
   y = paragraph(
@@ -414,7 +384,7 @@ export async function exportStandaloneQuotePdf(
       `Número: ${quote.quoteNumber}`,
       `Emissão: ${formatDateTime(issuedAt)}`,
       `Validade: ${quote.validUntil ? formatDate(quote.validUntil) : 'Não informada'}`,
-      `Período da locação: ${PERIOD_LABELS[quote.billingPeriod]}`,
+      `Período da locação: ${rentalDurationLabel(quote)}`,
       `Início previsto: ${formatDate(quote.startDate)}`,
       `Local de entrega/uso: ${quote.deliveryAddress || 'A combinar'}`,
       `Endereço da obra: ${quote.worksiteAddress || quote.deliveryAddress || 'A combinar'}`,
@@ -440,15 +410,7 @@ export async function exportStandaloneQuotePdf(
   y = sectionTitle(doc, 'Itens orçados', marginX, y + 10);
   y = drawItemsTable(doc, quote.items, marginX, y);
 
-  y += 12;
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.text(`Subtotal: ${formatCurrencyCents(quote.subtotalCents)}`, 390, y);
-  y += 17;
-  doc.text(`Frete: ${formatCurrencyCents(quote.shippingCents ?? 0)}`, 407, y);
-  y += 17;
-  doc.text(`Total: ${formatCurrencyCents(quote.totalCents)}`, 410, y);
-  y += 28;
+  y = drawFinancialSummary(doc, quote, marginX, y + 12);
 
   y = sectionTitle(doc, 'Condições comerciais', marginX, y);
   y = paragraph(
@@ -589,14 +551,14 @@ function drawLegacyPeriodBox(doc: LegacyPdfDoc, contract: RentalContract, x: num
   );
   centerCellText(
     doc,
-    `Período: ${PERIOD_LABELS[contract.billingPeriod]}`,
+    `Período: ${rentalDurationLabel(contract)}`,
     x,
     y + rowHeight + 13,
     colWidth
   );
   centerCellText(
     doc,
-    `Locação (${PERIOD_LABELS[contract.billingPeriod]}): ${formatCurrencyCents(contract.subtotalCents || contract.totalCents)}`,
+    `Locação (${rentalDurationLabel(contract)}): ${formatCurrencyCents(contract.subtotalCents || contract.totalCents)}`,
     x + colWidth,
     y + rowHeight + 13,
     colWidth
@@ -629,7 +591,7 @@ function drawLegacyItemsTable(doc: LegacyPdfDoc, contract: RentalContract, x: nu
   centerCellText(doc, 'Descrição dos Equipamentos', x + 94, y + 17, 238);
   centerCellText(doc, 'Aditivo', x + 332, y + 17, 24);
   centerCellText(doc, 'Valor do Equipamento', x + 356, y + 10, 94);
-  centerCellText(doc, 'Valor da Locação/Período', x + 450, y + 10, 93);
+  centerCellText(doc, 'Valor da Locação', x + 450, y + 10, 93);
   centerCellText(doc, 'Unitário', x + 356, y + 29, 47);
   centerCellText(doc, 'Total', x + 403, y + 29, 47);
   centerCellText(doc, 'Unitário', x + 450, y + 29, 46);
@@ -774,6 +736,95 @@ type LegacyPdfDoc = {
   text: (text: string | string[], x: number, y: number, options?: Record<string, unknown>) => void;
 };
 
+type FinancialDocument = {
+  subtotalCents: number;
+  shippingCents?: number;
+  discountCents?: number;
+  surchargeCents?: number;
+  totalCents: number;
+};
+
+function drawOperationalHeader(
+  doc: unknown,
+  title: string,
+  reference: string,
+  company: CompanyProfile,
+  logoDataUrl: string | null
+): number {
+  const pdf = doc as LegacyPdfDoc & {
+    addImage?: (imageData: string, format: string, x: number, y: number, width: number, height: number) => void;
+  };
+  const x = 48;
+  const y = 38;
+  const width = 499;
+
+  pdf.rect(x, y, width, 74);
+
+  if (logoDataUrl && pdf.addImage) {
+    try {
+      const logoWidth = 118;
+      const logoHeight = logoWidth / 4.993;
+      pdf.addImage(logoDataUrl, 'PNG', x + 16, y + 26, logoWidth, logoHeight);
+    } catch {
+      // Keep the document exportable if the logo cannot be embedded.
+    }
+  }
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(15);
+  pdf.text(title, x, y + 104);
+  pdf.setFontSize(10);
+  pdf.text(reference, x, y + 120);
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9.5);
+  drawFittedText(pdf, company.legalName || company.tradeName || 'Mega Equipamentos', x + 152, y + 22, 330);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8.2);
+  drawFittedText(pdf, formatCompanyAddress(company), x + 152, y + 36, 330);
+  drawFittedText(pdf, `CNPJ: ${company.document || 'Não informado'}`, x + 152, y + 50, 330);
+  drawFittedText(pdf, formatCompanyContact(company), x + 152, y + 64, 330);
+
+  return y + 144;
+}
+
+function drawFinancialSummary(doc: unknown, values: FinancialDocument, x: number, y: number): number {
+  const pdf = doc as {
+    setFont: (font: string, style: string) => void;
+    setFontSize: (size: number) => void;
+    text: (text: string, x: number, y: number, options?: Record<string, unknown>) => void;
+    line: (x1: number, y1: number, x2: number, y2: number) => void;
+  };
+  const labelX = 360;
+  const valueX = 547;
+  const rows = [
+    ['Subtotal', values.subtotalCents],
+    ['Frete', values.shippingCents ?? 0],
+    ['Desconto', -(values.discountCents ?? 0)],
+    ['Acréscimo', values.surchargeCents ?? 0],
+  ] as const;
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+
+  for (const [label, amount] of rows) {
+    pdf.text(`${label}:`, labelX, y);
+    const formatted = amount < 0
+      ? `- ${formatCurrencyCents(Math.abs(amount))}`
+      : formatCurrencyCents(amount);
+    pdf.text(formatted, valueX, y, { align: 'right' });
+    y += 15;
+  }
+
+  pdf.line(x, y - 5, valueX, y - 5);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(12);
+  pdf.text('Total:', labelX, y + 10);
+  pdf.text(formatCurrencyCents(values.totalCents), valueX, y + 10, { align: 'right' });
+
+  return y + 36;
+}
+
 function sectionTitle(doc: unknown, title: string, x: number, y: number): number {
   const pdf = doc as {
     setFont: (font: string, style: string) => void;
@@ -838,7 +889,7 @@ function drawItemsTable(doc: unknown, items: RentalContractItem[], x: number, y:
   pdf.setFontSize(9);
   pdf.text('Equipamento', columns[0], y);
   pdf.text('Qtd.', columns[1], y);
-  pdf.text('Unitário', columns[2], y);
+  pdf.text('Unit./período', columns[2], y);
   pdf.text('Total', columns[3], y);
   y += 8;
   pdf.line(x, y, 547, y);

@@ -58,7 +58,7 @@ export class GestorEquipamentosPage implements OnInit {
   protected loading = false;
   protected errorMessage = '';
   protected successMessage = '';
-  protected sortKey: EquipmentSortKey = 'name';
+  protected sortKey: EquipmentSortKey = 'code';
   protected sortDirection: SortDirection = 'asc';
   private catalogLoadStarted = false;
 
@@ -202,13 +202,15 @@ export class GestorEquipamentosPage implements OnInit {
     this.errorMessage = '';
 
     try {
-      [this.categories, this.equipments] = await withTimeout(
+      const [categories, equipments] = await withTimeout(
         Promise.all([
           this.catalogService.listCategories({ includeArchived: true }),
           this.catalogService.listEquipments({ includeArchived: true }),
         ]),
         CATALOG_LOAD_TIMEOUT_MS
       );
+      this.categories = [...categories].sort(compareCategoryByCode);
+      this.equipments = equipments;
 
       if (!this.equipments.length) {
         throw new Error('EMPTY_CATALOG');
@@ -233,6 +235,7 @@ export class GestorEquipamentosPage implements OnInit {
 
   private useLocalCatalog(errorMessage = '') {
     this.categories = this.catalogService.getLocalCategories({ includeArchived: true });
+    this.categories = [...this.categories].sort(compareCategoryByCode);
     this.equipments = this.catalogService.getLocalEquipments({ includeArchived: true });
     this.errorMessage = errorMessage;
   }
@@ -261,6 +264,13 @@ function sortBy<Item>(
       numeric: true,
       sensitivity: 'base',
     }) * multiplier;
+  });
+}
+
+function compareCategoryByCode(left: EquipamentoCategoria, right: EquipamentoCategoria): number {
+  return (left.codigo || left.nome).localeCompare(right.codigo || right.nome, 'pt-BR', {
+    numeric: true,
+    sensitivity: 'base',
   });
 }
 

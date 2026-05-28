@@ -31,6 +31,7 @@ export interface RentalContract {
   sellerEmail?: string;
   sellerPhone?: string;
   billingPeriod: RentalBillingPeriod;
+  rentalPeriodCount: number;
   startDate: string;
   endDate?: string;
   deliveryAddress?: string;
@@ -39,6 +40,8 @@ export interface RentalContract {
   terms?: string;
   subtotalCents: number;
   shippingCents: number;
+  discountCents: number;
+  surchargeCents: number;
   totalCents: number;
   status: RentalContractStatus;
   items: RentalContractItem[];

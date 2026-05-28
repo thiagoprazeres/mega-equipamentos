@@ -63,7 +63,7 @@
             </label>
 
             <label class="flex flex-col gap-1.5">
-              <span class="text-sm font-semibold text-base-content/80">Período da locação</span>
+              <span class="text-sm font-semibold text-base-content/80">Tabela de preço</span>
               <select
                 class="select select-bordered w-full"
                 formControlName="billingPeriod"
@@ -73,6 +73,21 @@
                   <option [value]="option.value">{{ option.label }}</option>
                 }
               </select>
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Qtd. de períodos</span>
+              <input
+                class="input input-bordered w-full"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                formControlName="rentalPeriodCount"
+                (input)="changeQuoteRentalPeriodCount()"
+                (change)="changeQuoteRentalPeriodCount()"
+              />
+              <span class="text-xs text-base-content/60">{{ rentalDurationLabel() }}</span>
             </label>
 
             <label class="flex flex-col gap-1.5">
@@ -113,6 +128,26 @@
                 [maskito]="currencyMask"
               />
             </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Desconto</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="numeric"
+                formControlName="discount"
+                [maskito]="currencyMask"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Acréscimo</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="numeric"
+                formControlName="surcharge"
+                [maskito]="currencyMask"
+              />
+            </label>
           </div>
         </section>
 
@@ -122,10 +157,16 @@
           <div class="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_8rem_auto] md:items-end" [formGroup]="itemForm">
             <label class="flex flex-col gap-1.5">
               <span class="text-sm font-semibold text-base-content/80">Equipamento</span>
+              <input
+                class="input input-bordered w-full"
+                type="search"
+                formControlName="equipmentQuery"
+                placeholder="Filtrar por código interno, categoria ou nome"
+              />
               <select class="select select-bordered w-full" formControlName="equipmentId">
                 <option [value]="0">Selecione</option>
-                @for (equipment of equipments; track equipment.id) {
-                  <option [value]="equipment.id">{{ equipment.codigoInterno }} - {{ equipment.nome }}</option>
+                @for (equipment of filteredEquipmentOptions(); track equipment.id) {
+                  <option [value]="equipment.id">{{ equipmentOptionLabel(equipment) }}</option>
                 }
               </select>
               <span class="text-xs text-base-content/60">
@@ -151,7 +192,7 @@
                   <th>Equipamento</th>
                   <th>Período</th>
                   <th>Qtd.</th>
-                  <th>Unitário</th>
+                  <th>Unit./período</th>
                   <th>Total</th>
                   <th class="text-right">Ações</th>
                 </tr>
@@ -160,7 +201,7 @@
                 @for (item of quoteItems; track item.equipmentId + '-' + $index) {
                   <tr>
                     <td>{{ item.equipmentName }}</td>
-                    <td>{{ periodLabel(item.billingPeriod) }}</td>
+                    <td>{{ rentalDurationLabel() }}</td>
                     <td>{{ item.quantity }}</td>
                     <td>{{ formatMoney(item.unitPriceCents) }}</td>
                     <td>{{ formatMoney(item.totalPriceCents) }}</td>
@@ -192,7 +233,7 @@
             <textarea class="textarea textarea-bordered min-h-28 w-full" formControlName="notes"></textarea>
           </label>
 
-          <div class="mt-5 grid gap-3 text-right md:grid-cols-3">
+          <div class="mt-5 grid gap-3 text-right md:grid-cols-5">
             <div>
               <p class="text-sm text-base-content/60">Subtotal</p>
               <p class="text-lg font-bold">{{ formatMoney(quoteSubtotal()) }}</p>
@@ -200,6 +241,14 @@
             <div>
               <p class="text-sm text-base-content/60">Frete</p>
               <p class="text-lg font-bold">{{ formatMoney(quoteShipping()) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-base-content/60">Desconto</p>
+              <p class="text-lg font-bold">- {{ formatMoney(quoteDiscount()) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-base-content/60">Acréscimo</p>
+              <p class="text-lg font-bold">{{ formatMoney(quoteSurcharge()) }}</p>
             </div>
             <div>
               <p class="text-sm text-base-content/60">Total</p>

@@ -9,6 +9,7 @@ import type {
 } from '../interfaces/equipamento';
 import type { EquipamentoCategoria } from '../interfaces/equipamento-categoria';
 import { emptyEquipmentPrices } from '../utils/prices';
+import { GestorApiService } from './gestor-api.service';
 import { SupabaseClientService } from './supabase-client.service';
 import { SupabaseConfigService } from './supabase-config.service';
 
@@ -93,6 +94,7 @@ export interface EquipmentEditorInput {
 
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
+  private readonly api = inject(GestorApiService);
   private readonly supabase = inject(SupabaseClientService);
   private readonly supabaseConfig = inject(SupabaseConfigService);
 
@@ -105,6 +107,21 @@ export class CatalogService {
   }
 
   async listCategories(options: Pick<CatalogListOptions, 'includeArchived'> = {}) {
+    if (options.includeArchived) {
+      return this.api.request<EquipamentoCategoria[]>('/categories?includeArchived=1');
+    }
+
+    const apiCategories = await this.api
+      .optionalRequest<EquipamentoCategoria[]>('/categories')
+      .catch((error) => {
+        console.warn('catalog categories api fallback', error);
+        return null;
+      });
+
+    if (apiCategories) {
+      return apiCategories;
+    }
+
     if (!options.includeArchived) {
       try {
         const data = await this.fetchPublicRows<CategoryRow>('categories', {
@@ -148,6 +165,32 @@ export class CatalogService {
   }
 
   async listEquipments(options: CatalogListOptions = {}) {
+    const searchParams = new URLSearchParams();
+
+    if (options.includeArchived) {
+      searchParams.set('includeArchived', '1');
+    }
+
+    if (options.categorySlug) {
+      searchParams.set('categorySlug', options.categorySlug);
+    }
+
+    if (options.search) {
+      searchParams.set('search', options.search);
+    }
+
+    const apiPath = `/equipments${searchParams.size ? `?${searchParams.toString()}` : ''}`;
+    const apiEquipments = options.includeArchived
+      ? await this.api.request<Equipamento[]>(apiPath)
+      : await this.api.optionalRequest<Equipamento[]>(apiPath).catch((error) => {
+          console.warn('catalog equipments api fallback', error);
+          return null;
+        });
+
+    if (apiEquipments) {
+      return apiEquipments;
+    }
+
     const categories = await this.listCategories({ includeArchived: options.includeArchived });
     const categoryById = new Map(categories.map((category) => [category.id, category] as const));
     const selectedCategory = options.categorySlug
@@ -248,62 +291,7 @@ export class CatalogService {
   }
 
   async saveEquipment(input: EquipmentEditorInput): Promise<Equipamento> {
-    const client = await this.supabase.requireClient();
-    const requestedSlug = input.slug.trim();
-    const slug = input.id ? requestedSlug : await this.resolveAvailableEquipmentSlug(requestedSlug);
-    const equipmentPayload = {
-      category_id: input.categoryId,
-      nome: input.nome.trim(),
-      technical_name: input.nomeTecnico.trim(),
-      slug,
-      avatar: normalizeNullable(input.avatar),
-      video: normalizeNullable(input.video),
-      descricao: input.descricao.trim(),
-      aplicacao: input.aplicacao.trim(),
-      tipo_de_servico: input.tipoDeServico.trim(),
-      periodo_de_locacao: input.periodoDeLocacao.trim(),
-      diferenciais: input.diferenciais.trim(),
-      equipment_code: normalizeCode(input.codigo),
-      asset_value_cents: normalizeCents(input.assetValueCents),
-      total_invested_cents: normalizeCents(input.totalInvestedCents),
-      notes: input.notes.trim(),
-      stock_quantity: normalizeStockQuantity(input.stockQuantity),
-      status: input.status ?? 'active',
-      sort_order: input.sortOrder ?? 0,
-    };
-    const equipmentResponse = input.id
-      ? await client.from('equipments').update(equipmentPayload).eq('id', input.id).select('*').single()
-      : await client.from('equipments').insert(equipmentPayload).select('*').single();
-
-    if (equipmentResponse.error || !equipmentResponse.data) {
-      throw equipmentResponse.error ?? new Error('Não foi possível salvar o equipamento.');
-    }
-
-    const savedEquipment = equipmentResponse.data as EquipmentRow;
-    const priceResponse = await client.from('equipment_prices').upsert(
-      {
-        equipment_id: savedEquipment.id,
-        daily_price_cents: input.precos.dailyPriceCents,
-        weekly_price_cents: input.precos.weeklyPriceCents,
-        fortnightly_price_cents: input.precos.fortnightlyPriceCents,
-        monthly_price_cents: input.precos.monthlyPriceCents,
-        currency: 'BRL',
-      },
-      { onConflict: 'equipment_id' }
-    );
-
-    if (priceResponse.error) {
-      throw priceResponse.error;
-    }
-
-    const categories = await this.listCategories({ includeArchived: true });
-    const category = categories.find((item) => item.id === savedEquipment.category_id);
-
-    if (!category) {
-      throw new Error('Categoria do equipamento não encontrada.');
-    }
-
-    return mapEquipmentRow(savedEquipment, category, input.precos)!;
+    return this.api.request<Equipamento>('/equipments', { method: 'POST', body: input });
   }
 
   async uploadEquipmentImage(file: File, equipmentSlug: string): Promise<string> {
@@ -372,12 +360,7 @@ export class CatalogService {
   }
 
   private async updateEquipmentStatus(id: number, status: CatalogStatus) {
-    const client = await this.supabase.requireClient();
-    const { error } = await client.from('equipments').update({ status }).eq('id', id);
-
-    if (error) {
-      throw error;
-    }
+    await this.api.request(`/equipments/${id}/status`, { method: 'PATCH', body: { status } });
   }
 
   private async getPricesByEquipmentId(equipmentIds: number[], includeArchived = false) {
