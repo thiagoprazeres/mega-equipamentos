@@ -4,6 +4,7 @@ import { EquipamentosCategoriasId } from '../enums/equipamentos-categorias-id';
 export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   {
     id: EquipamentosCategoriasId.Acesso_e_Elevacao,
+    codigo: '1',
     nome: 'Acesso e Elevação',
     name: 'Access and Elevation',
     slug: 'acesso-e-elevacao',
@@ -15,6 +16,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   },
   {
     id: EquipamentosCategoriasId.Andaimes,
+    codigo: '2',
     nome: 'Andaimes',
     name: 'Scaffolding',
     slug: 'andaimes',
@@ -26,6 +28,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   },
   {
     id: EquipamentosCategoriasId.Escoramento_de_Estruturas,
+    codigo: '3',
     nome: 'Escoramento de Estruturas',
     name: 'Structural Shoring',
     slug: 'escoramento-de-estruturas',
@@ -38,6 +41,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   },
   {
     id: EquipamentosCategoriasId.Compactacao_e_Solo,
+    codigo: '4',
     nome: 'Compactação e Solo',
     name: 'Soil Compaction',
     slug: 'compactacao-e-solo',
@@ -49,6 +53,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   },
   {
     id: EquipamentosCategoriasId.Concretagem,
+    codigo: '5',
     nome: 'Concretagem',
     name: 'Concreting',
     slug: 'concretagem',
@@ -60,6 +65,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   },
   {
     id: EquipamentosCategoriasId.Corte_e_Demolicao,
+    codigo: '6',
     nome: 'Corte e Demolição',
     name: 'Cutting and Demolition',
     slug: 'corte-e-demolicao',
@@ -71,6 +77,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   },
   {
     id: EquipamentosCategoriasId.Ferramentas_Eletricas,
+    codigo: '7',
     nome: 'Ferramentas Elétricas',
     name: 'Power Tools',
     slug: 'ferramentas-eletricas',
@@ -82,6 +89,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   },
   {
     id: EquipamentosCategoriasId.Motores_e_Geradores,
+    codigo: '8',
     nome: 'Motores e Geradores',
     name: 'Engines and Generators',
     slug: 'motores-e-geradores',
@@ -93,6 +101,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   },
   {
     id: EquipamentosCategoriasId.Reboque_e_Transporte,
+    codigo: '9',
     nome: 'Reboque e Transporte',
     name: 'Trailers and Transport',
     slug: 'reboque-e-transporte',
@@ -104,6 +113,7 @@ export const equipamentosCategoriasData: EquipamentoCategoria[] = [
   },
   {
     id: EquipamentosCategoriasId.Diversos,
+    codigo: '10',
     nome: 'Diversos',
     name: 'Miscellaneous',
     slug: 'diversos',

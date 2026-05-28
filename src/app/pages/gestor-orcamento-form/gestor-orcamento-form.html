@@ -1,0 +1,225 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <header class="flex flex-col gap-4">
+      <a class="btn btn-ghost w-fit" routerLink="/gestor/orcamentos">
+        <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
+        Voltar para orçamentos
+      </a>
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+          <h1 class="text-3xl font-extrabold text-primary md:text-4xl">{{ pageTitle }}</h1>
+        </div>
+        <button class="btn btn-ghost" type="button" (click)="signOut()">
+          <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+          Sair
+        </button>
+      </div>
+    </header>
+
+    <app-gestor-nav></app-gestor-nav>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else if (loadFailed) {
+      <section class="rounded-box border border-base-300 bg-base-100 p-8">
+        <p class="text-base-content/70">Não foi possível carregar este orçamento.</p>
+        <a class="btn btn-primary mt-4" routerLink="/gestor/orcamentos">Voltar para orçamentos</a>
+      </section>
+    } @else {
+      <form class="space-y-6" [formGroup]="form" (submit)="saveQuote()">
+        <section class="rounded-box border border-base-300 bg-base-100 p-5">
+          <h2 class="text-xl font-bold text-primary">Dados comerciais</h2>
+
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Cliente</span>
+              <select class="select select-bordered w-full" formControlName="customerId">
+                <option [value]="0">Sem cliente cadastrado</option>
+                @for (customer of customers; track customer.id) {
+                  <option [value]="customer.id">{{ customer.nome }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Vendedor</span>
+              <select class="select select-bordered w-full" formControlName="sellerId">
+                <option [value]="0">Não informado</option>
+                @for (seller of sellers; track seller.id) {
+                  <option [value]="seller.id">{{ seller.nome }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Período da locação</span>
+              <select
+                class="select select-bordered w-full"
+                formControlName="billingPeriod"
+                (change)="changeQuoteBillingPeriod()"
+              >
+                @for (option of periodOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Status</span>
+              <select class="select select-bordered w-full" formControlName="status">
+                @for (option of statusOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Início previsto</span>
+              <input class="input input-bordered w-full" type="date" formControlName="startDate" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Validade do orçamento</span>
+              <input class="input input-bordered w-full" type="date" formControlName="validUntil" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Local de entrega/uso</span>
+              <input class="input input-bordered w-full" formControlName="deliveryAddress" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Endereço da obra</span>
+              <input class="input input-bordered w-full" formControlName="worksiteAddress" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Frete</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="numeric"
+                formControlName="shipping"
+                [maskito]="currencyMask"
+              />
+            </label>
+          </div>
+        </section>
+
+        <section class="rounded-box border border-base-300 bg-base-100 p-5">
+          <h2 class="text-xl font-bold text-primary">Equipamentos</h2>
+
+          <div class="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_8rem_auto] md:items-end" [formGroup]="itemForm">
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Equipamento</span>
+              <select class="select select-bordered w-full" formControlName="equipmentId">
+                <option [value]="0">Selecione</option>
+                @for (equipment of equipments; track equipment.id) {
+                  <option [value]="equipment.id">{{ equipment.codigoInterno }} - {{ equipment.nome }}</option>
+                }
+              </select>
+              <span class="text-xs text-base-content/60">
+                {{ selectedEquipmentStockLabel() }} | {{ selectedEquipmentPriceLabel() }}
+              </span>
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Qtd.</span>
+              <input class="input input-bordered w-full" type="number" min="1" formControlName="quantity" />
+            </label>
+
+            <button class="btn btn-primary" type="button" (click)="addItem()">
+              <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
+              Adicionar
+            </button>
+          </div>
+
+          <div class="mt-5 overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th>Equipamento</th>
+                  <th>Período</th>
+                  <th>Qtd.</th>
+                  <th>Unitário</th>
+                  <th>Total</th>
+                  <th class="text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of quoteItems; track item.equipmentId + '-' + $index) {
+                  <tr>
+                    <td>{{ item.equipmentName }}</td>
+                    <td>{{ periodLabel(item.billingPeriod) }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ formatMoney(item.unitPriceCents) }}</td>
+                    <td>{{ formatMoney(item.totalPriceCents) }}</td>
+                    <td>
+                      <div class="flex justify-end">
+                        <button class="btn btn-square btn-ghost" type="button" (click)="removeItem($index)">
+                          <lucide-angular [img]="Trash2" class="h-4 w-4"></lucide-angular>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="6" class="py-8 text-center text-base-content/60">
+                      Nenhum equipamento adicionado.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="rounded-box border border-base-300 bg-base-100 p-5">
+          <h2 class="text-xl font-bold text-primary">Observações e totais</h2>
+
+          <label class="mt-4 flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Observações</span>
+            <textarea class="textarea textarea-bordered min-h-28 w-full" formControlName="notes"></textarea>
+          </label>
+
+          <div class="mt-5 grid gap-3 text-right md:grid-cols-3">
+            <div>
+              <p class="text-sm text-base-content/60">Subtotal</p>
+              <p class="text-lg font-bold">{{ formatMoney(quoteSubtotal()) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-base-content/60">Frete</p>
+              <p class="text-lg font-bold">{{ formatMoney(quoteShipping()) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-base-content/60">Total</p>
+              <p class="text-2xl font-extrabold text-primary">{{ formatMoney(quoteTotal()) }}</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="flex justify-end gap-3">
+          <a class="btn btn-ghost" routerLink="/gestor/orcamentos">Cancelar</a>
+          <button class="btn btn-primary" type="submit" [disabled]="saving">
+            @if (saving) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              <lucide-angular [img]="Save" class="h-4 w-4"></lucide-angular>
+            }
+            Salvar orçamento
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</section>

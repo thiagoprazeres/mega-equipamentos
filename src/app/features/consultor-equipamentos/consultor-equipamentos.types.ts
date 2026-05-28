@@ -22,6 +22,7 @@ export interface ConsultorCatalogItem {
   descricao: string;
   aplicacao: string;
   tipoDeServico: string;
+  precos?: string;
 }
 
 export interface ConsultorAiPromptPayload {

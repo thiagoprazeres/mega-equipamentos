@@ -10,12 +10,14 @@ export interface RentalContractItem {
   billingPeriod: RentalBillingPeriod;
   unitPriceCents: number;
   totalPriceCents: number;
+  assetValueCents?: number;
   sortOrder?: number;
 }
 
 export interface RentalContract {
   id: number;
   contractNumber: string;
+  previousContractNumber?: string;
   customerId: number;
   customerName: string;
   customerDocument?: string;

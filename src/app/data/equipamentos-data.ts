@@ -50,6 +50,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 4,
     nome: 'Painel de Andaime 1,00 × 1,50 m',
+    nomeTecnico: 'Andaime tubular - 1,5 m x 1,5 m',
     slug: 'painel-de-andaime-1-00-x-1-50-m',
     avatar: '/imagens/equipamentos/catalogo/andaimes/painel-de-andaime-1-00-x-1-50-m.webp',
     descricao:
@@ -65,6 +66,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 5,
     nome: 'Painel de Andaime 1,00 × 1,00 m',
+    nomeTecnico: 'Andaime tubular - 1,0 m x 1,5 m',
     slug: 'painel-de-andaime-1-00-x-1-00-m',
     avatar: '/imagens/equipamentos/catalogo/andaimes/painel-de-andaime-1-00-x-1-00-m.webp',
     descricao:
@@ -80,6 +82,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 6,
     nome: 'Plataforma Metálica',
+    nomeTecnico: 'Piso para andaime 1,5 m',
     slug: 'plataforma-metalica',
     avatar: '/imagens/equipamentos/catalogo/andaimes/plataforma-metalica.webp',
     descricao: 'Piso metálico antiderrapante para circulação segura nas torres de andaime.',
@@ -94,6 +97,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 7,
     nome: 'Barra Diagonal',
+    nomeTecnico: 'Barra diagonal p/ andaime 1,5 m',
     slug: 'barra-diagonal',
     avatar: '/imagens/equipamentos/catalogo/andaimes/barra-diagonal.webp',
     descricao: 'Travamento estrutural para garantir rigidez e segurança das torres.',
@@ -108,6 +112,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 8,
     nome: 'Sapata Fixa',
+    nomeTecnico: 'Sapatas fixas p/ andaime',
     slug: 'sapata-fixa',
     avatar: '/imagens/equipamentos/catalogo/andaimes/sapata-fixa.webp',
     descricao: 'Base de apoio para pisos nivelados, garantindo estabilidade do conjunto.',
@@ -122,6 +127,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 9,
     nome: 'Sapata Ajustável',
+    nomeTecnico: 'Sapatas ajustáveis p/ andaime',
     slug: 'sapata-ajustavel',
     avatar: '/imagens/equipamentos/catalogo/andaimes/sapata-ajustavel.webp',
     descricao: 'Base com rosca para nivelamento em pisos irregulares.',
@@ -136,6 +142,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 10,
     nome: 'Guarda-Corpo (com/sem porta)',
+    nomeTecnico: 'Guarda corpo c/ porta / Guarda corpo s/ porta',
     slug: 'guarda-corpo-com-sem-porta',
     avatar: '/imagens/equipamentos/catalogo/andaimes/guarda-corpo-com-sem-porta.webp',
     descricao: 'Proteção lateral para plataformas; opção com porta de acesso.',
@@ -150,6 +157,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 11,
     nome: 'Rodízio para Andaime',
+    nomeTecnico: 'Rodízio de borracha para andaime',
     slug: 'rodizio-para-andaime',
     avatar: '/imagens/equipamentos/catalogo/andaimes/rodizio-para-andaime.webp',
     descricao: 'Roda com trava dupla acoplada à base para movimentação segura.',
@@ -164,6 +172,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 12,
     nome: 'Escada de Andaime',
+    nomeTecnico: 'Escada p/ andaime',
     slug: 'escada-de-andaime',
     avatar: '/imagens/equipamentos/catalogo/andaimes/escada-de-andaime.webp',
     descricao:
@@ -179,6 +188,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 13,
     nome: 'Escora Metálica 3,20 m',
+    nomeTecnico: 'Escora metálica 2,10 m a 3,10 m - média',
     slug: 'escora-metalica-3-20-m',
     avatar: '/imagens/equipamentos/catalogo/escoramento-de-estruturas/escora-metalica-3-20-m.webp',
     descricao:
@@ -251,6 +261,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 18,
     nome: 'Compactador de Solo (Sapo)',
+    nomeTecnico: 'Compactador de percussão RAM75M com motor Menegotti 165 CB',
     slug: 'compactador-de-solo-sapo',
     avatar: '/imagens/equipamentos/catalogo/compactacao-e-solo/compactador-de-solo-sapo.webp',
     video: 'videos/compactador-de-solo-sapo.mp4',
@@ -266,7 +277,8 @@ export const equipamentosData: Equipamento[] = [
   },
   {
     id: 19,
-    nome: 'Placa Vibratória',
+    nome: 'Placa vibratória',
+    nomeTecnico: 'Placa vibratória com motor Branco',
     slug: 'placa-vibratoria',
     avatar: '/imagens/equipamentos/catalogo/compactacao-e-solo/placa-vibratoria.webp',
     descricao: 'Compactação de solos granulares, areia e brita, com acabamento uniforme.',
@@ -281,6 +293,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 20,
     nome: 'Betoneira (200–400 L)',
+    nomeTecnico: 'Betoneira 400 L Rental - 2CV - 220 V',
     slug: 'betoneira-200-400-l',
     avatar: '/imagens/equipamentos/catalogo/concretagem/betoneira-200-400-l.webp',
     descricao:
@@ -296,6 +309,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 21,
     nome: 'Vibrador de Concreto',
+    nomeTecnico: 'Vibrador de concreto com mangote',
     slug: 'vibrador-de-concreto',
     avatar: '/imagens/equipamentos/catalogo/concretagem/vibrador-de-concreto.webp',
     descricao:
@@ -311,6 +325,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 26,
     nome: 'Máquina de Cortar Piso',
+    nomeTecnico: 'Riscadeira de piso - 1,20 m / Riscadeira de piso - 0,9 m',
     slug: 'maquina-de-cortar-piso',
     avatar: '/imagens/equipamentos/catalogo/corte-e-demolicao/maquina-de-cortar-piso.webp',
     descricao: 'Corte linear em concreto/asfalto com disco diamantado.',
@@ -325,6 +340,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 22,
     nome: 'Martelete Demolidor 30 kg',
+    nomeTecnico: 'Martelete 30 kg',
     slug: 'martelete-demolidor-30-kg',
     avatar: '/imagens/equipamentos/catalogo/corte-e-demolicao/martelete-demolidor-30-kg.webp',
     descricao: 'Martelete de alto impacto para demolições pesadas de concreto e pavimentos.',
@@ -381,6 +397,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 27,
     nome: 'Martelete 2,5 kg',
+    nomeTecnico: 'Martelete 900W - 2,5 kg',
     slug: 'martelete-2-5-kg',
     avatar: '/imagens/equipamentos/catalogo/corte-e-demolicao/martelete-2-5-kg.webp',
     descricao: 'Leve e versátil para pequenos serviços e perfurações em alvenaria.',
@@ -395,6 +412,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 24,
     nome: 'Serra Mármore',
+    nomeTecnico: 'Serra mármore Bosch / Serra mármore Makita / Serra mármore Skil',
     slug: 'serra-marme',
     avatar: '/imagens/equipamentos/catalogo/ferramentas-eletricas/serra-marme.webp',
     descricao: 'Corte, desbaste e acabamento em metal, concreto e pedra.',
@@ -409,6 +427,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 25,
     nome: 'Esmerilhadeira',
+    nomeTecnico: 'Esmerilhadeira 4"',
     slug: 'esmerilhadeira',
     avatar: '/imagens/equipamentos/catalogo/ferramentas-eletricas/esmerilhadeira.webp',
     descricao: 'Corte, desbaste e acabamento em metal, concreto e pedra.',
@@ -423,6 +442,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 30,
     nome: 'Pistola Finca-Pinos',
+    nomeTecnico: 'Pistola finca-pinos - Artengo',
     slug: 'pistola-fincapinos',
     avatar: '/imagens/equipamentos/catalogo/ferramentas-eletricas/pistola-fincapinos.webp',
     descricao: 'Fixação rápida de pinos em concreto e aço com cartuchos de pólvora.',
@@ -437,6 +457,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 31,
     nome: 'Serra Circular',
+    nomeTecnico: 'Serra circular Skil - 1200 W',
     slug: 'serra-circular',
     avatar: '/imagens/equipamentos/catalogo/ferramentas-eletricas/serra-circular.webp',
     descricao: 'Corte, desbaste e acabamento em metais, concreto e pedra.',
@@ -479,6 +500,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 34,
     nome: 'Politriz',
+    nomeTecnico: "Politriz 7'' - verificar especificação",
     slug: 'politriz',
     avatar: '/imagens/equipamentos/catalogo/ferramentas-eletricas/politriz.webp',
     descricao: 'Corte, desbaste e acabamento em metais, concreto e pedra.',
@@ -493,6 +515,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 35,
     nome: 'Nível a Laser',
+    nomeTecnico: 'Nível à laser - Bosch',
     slug: 'nivel-a-laser',
     avatar: '/imagens/equipamentos/catalogo/ferramentas-eletricas/nivel-a-laser.webp',
     descricao: 'Corte, desbaste e acabamento em metais, concreto e pedra.',
@@ -507,6 +530,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 36,
     nome: 'Lixadeira de Parede',
+    nomeTecnico: 'Lixadeira de parede e teto - Menegotti',
     slug: 'lixadeira-de-parede',
     avatar: '/imagens/equipamentos/catalogo/ferramentas-eletricas/lixadeira-de-parede.webp',
     descricao: 'Corte, desbaste e acabamento em metais, concreto e pedra.',
@@ -549,6 +573,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 39,
     nome: 'Furadeira e Parafusadeira',
+    nomeTecnico: 'Parafusadeira / Furadeira 400W',
     slug: 'furadeira-e-parafusadeira',
     avatar: '/imagens/equipamentos/catalogo/ferramentas-eletricas/furadeira-e-parafusadeira.webp',
     descricao: 'Corte, desbaste e acabamento em metais, concreto e pedra.',
@@ -577,6 +602,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 41,
     nome: 'Soprador Térmico',
+    nomeTecnico: 'Soprador térmico',
     slug: 'soprador-thermal',
     avatar: '/imagens/equipamentos/catalogo/ferramentas-eletricas/soprador-thermal.webp',
     descricao: 'Corte, desbaste e acabamento em metais, concreto e pedra.',
@@ -591,6 +617,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 42,
     nome: 'Compressor de Ar 25 L',
+    nomeTecnico: 'Compressor de ar - 20 L - 220V',
     slug: 'compressor-de-ar-25-l',
     avatar: '/imagens/equipamentos/catalogo/motores-e-geradores/compressor-de-ar-25-l.webp',
     descricao: 'Corte, desbaste e acabamento em metais, concreto e pedra.',
@@ -633,6 +660,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 49,
     nome: 'Bomba Submersa de Água Suja (com Mangotes)',
+    nomeTecnico: 'Bomba submersa com mangueira - água suja/limpa',
     slug: 'bomba-submersa-de-agua-suja-com-mangotes',
     avatar: '/imagens/equipamentos/catalogo/motores-e-geradores/bomba-submersa-de-agua-suja-com-mangotes.webp',
     descricao: 'Drenagem e esgotamento de água suja; desligamento automático por pressão.',
@@ -661,6 +689,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 51,
     nome: 'Reboque 1,20 × 1,80 m (1 eixo)',
+    nomeTecnico: 'Reboque médio - 1,80 x 1,20 m',
     slug: 'reboque-1-20-x-1-80-m-1-eixo',
     avatar: '/imagens/equipamentos/catalogo/reboque-e-transporte/reboque-1-20-x-1-80-m-1-eixo.webp',
     descricao:
@@ -676,6 +705,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 52,
     nome: 'Reboque 1,60 × 3,00 m (1 eixo)',
+    nomeTecnico: 'Reboque grande - 3,10 x 1,65 m',
     slug: 'reboque-1-60-x-3-00-m-1-eixo',
     avatar: '/imagens/equipamentos/catalogo/reboque-e-transporte/reboque-1-60-x-3-00-m-1-eixo.webp',
     descricao: 'Plataforma ampla para máquinas e materiais maiores; piso com chapa antiderrapante.',
@@ -690,6 +720,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 53,
     nome: 'Banheiro de Obra (Módulo Sanitário)',
+    nomeTecnico: 'Banheiro provisório',
     slug: 'banheiro-de-obra-modulo-sanitario',
     avatar: '/imagens/equipamentos/catalogo/diversos/banheiro-de-obra-modulo-sanitario.webp',
     descricao: 'Unidade sanitária móvel com ventilação e acabamento de fácil higienização.',
@@ -704,6 +735,7 @@ export const equipamentosData: Equipamento[] = [
   {
     id: 54,
     nome: 'Container Almoxarifado 1,50 × 3,00 × 2,00 m',
+    nomeTecnico: 'Container almoxarife 3,0 x 1,5 m',
     slug: 'container-almoxarifado-1-50-x-3-00-x-2-00-m',
     avatar: '/imagens/equipamentos/catalogo/diversos/container-almoxarifado-1-50-x-3-00-x-2-00-m.webp',
     descricao: 'Armazenamento seguro de ferramentas/insumos com porta e ventilação.',

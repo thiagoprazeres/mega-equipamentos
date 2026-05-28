@@ -67,7 +67,7 @@ describe('consultor-equipamentos', () => {
     );
   });
 
-  it('normaliza uma resposta da IA sem produtos quando ela só está refinando a conversa', () => {
+  it('normaliza uma resposta da IA sem equipamentos quando ela só está refinando a conversa', () => {
     const request = createConsultorRequest('Oi, meu nome é Thiago', []);
     const normalized = normalizeConsultorResponse(
       {
@@ -87,7 +87,7 @@ describe('consultor-equipamentos', () => {
     expect(normalized!.showQuoteCta).toBeFalse();
   });
 
-  it('recupera todos os links inline para os produtos citados pela IA', () => {
+  it('recupera todos os links inline para os equipamentos citados pela IA', () => {
     const request = createConsultorRequest(
       'Quero demolir um piso de concreto com agilidade em Caruaru. Meu nome é Thiago. 81997070825',
       []

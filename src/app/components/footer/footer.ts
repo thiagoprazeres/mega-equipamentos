@@ -1,6 +1,16 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { LucideAngularModule, PhoneCall, Mail, MapPin, Clock, Building2 } from 'lucide-angular';
+import {
+  Building2,
+  Clock,
+  LockKeyhole,
+  LucideAngularModule,
+  Mail,
+  MapPin,
+  PhoneCall,
+} from 'lucide-angular';
+
+import { APP_VERSION } from '../../app-version';
 
 @Component({
   selector: 'app-footer',
@@ -15,5 +25,7 @@ export class Footer {
   readonly MapPin = MapPin;
   readonly Clock = Clock;
   readonly Building2 = Building2;
+  readonly LockKeyhole = LockKeyhole;
   readonly year = new Date().getFullYear();
+  readonly appVersion = APP_VERSION;
 }

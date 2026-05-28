@@ -107,6 +107,12 @@
         </p>
       </div>
 
+      @if (loading) {
+        <div class="flex justify-center py-10">
+          <span class="loading loading-spinner loading-lg text-primary"></span>
+        </div>
+      }
+
       <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         @for (categoria of categorias; track categoria.slug) {
           <a

@@ -1,6 +1,6 @@
 {
   "name": "mega-equipamentos",
-  "version": "0.0.0",
+  "version": "0.2.43",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -36,10 +36,15 @@
     "@angular/router": "^22.0.0-next.7",
     "@angular/ssr": "^22.0.0-next.7",
     "@google/genai": "^2.5.0",
+    "@maskito/angular": "^5.2.2",
+    "@maskito/core": "^5.2.2",
+    "@maskito/kit": "^5.2.2",
     "@netlify/functions": "^5.2.2",
+    "@supabase/supabase-js": "^2.106.1",
     "@tailwindcss/postcss": "^4.3.0",
     "daisyui": "^5.5.20",
     "express": "^5.2.1",
+    "jspdf": "^4.2.1",
     "lucide-angular": "^1.0.0",
     "postcss": "^8.5.15",
     "rxjs": "~7.8.2",

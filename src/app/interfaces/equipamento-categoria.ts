@@ -1,5 +1,8 @@
+import type { CatalogStatus } from './equipamento';
+
 export interface EquipamentoCategoria {
   id: number;
+  codigo: string;
   nome: string;
   slug: string;
   name: string;
@@ -9,4 +12,6 @@ export interface EquipamentoCategoria {
   avatarCard?: string;
   video?: string;
   objetivo: string;
+  status?: CatalogStatus;
+  sortOrder?: number;
 }

@@ -1,0 +1,186 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-7xl space-y-6">
+    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+        <h1 class="text-3xl font-extrabold text-primary md:text-4xl">Usuários</h1>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a class="btn btn-primary" routerLink="/gestor/usuarios/novo">
+          <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
+          Novo usuário
+        </a>
+        <button class="btn btn-ghost" type="button" (click)="signOut()">
+          <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+          Sair
+        </button>
+      </div>
+    </header>
+
+    <app-gestor-nav></app-gestor-nav>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
+    <section class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center">
+      <label class="input input-bordered flex items-center gap-2">
+        <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
+        <input
+          class="grow"
+          type="search"
+          placeholder="Buscar por nome, role, CPF/CNPJ, e-mail, contato ou endereço"
+          [value]="query"
+          (input)="query = $any($event.target).value"
+        />
+      </label>
+
+      <div role="tablist" class="tabs tabs-box w-fit">
+        <button
+          role="tab"
+          type="button"
+          class="tab"
+          [class.tab-active]="activeStatus === 'all'"
+          (click)="setStatus('all')"
+        >
+          Todos
+        </button>
+        <button
+          role="tab"
+          type="button"
+          class="tab"
+          [class.tab-active]="activeStatus === 'active'"
+          (click)="setStatus('active')"
+        >
+          Ativos
+        </button>
+        <button
+          role="tab"
+          type="button"
+          class="tab"
+          [class.tab-active]="activeStatus === 'archived'"
+          (click)="setStatus('archived')"
+        >
+          Arquivados
+        </button>
+      </div>
+
+      <select
+        class="select select-bordered w-full md:w-48"
+        [value]="selectedRole"
+        (change)="setRole($any($event.target).value)"
+      >
+        @for (option of roleOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </section>
+
+    <p class="text-sm text-base-content/60">
+      {{ filteredUsersCount() }} de {{ users.length }} usuário(s)
+    </p>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else {
+      <section class="rounded-box border border-base-300 bg-base-100">
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('name')">
+                    Usuário <span class="text-xs">{{ sortIndicator('name') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('role')">
+                    Role <span class="text-xs">{{ sortIndicator('role') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('document')">
+                    CPF/CNPJ <span class="text-xs">{{ sortIndicator('document') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('contact')">
+                    Contato <span class="text-xs">{{ sortIndicator('contact') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('address')">
+                    Endereço <span class="text-xs">{{ sortIndicator('address') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('status')">
+                    Status <span class="text-xs">{{ sortIndicator('status') }}</span>
+                  </button>
+                </th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of filteredUsers(); track user.id) {
+                <tr>
+                  <td>
+                    <div class="flex min-w-72 items-center gap-3">
+                      <div class="grid h-11 w-11 place-items-center rounded-box bg-primary/10 text-primary">
+                        <lucide-angular [img]="UserRound" class="h-5 w-5"></lucide-angular>
+                      </div>
+                      <div>
+                        <p class="font-bold text-primary">{{ user.nome }}</p>
+                        <p class="text-xs text-base-content/60">{{ user.email || 'Sem e-mail' }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ roleLabel(user.role) }}</td>
+                  <td>{{ user.document || 'Não informado' }}</td>
+                  <td>{{ userContact(user) }}</td>
+                  <td class="max-w-xs truncate">{{ user.address || 'Não informado' }}</td>
+                  <td>
+                    <span class="badge" [class.badge-success]="user.status !== 'archived'">
+                      {{ user.status === 'archived' ? 'Arquivado' : 'Ativo' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <a class="btn btn-square btn-ghost" [routerLink]="['/gestor/usuarios', user.id]">
+                        <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
+                      </a>
+                      <a class="btn btn-square btn-ghost" [routerLink]="['/gestor/usuarios', user.id, 'editar']">
+                        <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
+                      </a>
+                      @if (user.status === 'archived') {
+                        <button class="btn btn-square btn-ghost" type="button" (click)="restore(user)">
+                          <lucide-angular [img]="RotateCcw" class="h-4 w-4"></lucide-angular>
+                        </button>
+                      } @else {
+                        <button class="btn btn-square btn-ghost" type="button" (click)="archive(user)">
+                          <lucide-angular [img]="Archive" class="h-4 w-4"></lucide-angular>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="py-10 text-center text-base-content/60">
+                    Nenhum usuário encontrado.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  </div>
+</section>

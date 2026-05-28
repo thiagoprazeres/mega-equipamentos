@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import type { Customer } from '../interfaces/customer';
-import type { Seller } from '../interfaces/seller';
+import type { StaffUser } from '../interfaces/staff-user';
 import type {
   RentalBillingPeriod,
   RentalContract,
@@ -13,6 +13,7 @@ import { SupabaseClientService } from './supabase-client.service';
 interface RentalContractRow {
   id: number;
   contract_number: string;
+  previous_contract_number?: string | null;
   customer_id: number;
   customer_name: string;
   customer_document: string;
@@ -49,13 +50,14 @@ interface RentalContractItemRow {
   billing_period: RentalBillingPeriod;
   unit_price_cents: number;
   total_price_cents: number;
+  asset_value_cents?: number | null;
   sort_order: number;
 }
 
 export interface RentalContractEditorInput {
   id?: number;
   customer: Customer;
-  seller: Seller;
+  seller: StaffUser;
   billingPeriod: RentalBillingPeriod;
   startDate: string;
   endDate?: string;
@@ -156,6 +158,7 @@ export class RentalContractService {
           billing_period: item.billingPeriod,
           unit_price_cents: item.unitPriceCents,
           total_price_cents: item.totalPriceCents,
+          asset_value_cents: item.assetValueCents ?? 0,
           sort_order: index + 1,
         }))
       );
@@ -206,6 +209,7 @@ function normalizeContractItem(
 ): RentalContractItem {
   const quantity = Math.max(1, Math.trunc(Number(item.quantity) || 1));
   const unitPriceCents = Math.max(0, Math.trunc(Number(item.unitPriceCents) || 0));
+  const assetValueCents = Math.max(0, Math.trunc(Number(item.assetValueCents) || 0));
 
   return {
     equipmentId: item.equipmentId,
@@ -214,6 +218,7 @@ function normalizeContractItem(
     billingPeriod,
     unitPriceCents,
     totalPriceCents: quantity * unitPriceCents,
+    assetValueCents,
     sortOrder: index + 1,
   };
 }
@@ -222,6 +227,7 @@ function mapContractRow(row: RentalContractRow, items: RentalContractItem[]): Re
   return {
     id: row.id,
     contractNumber: row.contract_number,
+    previousContractNumber: row.previous_contract_number || undefined,
     customerId: row.customer_id,
     customerName: row.customer_name,
     customerDocument: row.customer_document || undefined,
@@ -261,6 +267,7 @@ function mapContractItemRow(row: RentalContractItemRow): RentalContractItem {
     billingPeriod: normalizeBillingPeriod(row.billing_period),
     unitPriceCents: row.unit_price_cents,
     totalPriceCents: row.total_price_cents,
+    assetValueCents: row.asset_value_cents ?? 0,
     sortOrder: row.sort_order,
   };
 }

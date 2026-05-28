@@ -1,0 +1,184 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-7xl space-y-6">
+    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+        <h1 class="text-3xl font-extrabold text-primary md:text-4xl">Orçamentos</h1>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a class="btn btn-primary" routerLink="/gestor/orcamentos/novo">
+          <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
+          Novo orçamento
+        </a>
+        <button class="btn btn-ghost" type="button" (click)="signOut()">
+          <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+          Sair
+        </button>
+      </div>
+    </header>
+
+    <app-gestor-nav></app-gestor-nav>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    <section class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+      <label class="input input-bordered flex items-center gap-2">
+        <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
+        <input
+          class="grow"
+          type="search"
+          placeholder="Buscar por número, cliente, vendedor, documento ou contato"
+          [value]="query"
+          (input)="query = $any($event.target).value"
+        />
+      </label>
+
+      <div role="tablist" class="tabs tabs-box w-fit">
+        <button
+          role="tab"
+          type="button"
+          class="tab"
+          [class.tab-active]="selectedStatus === 'all'"
+          (click)="setStatus('all')"
+        >
+          Todos
+        </button>
+        @for (option of statusOptions; track option.value) {
+          <button
+            role="tab"
+            type="button"
+            class="tab"
+            [class.tab-active]="selectedStatus === option.value"
+            (click)="setStatus(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <p class="text-sm text-base-content/60">
+      {{ filteredQuotesCount() }} de {{ quotes.length }} orçamento(s)
+    </p>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else {
+      <section class="rounded-box border border-base-300 bg-base-100">
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('number')">
+                    Orçamento <span class="text-xs">{{ sortIndicator('number') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('customer')">
+                    Cliente <span class="text-xs">{{ sortIndicator('customer') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('seller')">
+                    Vendedor <span class="text-xs">{{ sortIndicator('seller') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('period')">
+                    Período <span class="text-xs">{{ sortIndicator('period') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('validUntil')">
+                    Validade <span class="text-xs">{{ sortIndicator('validUntil') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('items')">
+                    Itens <span class="text-xs">{{ sortIndicator('items') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('total')">
+                    Total <span class="text-xs">{{ sortIndicator('total') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('status')">
+                    Status <span class="text-xs">{{ sortIndicator('status') }}</span>
+                  </button>
+                </th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (quote of filteredQuotes(); track quote.id) {
+                <tr>
+                  <td>
+                    <div class="flex min-w-48 items-center gap-3">
+                      <div class="grid h-11 w-11 place-items-center rounded-box bg-primary/10 text-primary">
+                        <lucide-angular [img]="ClipboardList" class="h-5 w-5"></lucide-angular>
+                      </div>
+                      <div>
+                        <p class="font-bold text-primary">{{ quote.quoteNumber }}</p>
+                        <p class="text-xs text-base-content/60">{{ quote.createdAt | date: 'dd/MM/yyyy' }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <p class="font-semibold">{{ quote.customerName || 'Não informado' }}</p>
+                    <p class="text-xs text-base-content/60">{{ quote.customerPhone || 'Sem contato' }}</p>
+                  </td>
+                  <td>
+                    <p class="font-semibold">{{ quote.sellerName || 'Não informado' }}</p>
+                    <p class="text-xs text-base-content/60">{{ quote.sellerPhone || quote.sellerEmail || 'Sem contato' }}</p>
+                  </td>
+                  <td>{{ periodLabel(quote.billingPeriod) }}</td>
+                  <td>{{ formatDate(quote.validUntil) }}</td>
+                  <td>{{ quote.items.length }}</td>
+                  <td>{{ formatMoney(quote.totalCents) }}</td>
+                  <td>
+                    <span class="badge" [class.badge-success]="quote.status === 'approved'">
+                      {{ statusLabel(quote.status) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <a class="btn btn-square btn-ghost" [routerLink]="['/gestor/orcamentos', quote.id, 'editar']">
+                        <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
+                      </a>
+                      <button
+                        class="btn btn-square btn-ghost"
+                        type="button"
+                        title="Gerar orçamento"
+                        aria-label="Gerar orçamento em PDF"
+                        (click)="exportPdf(quote)"
+                      >
+                        @if (exportingQuoteId === quote.id) {
+                          <span class="loading loading-spinner loading-xs"></span>
+                        } @else {
+                          <lucide-angular [img]="Download" class="h-4 w-4"></lucide-angular>
+                        }
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="9" class="py-10 text-center text-base-content/60">
+                    Nenhum orçamento encontrado.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  </div>
+</section>

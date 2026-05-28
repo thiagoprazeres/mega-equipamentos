@@ -103,12 +103,25 @@
       class="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2 text-xs opacity-90"
     >
       <p>© {{ year }} <b>Mega Equipamentos</b>. Todos os direitos reservados.</p>
-      <p>
-        Desenvolvido pela
-        <a href="https://www.instagram.com/cafeina_dev" target="_blank" rel="noopener" class="link"
-          >Cafeína Dev</a
-        >
-      </p>
+      <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 md:justify-end">
+        <a routerLink="/area-restrita" class="link inline-flex items-center gap-1">
+          <lucide-angular [img]="LockKeyhole" class="h-3.5 w-3.5"></lucide-angular>
+          Área restrita
+        </a>
+        <p>
+          Desenvolvido pela
+          <a
+            href="https://www.instagram.com/cafeina_dev"
+            target="_blank"
+            rel="noopener"
+            class="link"
+            >Cafeína Dev</a
+          >
+        </p>
+        <span class="text-[0.65rem] font-medium opacity-50" aria-label="Versão do site">
+          v{{ appVersion }}
+        </span>
+      </div>
     </div>
   </div>
 </footer>

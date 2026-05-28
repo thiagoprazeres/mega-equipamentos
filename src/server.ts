@@ -1,7 +1,9 @@
 import { AngularAppEngine, createRequestHandler } from '@angular/ssr';
 import { getContext } from '@netlify/angular-runtime/context.mjs';
 
-const angularAppEngine = new AngularAppEngine();
+const angularAppEngine = new AngularAppEngine({
+  allowedHosts: ['megaequip.com.br'],
+});
 
 export async function netlifyAppEngineHandler(request: Request): Promise<Response> {
   const context = getContext();

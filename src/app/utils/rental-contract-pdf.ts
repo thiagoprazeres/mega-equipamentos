@@ -1,5 +1,6 @@
 import type { CompanyProfile } from '../interfaces/company-profile';
 import type { RentalContract, RentalContractItem, RentalBillingPeriod } from '../interfaces/rental-contract';
+import type { RentalQuote } from '../interfaces/rental-quote';
 import { formatCurrencyCents } from './prices';
 
 const DEFAULT_COMPANY_PROFILE: CompanyProfile = {
@@ -290,6 +291,193 @@ export async function exportInvoicePdf(
   doc.save(`${sanitizeFileName(contract.contractNumber)}-fatura.pdf`);
 }
 
+export async function exportQuotePdf(
+  contract: RentalContract,
+  companyProfile?: CompanyProfile
+): Promise<void> {
+  const { jsPDF } = await import('jspdf');
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const company = companyProfile ?? DEFAULT_COMPANY_PROFILE;
+  const marginX = 48;
+  const issuedAt = new Date();
+  const validUntil = addDays(issuedAt, 7);
+  let y = 52;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.text('ORÇAMENTO', marginX, y);
+  doc.setFontSize(11);
+  doc.text(`ORC-${contract.contractNumber}`, marginX, y + 22);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  drawCompanyHeader(doc, company, 370, y);
+  y += 68;
+
+  y = sectionTitle(doc, 'Dados do orçamento', marginX, y);
+  y = paragraph(
+    doc,
+    [
+      `Referência: Locação nº ${contract.contractNumber}`,
+      `Emissão: ${formatDateTime(issuedAt)}`,
+      `Validade: ${formatDateOnly(validUntil)}`,
+      `Período da locação: ${PERIOD_LABELS[contract.billingPeriod]}`,
+      `Vigência estimada: ${formatContractPeriod(contract)}`,
+      `Local de entrega/uso: ${contract.deliveryAddress || 'A combinar'}`,
+      `Endereço da obra: ${formatWorksiteAddress(contract)}`,
+      `Vendedor: ${contract.sellerName || 'Não informado'}${contract.sellerPhone ? ` | ${contract.sellerPhone}` : ''}`,
+    ],
+    marginX,
+    y
+  );
+
+  y = sectionTitle(doc, 'Cliente', marginX, y + 10);
+  y = paragraph(
+    doc,
+    [
+      `Cliente: ${contract.customerName}`,
+      `CPF/CNPJ: ${contract.customerDocument || 'Não informado'}`,
+      `Contato: ${contract.customerPhone || contract.customerEmail || 'Não informado'}`,
+      `Endereço: ${formatCustomerAddress(contract)}`,
+    ],
+    marginX,
+    y
+  );
+
+  y = sectionTitle(doc, 'Itens orçados', marginX, y + 10);
+  y = drawItemsTable(doc, contract.items, marginX, y);
+
+  y += 12;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text(`Subtotal: ${formatCurrencyCents(contract.subtotalCents)}`, 390, y);
+  y += 17;
+  doc.text(`Frete: ${formatCurrencyCents(contract.shippingCents ?? 0)}`, 407, y);
+  y += 17;
+  doc.text(`Total: ${formatCurrencyCents(contract.totalCents)}`, 410, y);
+  y += 28;
+
+  y = sectionTitle(doc, 'Condições comerciais', marginX, y);
+  y = paragraph(
+    doc,
+    [
+      'Orçamento sujeito à disponibilidade dos equipamentos na confirmação da locação.',
+      'Valores calculados para o período informado e podem ser ajustados em caso de prorrogação, avarias, perdas ou alterações de escopo.',
+      `Pagamento via PIX: ${company.pixKey || company.document || 'Não informado'}`,
+    ],
+    marginX,
+    y
+  );
+
+  if (contract.notes) {
+    y = sectionTitle(doc, 'Observações', marginX, y + 10);
+    y = paragraph(doc, splitText(contract.notes), marginX, y);
+  }
+
+  y = Math.max(y + 44, 690);
+  doc.line(marginX, y, 250, y);
+  doc.line(345, y, 547, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text('Mega Equipamentos', marginX + 48, y + 16);
+  doc.text('Cliente/Responsável', 345 + 58, y + 16);
+
+  doc.save(`${sanitizeFileName(contract.contractNumber)}-orcamento.pdf`);
+}
+
+export async function exportStandaloneQuotePdf(
+  quote: RentalQuote,
+  companyProfile?: CompanyProfile
+): Promise<void> {
+  const { jsPDF } = await import('jspdf');
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const company = companyProfile ?? DEFAULT_COMPANY_PROFILE;
+  const marginX = 48;
+  const issuedAt = new Date();
+  let y = 52;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.text('ORÇAMENTO', marginX, y);
+  doc.setFontSize(11);
+  doc.text(quote.quoteNumber, marginX, y + 22);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  drawCompanyHeader(doc, company, 370, y);
+  y += 68;
+
+  y = sectionTitle(doc, 'Dados do orçamento', marginX, y);
+  y = paragraph(
+    doc,
+    [
+      `Número: ${quote.quoteNumber}`,
+      `Emissão: ${formatDateTime(issuedAt)}`,
+      `Validade: ${quote.validUntil ? formatDate(quote.validUntil) : 'Não informada'}`,
+      `Período da locação: ${PERIOD_LABELS[quote.billingPeriod]}`,
+      `Início previsto: ${formatDate(quote.startDate)}`,
+      `Local de entrega/uso: ${quote.deliveryAddress || 'A combinar'}`,
+      `Endereço da obra: ${quote.worksiteAddress || quote.deliveryAddress || 'A combinar'}`,
+      `Vendedor: ${quote.sellerName || 'Não informado'}${quote.sellerPhone ? ` | ${quote.sellerPhone}` : ''}`,
+    ],
+    marginX,
+    y
+  );
+
+  y = sectionTitle(doc, 'Cliente', marginX, y + 10);
+  y = paragraph(
+    doc,
+    [
+      `Cliente: ${quote.customerName || 'Não informado'}`,
+      `CPF/CNPJ: ${quote.customerDocument || 'Não informado'}`,
+      `Contato: ${quote.customerPhone || quote.customerEmail || 'Não informado'}`,
+      `Endereço: ${formatQuoteCustomerAddress(quote)}`,
+    ],
+    marginX,
+    y
+  );
+
+  y = sectionTitle(doc, 'Itens orçados', marginX, y + 10);
+  y = drawItemsTable(doc, quote.items, marginX, y);
+
+  y += 12;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text(`Subtotal: ${formatCurrencyCents(quote.subtotalCents)}`, 390, y);
+  y += 17;
+  doc.text(`Frete: ${formatCurrencyCents(quote.shippingCents ?? 0)}`, 407, y);
+  y += 17;
+  doc.text(`Total: ${formatCurrencyCents(quote.totalCents)}`, 410, y);
+  y += 28;
+
+  y = sectionTitle(doc, 'Condições comerciais', marginX, y);
+  y = paragraph(
+    doc,
+    [
+      'Orçamento sujeito à disponibilidade dos equipamentos na confirmação da locação.',
+      'Valores calculados para o período informado e podem ser ajustados em caso de prorrogação, avarias, perdas ou alterações de escopo.',
+      `Pagamento via PIX: ${company.pixKey || company.document || 'Não informado'}`,
+    ],
+    marginX,
+    y
+  );
+
+  if (quote.notes) {
+    y = sectionTitle(doc, 'Observações', marginX, y + 10);
+    y = paragraph(doc, splitText(quote.notes), marginX, y);
+  }
+
+  y = Math.max(y + 44, 690);
+  doc.line(marginX, y, 250, y);
+  doc.line(345, y, 547, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text('Mega Equipamentos', marginX + 48, y + 16);
+  doc.text('Cliente/Responsável', 345 + 58, y + 16);
+
+  doc.save(`${sanitizeFileName(quote.quoteNumber)}-orcamento.pdf`);
+}
+
 function drawLegacyContractFirstPage(
   doc: unknown,
   contract: RentalContract,
@@ -313,17 +501,19 @@ function drawLegacyContractFirstPage(
 
   if (logoDataUrl) {
     try {
-      pdf.addImage(logoDataUrl, 'PNG', x + 38, 50, 72, 21);
+      const logoWidth = 112;
+      const logoHeight = logoWidth / 4.993;
+      pdf.addImage(logoDataUrl, 'PNG', x + 30, 44, logoWidth, logoHeight);
     } catch {
       // The logo is decorative in the PDF; keep the document exportable if it cannot be embedded.
     }
   }
 
-  pdf.setFontSize(10);
-  drawWrappedText(pdf, company.legalName, x + 138, 40, 360, 12);
-  drawWrappedText(pdf, formatCompanyAddress(company), x + 138, 52, 360, 12);
-  drawWrappedText(pdf, `CNPJ: ${company.document || 'Não informado'}`, x + 138, 64, 360, 12);
-  drawWrappedText(pdf, formatCompanyContact(company), x + 138, 76, 360, 12);
+  pdf.setFontSize(9.6);
+  drawFittedText(pdf, company.legalName, x + 150, 40, 375);
+  drawFittedText(pdf, formatCompanyAddress(company), x + 150, 52, 375);
+  drawFittedText(pdf, `CNPJ: ${company.document || 'Não informado'}`, x + 150, 64, 375);
+  drawFittedText(pdf, formatCompanyContact(company), x + 150, 76, 375);
 
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(12);
@@ -351,32 +541,35 @@ function drawLegacyCustomerBox(doc: LegacyPdfDoc, contract: RentalContract, x: n
 
   const leftX = x + 2;
   const rightX = x + 270;
+  const leftWidth = 260;
+  const rightWidth = 248;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  drawWrappedText(doc, `DATA: ${formatDate(contract.createdAt || contract.startDate)}`, leftX, y + 24, 250, 9);
-  drawWrappedText(doc, `Nome/Empresa:${contract.customerName}`, leftX, y + 36, 260, 9);
-  drawWrappedText(doc, `Endereço: ${formatCustomerAddress(contract)}`, leftX, y + 48, 260, 9);
-  drawWrappedText(doc, `Cidade: ${formatCustomerCityState(contract)}`, leftX, y + 72, 250, 9);
-  drawWrappedText(doc, `Entrega em: ${deliveryLocationLabel(contract)}`, leftX, y + 84, 250, 9);
-  drawWrappedText(doc, `Endereço da Entrega: ${formatLegacyDeliveryAddress(contract)}`, leftX, y + 96, 512, 9, 2);
+  drawWrappedText(doc, `DATA: ${formatDate(contract.createdAt || contract.startDate)}`, leftX, y + 24, leftWidth, 9, 1);
+  drawWrappedText(doc, `Nome/Empresa: ${contract.customerName}`, leftX, y + 36, leftWidth, 9, 1);
+  drawWrappedText(doc, `Endereço: ${formatCustomerAddress(contract)}`, leftX, y + 48, leftWidth, 9, 2);
+  drawWrappedText(doc, `Cidade: ${formatCustomerCityState(contract)}`, leftX, y + 72, leftWidth, 9, 1);
+  drawWrappedText(doc, `Entrega em: ${deliveryLocationLabel(contract)}`, leftX, y + 84, leftWidth, 9, 1);
+  drawWrappedText(doc, `Endereço da Entrega: ${formatLegacyDeliveryAddress(contract)}`, leftX, y + 96, leftWidth, 9, 1);
 
-  drawWrappedText(doc, `CPF/CNPJ: ${contract.customerDocument || 'Não informado'}`, rightX, y + 24, 248, 9);
-  drawWrappedText(doc, `Código do Cliente: ${padLegacyCode(contract.customerId)}`, rightX, y + 36, 248, 9);
-  drawWrappedText(doc, `Telefones: ${contract.customerPhone || 'Não informado'}`, rightX, y + 58, 248, 9);
-  drawWrappedText(doc, `CEP: ${extractZipCode(contract.customerAddress || contract.deliveryAddress) || '-'}`, rightX, y + 72, 248, 9);
-  drawWrappedText(doc, `Vendedor: ${contract.sellerName || 'Não informado'}`, rightX, y + 84, 248, 9);
+  drawWrappedText(doc, `CPF/CNPJ: ${contract.customerDocument || 'Não informado'}`, rightX, y + 24, rightWidth, 9, 1);
+  drawWrappedText(doc, `Código do Cliente: ${padLegacyCode(contract.customerId)}`, rightX, y + 36, rightWidth, 9, 1);
+  drawWrappedText(doc, `Telefones: ${contract.customerPhone || 'Não informado'}`, rightX, y + 58, rightWidth, 9, 1);
+  drawWrappedText(doc, `CEP: ${extractZipCode(contract.customerAddress || contract.deliveryAddress) || '-'}`, rightX, y + 72, rightWidth, 9, 1);
+  drawWrappedText(doc, `Vendedor: ${contract.sellerName || 'Não informado'}`, rightX, y + 84, rightWidth, 9, 1);
   drawWrappedText(
     doc,
     `Contato/Fone: ${contract.sellerPhone || contract.customerPhone || 'Não informado'}`,
     rightX,
     y + 96,
-    248,
-    9
+    rightWidth,
+    9,
+    1
   );
 }
 
 function drawLegacyPeriodBox(doc: LegacyPdfDoc, contract: RentalContract, x: number, y: number, width: number): void {
-  const rowHeight = 18;
+  const rowHeight = 20;
   const colWidth = width / 3;
   doc.rect(x, y, width, rowHeight * 2);
   doc.line(x, y + rowHeight, x + width, y + rowHeight);
@@ -385,32 +578,30 @@ function drawLegacyPeriodBox(doc: LegacyPdfDoc, contract: RentalContract, x: num
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  centerCellText(doc, `Início do contrato: ${formatDate(contract.startDate)}`, x, y + 12, colWidth);
-  centerCellText(doc, `Nº contrato: ${contract.contractNumber}`, x + colWidth, y + 12, colWidth);
+  centerCellText(doc, `Início: ${formatDate(contract.startDate)}`, x, y + 13, colWidth);
+  centerCellText(doc, `Nº contrato: ${contract.contractNumber}`, x + colWidth, y + 13, colWidth);
   centerCellText(
     doc,
-    `Previsão de término: ${contract.endDate ? formatDate(contract.endDate) : '-'}`,
+    `Término: ${contract.endDate ? formatDate(contract.endDate) : '-'}`,
     x + colWidth * 2,
-    y + 12,
+    y + 13,
     colWidth
   );
   centerCellText(
     doc,
-    `Período de cobrança: ${PERIOD_LABELS[contract.billingPeriod]}`,
+    `Período: ${PERIOD_LABELS[contract.billingPeriod]}`,
     x,
-    y + rowHeight + 12,
-    colWidth,
-    true
+    y + rowHeight + 13,
+    colWidth
   );
   centerCellText(
     doc,
-    `Valor da locação por período (${PERIOD_LABELS[contract.billingPeriod]}): ${formatCurrencyCents(contract.subtotalCents || contract.totalCents)}`,
+    `Locação (${PERIOD_LABELS[contract.billingPeriod]}): ${formatCurrencyCents(contract.subtotalCents || contract.totalCents)}`,
     x + colWidth,
-    y + rowHeight + 12,
-    colWidth,
-    true
+    y + rowHeight + 13,
+    colWidth
   );
-  centerCellText(doc, `Valor frete: ${formatCurrencyCents(contract.shippingCents ?? 0)}`, x + colWidth * 2, y + rowHeight + 12, colWidth, true);
+  centerCellText(doc, `Frete: ${formatCurrencyCents(contract.shippingCents ?? 0)}`, x + colWidth * 2, y + rowHeight + 13, colWidth);
 }
 
 function drawLegacyNotesBox(doc: LegacyPdfDoc, contract: RentalContract, x: number, y: number, width: number): void {
@@ -454,17 +645,21 @@ function drawLegacyItemsTable(doc: LegacyPdfDoc, contract: RentalContract, x: nu
           billingPeriod: contract.billingPeriod,
           unitPriceCents: contract.subtotalCents || contract.totalCents,
           totalPriceCents: contract.subtotalCents || contract.totalCents,
+          assetValueCents: 0,
         },
       ];
   let rowY = y + 45;
 
   doc.setFontSize(7.2);
   for (const item of items) {
+    const assetValueCents = item.assetValueCents ?? 0;
+    const assetTotalCents = assetValueCents * item.quantity;
+
     doc.text(String(item.quantity), x + 29, rowY, { align: 'right' });
     drawWrappedText(doc, item.equipmentName, x + 98, rowY, 228, 8, 2);
     centerCellText(doc, '-', x + 332, rowY, 24);
-    doc.text('-', x + 398, rowY, { align: 'right' });
-    doc.text('-', x + 445, rowY, { align: 'right' });
+    doc.text(formatCurrencyCents(assetValueCents).replace('R$ ', ''), x + 398, rowY, { align: 'right' });
+    doc.text(formatCurrencyCents(assetTotalCents).replace('R$ ', ''), x + 445, rowY, { align: 'right' });
     doc.text(formatCurrencyCents(item.unitPriceCents).replace('R$ ', ''), x + 491, rowY, { align: 'right' });
     doc.text(formatCurrencyCents(item.totalPriceCents).replace('R$ ', ''), x + 538, rowY, { align: 'right' });
     rowY += 13;
@@ -508,6 +703,8 @@ function drawLegacyPromissoryBox(
   y: number,
   width: number
 ): void {
+  const assetTotalCents = contractAssetTotalCents(contract);
+
   doc.rect(x, y, width, 118);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
@@ -516,10 +713,10 @@ function drawLegacyPromissoryBox(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.text(`Nº: ${contract.contractNumber}`, x + 2, y + 23);
-  doc.text(`Valor: ${formatCurrencyCents(contract.totalCents)}`, x + width - 90, y + 23);
+  doc.text(`Valor: ${formatCurrencyCents(assetTotalCents)}`, x + width - 90, y + 23);
   drawWrappedText(
     doc,
-    `Pagarei por essa Nota Promissória à ${company.legalName}, CNPJ: ${company.document || 'Não informado'} ou a sua ordem, a quantia de ${formatCurrencyCents(contract.totalCents)} em moeda corrente deste país, pagável em ${company.city || 'Caruaru'}/${company.state || 'PE'}, caso não haja a devolução do bem locado ao término do contrato ou manifestação a fim de prorrogação deste contrato.`,
+    `Pagarei por essa Nota Promissória à ${company.legalName}, CNPJ: ${company.document || 'Não informado'} ou a sua ordem, a quantia de ${formatCurrencyCents(assetTotalCents)} em moeda corrente deste país, pagável em ${company.city || 'Caruaru'}/${company.state || 'PE'}, caso não haja a devolução do bem locado ao término do contrato ou manifestação a fim de prorrogação deste contrato.`,
     x + 2,
     y + 48,
     width - 4,
@@ -530,6 +727,14 @@ function drawLegacyPromissoryBox(
   doc.text(`CPF/CNPJ: ${contract.customerDocument || 'Não informado'}`, x + 2, y + 95);
   doc.text(`ENDEREÇO: ${truncate(formatCustomerAddress(contract), 86)}`, x + 2, y + 107);
   doc.line(x + width - 90, y + 96, x + width, y + 96);
+}
+
+function contractAssetTotalCents(contract: RentalContract): number {
+  return contract.items.reduce((total, item) => {
+    const assetValueCents = Math.max(0, Math.trunc(Number(item.assetValueCents) || 0));
+    const quantity = Math.max(1, Math.trunc(Number(item.quantity) || 1));
+    return total + assetValueCents * quantity;
+  }, 0);
 }
 
 function drawLegacyContractTermsPage(doc: unknown, contract: RentalContract): void {
@@ -560,6 +765,7 @@ function drawLegacyContractTermsPage(doc: unknown, contract: RentalContract): vo
 }
 
 type LegacyPdfDoc = {
+  getTextWidth?: (text: string) => number;
   line: (x1: number, y1: number, x2: number, y2: number) => void;
   rect: (x: number, y: number, width: number, height: number) => void;
   setFont: (font: string, style?: string) => void;
@@ -742,26 +948,39 @@ function centerCellText(
   text: string,
   x: number,
   y: number,
-  width: number,
-  boldValue = false
+  width: number
 ): void {
-  if (!boldValue) {
-    doc.text(text, x + width / 2, y, { align: 'center' });
-    return;
+  drawFittedText(doc, text, x + width / 2, y, width - 6, 'center');
+}
+
+function drawFittedText(
+  doc: LegacyPdfDoc,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  align: 'left' | 'center' | 'right' = 'left'
+): void {
+  doc.text(fitTextToWidth(doc, text, maxWidth), x, y, { align });
+}
+
+function fitTextToWidth(doc: LegacyPdfDoc, text: string, maxWidth: number): string {
+  if (!doc.getTextWidth) {
+    const maxChars = Math.max(8, Math.floor(maxWidth / 3.8));
+    return text.length > maxChars ? `${text.slice(0, maxChars - 3)}...` : text;
   }
 
-  const [label, ...valueParts] = text.split(': ');
-  const value = valueParts.join(': ');
-
-  if (!value) {
-    doc.text(text, x + width / 2, y, { align: 'center' });
-    return;
+  if (doc.getTextWidth(text) <= maxWidth) {
+    return text;
   }
 
-  doc.text(`${label}:`, x + width / 2 - Math.min(width / 3, label.length * 2.3), y, { align: 'center' });
-  doc.setFont('helvetica', 'bold');
-  doc.text(value, x + width / 2 + Math.min(width / 5, value.length * 1.6), y, { align: 'center' });
-  doc.setFont('helvetica', 'normal');
+  let fitted = text;
+
+  while (fitted.length > 3 && doc.getTextWidth(`${fitted}...`) > maxWidth) {
+    fitted = fitted.slice(0, -1);
+  }
+
+  return `${fitted.trimEnd()}...`;
 }
 
 function drawWrappedText(
@@ -786,6 +1005,11 @@ function drawWrappedText(
 function formatCustomerAddress(contract: RentalContract): string {
   const city = [contract.customerCity, contract.customerState].filter(Boolean).join(' / ');
   return [contract.customerAddress, city].filter(Boolean).join(' - ') || 'Não informado';
+}
+
+function formatQuoteCustomerAddress(quote: RentalQuote): string {
+  const city = [quote.customerCity, quote.customerState].filter(Boolean).join(' / ');
+  return [quote.customerAddress, city].filter(Boolean).join(' - ') || 'Não informado';
 }
 
 function formatCustomerCityState(contract: RentalContract): string {
@@ -861,6 +1085,18 @@ function formatDateTime(value: Date): string {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(value);
+}
+
+function formatDateOnly(value: Date): string {
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+  }).format(value);
+}
+
+function addDays(value: Date, days: number): Date {
+  const result = new Date(value);
+  result.setDate(result.getDate() + days);
+  return result;
 }
 
 function formatContractPeriod(contract: RentalContract): string {

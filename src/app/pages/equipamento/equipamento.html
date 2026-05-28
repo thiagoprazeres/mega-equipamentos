@@ -49,6 +49,29 @@
       <div class="card">
         <div class="card-body">
           <h3 class="card-title">Solicitar orçamento</h3>
+          <div class="space-y-2">
+            <p class="text-sm font-semibold uppercase tracking-[0.12em] text-primary/70">
+              Valores de locação
+            </p>
+            @if (hasPrices()) {
+              <div class="overflow-x-auto">
+                <table class="table table-sm">
+                  <tbody>
+                    @for (price of priceRows(); track price.label) {
+                      @if (price.value > 0) {
+                        <tr>
+                          <th>{{ price.label }}</th>
+                          <td class="text-right font-semibold">{{ formatPrice(price.value) }}</td>
+                        </tr>
+                      }
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="text-sm text-base-content/70">Preço sob consulta.</p>
+            }
+          </div>
           <a
             class="btn btn-secondary w-full"
             [href]="whatsappHref()"

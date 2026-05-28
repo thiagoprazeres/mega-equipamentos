@@ -17,13 +17,7 @@
       </button>
     </div>
 
-    <nav class="tabs tabs-box w-fit">
-      <a class="tab" routerLink="/gestor/equipamentos">Equipamentos</a>
-      <a class="tab" routerLink="/gestor/clientes">Clientes</a>
-      <a class="tab" routerLink="/gestor/vendedores">Vendedores</a>
-      <a class="tab tab-active" routerLink="/gestor/contratos">Contratos</a>
-      <a class="tab" routerLink="/gestor/empresa">Empresa</a>
-    </nav>
+    <app-gestor-nav></app-gestor-nav>
 
     @if (errorMessage) {
       <div class="alert alert-error">{{ errorMessage }}</div>

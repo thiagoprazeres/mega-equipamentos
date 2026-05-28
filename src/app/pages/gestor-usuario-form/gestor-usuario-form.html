@@ -1,0 +1,118 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-4xl space-y-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div class="space-y-3">
+        <a class="btn btn-ghost w-fit" routerLink="/gestor/usuarios">
+          <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
+          Usuários
+        </a>
+        <div>
+          <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+          <h1 class="text-3xl font-extrabold text-primary md:text-4xl">{{ pageTitle }}</h1>
+          <p class="mt-1 text-sm text-base-content/65">
+            Usuários com role Vendedor ficam disponíveis para os contratos de locação.
+          </p>
+        </div>
+      </div>
+      <button class="btn btn-ghost w-fit" type="button" (click)="signOut()">
+        <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+        Sair
+      </button>
+    </div>
+
+    <app-gestor-nav></app-gestor-nav>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else if (loadFailed) {
+      <div class="rounded-box border border-base-300 bg-base-100 p-6">
+        <a class="btn btn-primary" routerLink="/gestor/usuarios">Voltar para usuários</a>
+      </div>
+    } @else {
+      <form class="space-y-6 rounded-box border border-base-300 bg-base-100 p-5" [formGroup]="form" (submit)="saveUser()">
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Nome</span>
+            <input class="input input-bordered w-full" formControlName="nome" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Role</span>
+            <select class="select select-bordered w-full" formControlName="role">
+              @for (role of roleOptions; track role.value) {
+                <option [ngValue]="role.value">{{ role.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">CPF/CNPJ</span>
+            <input
+              class="input input-bordered w-full"
+              inputmode="numeric"
+              formControlName="document"
+              [maskito]="documentMask"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">E-mail</span>
+            <input class="input input-bordered w-full" type="email" formControlName="email" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Telefone</span>
+            <input
+              class="input input-bordered w-full"
+              inputmode="numeric"
+              formControlName="phone"
+              [maskito]="phoneMask"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">WhatsApp</span>
+            <input
+              class="input input-bordered w-full"
+              inputmode="numeric"
+              formControlName="whatsapp"
+              [maskito]="phoneMask"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1.5 md:col-span-2">
+            <span class="text-sm font-semibold text-base-content/80">Endereço</span>
+            <input class="input input-bordered w-full" formControlName="address" />
+          </label>
+
+          <label class="flex flex-col gap-1.5 md:col-span-2">
+            <span class="text-sm font-semibold text-base-content/80">Observações</span>
+            <textarea class="textarea textarea-bordered h-24 w-full" formControlName="notes"></textarea>
+          </label>
+        </div>
+
+        <div class="flex flex-wrap justify-end gap-2">
+          <a class="btn btn-ghost" routerLink="/gestor/usuarios">Cancelar</a>
+          <button class="btn btn-primary" type="submit" [disabled]="saving">
+            @if (saving) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              <lucide-angular [img]="Save" class="h-4 w-4"></lucide-angular>
+            }
+            Salvar
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</section>

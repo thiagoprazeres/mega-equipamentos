@@ -1,0 +1,293 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div class="space-y-3">
+        <a class="btn btn-ghost w-fit" routerLink="/gestor/equipamentos">
+          <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
+          Equipamentos
+        </a>
+        <div>
+          <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+          <h1 class="text-3xl font-extrabold text-primary md:text-4xl">{{ pageTitle }}</h1>
+          <p class="mt-1 text-sm text-base-content/65">
+            Os dados salvos aqui alimentam o catálogo público.
+          </p>
+        </div>
+      </div>
+      <button class="btn btn-ghost w-fit" type="button" (click)="signOut()">
+        <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+        Sair
+      </button>
+    </div>
+
+    <app-gestor-nav></app-gestor-nav>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else if (loadFailed) {
+      <div class="rounded-box border border-base-300 bg-base-100 p-6">
+        <a class="btn btn-primary" routerLink="/gestor/equipamentos">Voltar para equipamentos</a>
+      </div>
+    } @else {
+      <form class="space-y-6 rounded-box border border-base-300 bg-base-100 p-5" [formGroup]="form" (submit)="saveEquipment()">
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Código do equipamento</span>
+            <input class="input input-bordered w-full" formControlName="codigo" />
+            <span class="text-xs text-base-content/60">
+              Código interno: {{ internalCodePreview() }}
+            </span>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Nome comercial</span>
+            <input
+              class="input input-bordered w-full"
+              formControlName="nome"
+              (input)="syncSlugFromName()"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Nome técnico</span>
+            <input class="input input-bordered w-full" formControlName="nomeTecnico" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Slug</span>
+            <input class="input input-bordered w-full" formControlName="slug" (input)="markSlugTouched()" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Categoria</span>
+            <select class="select select-bordered w-full" formControlName="categoryId">
+              @for (category of categories; track category.id) {
+                <option [value]="category.id">{{ category.codigo }} - {{ category.nome }}</option>
+              }
+            </select>
+          </label>
+
+          <div class="flex flex-col gap-1.5 md:col-span-2">
+            <span class="text-sm font-semibold text-base-content/80">Imagem</span>
+            <div class="grid gap-3 md:grid-cols-[7rem_minmax(0,1fr)] md:items-start">
+              <div class="flex h-28 w-28 items-center justify-center overflow-hidden rounded-box border border-base-300 bg-base-200">
+                @if (imagePreviewUrl) {
+                  <img class="h-full w-full object-cover" [src]="imagePreviewUrl" alt="" />
+                } @else {
+                  <lucide-angular [img]="ImageUp" class="h-8 w-8 text-base-content/35"></lucide-angular>
+                }
+              </div>
+              <div class="space-y-3">
+                <input
+                  class="input input-bordered w-full"
+                  formControlName="avatar"
+                  placeholder="URL da imagem"
+                  (input)="onAvatarInput()"
+                />
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="btn btn-outline btn-sm" [class.btn-disabled]="uploadingImage">
+                    <lucide-angular [img]="ImageUp" class="h-4 w-4"></lucide-angular>
+                    Upload
+                    <input
+                      class="sr-only"
+                      type="file"
+                      accept="image/*"
+                      [disabled]="uploadingImage"
+                      (change)="handleImageSelected($event)"
+                    />
+                  </label>
+                  <button
+                    class="btn btn-outline btn-sm"
+                    type="button"
+                    [disabled]="uploadingImage || cameraStarting"
+                    (click)="openCamera()"
+                  >
+                    <lucide-angular [img]="Camera" class="h-4 w-4"></lucide-angular>
+                    Câmera
+                  </button>
+                  @if (uploadingImage) {
+                    <span class="loading loading-spinner loading-sm text-primary"></span>
+                  }
+                </div>
+                @if (cameraOpen) {
+                  <div class="rounded-box border border-base-300 bg-base-200 p-3">
+                    <div class="relative overflow-hidden rounded-box bg-black">
+                      <video
+                        #cameraVideo
+                        class="aspect-video w-full object-cover"
+                        autoplay
+                        muted
+                        playsinline
+                      ></video>
+                      @if (cameraStarting) {
+                        <div class="absolute inset-0 grid place-items-center bg-black/50">
+                          <span class="loading loading-spinner loading-md text-primary"></span>
+                        </div>
+                      }
+                    </div>
+                    @if (cameraErrorMessage) {
+                      <p class="mt-2 text-sm text-error">{{ cameraErrorMessage }}</p>
+                    }
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <button
+                        class="btn btn-primary btn-sm"
+                        type="button"
+                        [disabled]="cameraStarting || uploadingImage"
+                        (click)="captureCameraPhoto()"
+                      >
+                        <lucide-angular [img]="Camera" class="h-4 w-4"></lucide-angular>
+                        Capturar foto
+                      </button>
+                      <button class="btn btn-ghost btn-sm" type="button" (click)="closeCamera()">
+                        <lucide-angular [img]="X" class="h-4 w-4"></lucide-angular>
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <label class="flex flex-col gap-1.5 md:col-span-2">
+            <span class="text-sm font-semibold text-base-content/80">Vídeo</span>
+            <input class="input input-bordered w-full" formControlName="video" />
+          </label>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="flex flex-col gap-1.5 md:col-span-2">
+            <span class="text-sm font-semibold text-base-content/80">Descrição</span>
+            <textarea class="textarea textarea-bordered h-24 w-full" formControlName="descricao"></textarea>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Aplicação</span>
+            <textarea class="textarea textarea-bordered h-24 w-full" formControlName="aplicacao"></textarea>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Tipo de serviço</span>
+            <textarea class="textarea textarea-bordered h-24 w-full" formControlName="tipoDeServico"></textarea>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Período de locação</span>
+            <input class="input input-bordered w-full" formControlName="periodoDeLocacao" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Diferenciais</span>
+            <input class="input input-bordered w-full" formControlName="diferenciais" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Quantidade em estoque</span>
+            <input
+              class="input input-bordered w-full"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              step="1"
+              formControlName="stockQuantity"
+            />
+          </label>
+        </div>
+
+        <section>
+          <h2 class="text-lg font-bold text-primary">Preços</h2>
+          <div class="mt-3 grid gap-4 md:grid-cols-2">
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Diária</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="decimal"
+                formControlName="dailyPrice"
+                [maskito]="currencyMask"
+              />
+            </label>
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Semanal</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="decimal"
+                formControlName="weeklyPrice"
+                [maskito]="currencyMask"
+              />
+            </label>
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Quinzenal</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="decimal"
+                formControlName="fortnightlyPrice"
+                [maskito]="currencyMask"
+              />
+            </label>
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Mensal</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="decimal"
+                formControlName="monthlyPrice"
+                [maskito]="currencyMask"
+              />
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-lg font-bold text-primary">Dados comerciais</h2>
+          <div class="mt-3 grid gap-4 md:grid-cols-4">
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Valor do bem</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="decimal"
+                formControlName="assetValue"
+                [maskito]="currencyMask"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Total investido</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="decimal"
+                formControlName="totalInvested"
+                [maskito]="currencyMask"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1.5 md:col-span-2">
+              <span class="text-sm font-semibold text-base-content/80">Observação</span>
+              <textarea class="textarea textarea-bordered h-20 w-full" formControlName="notes"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <div class="flex flex-wrap justify-end gap-2">
+          <a class="btn btn-ghost" routerLink="/gestor/equipamentos">Cancelar</a>
+          <button class="btn btn-primary" type="submit" [disabled]="saving || uploadingImage">
+            @if (saving) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              <lucide-angular [img]="Save" class="h-4 w-4"></lucide-angular>
+            }
+            Salvar
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</section>

@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { afterNextRender, Component } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule, MessageCircleMore, Search } from 'lucide-angular';
 
-import { equipamentosCategoriasData } from '../../data/equipamentos-categorias-data';
-import { equipamentosData } from '../../data/equipamentos-data';
+import { Equipamento } from '../../interfaces/equipamento';
+import { EquipamentoCategoria } from '../../interfaces/equipamento-categoria';
+import { CatalogService } from '../../services/catalog.service';
 
 interface SearchSuggestion {
   label: string;
@@ -24,12 +25,19 @@ interface SearchSuggestion {
 export class EquipamentosPage {
   protected readonly Search = Search;
   protected readonly MessageCircleMore = MessageCircleMore;
-  protected readonly categorias = equipamentosCategoriasData;
 
+  protected categorias: EquipamentoCategoria[] = [];
+  protected equipamentos: Equipamento[] = [];
   protected query = '';
   protected suggestions: SearchSuggestion[] = [];
+  protected loading = false;
 
-  constructor(private readonly router: Router, title: Title, meta: Meta) {
+  constructor(
+    private readonly router: Router,
+    private readonly catalogService: CatalogService,
+    title: Title,
+    meta: Meta
+  ) {
     const pageTitle = 'Catálogo de Equipamentos | Mega Equipamentos';
     const desc = 'Catálogo completo de equipamentos para locação em Caruaru: andaimes, escoras metálicas, betoneiras, compactadores, marteletes, ferramentas elétricas, geradores e muito mais.';
     const url = 'https://megaequip.com.br/equipamentos';
@@ -47,6 +55,23 @@ export class EquipamentosPage {
     meta.updateTag({ name: 'twitter:title', content: pageTitle });
     meta.updateTag({ name: 'twitter:description', content: desc });
     meta.updateTag({ name: 'twitter:image', content: img });
+
+    this.categorias = this.catalogService.getLocalCategories();
+    this.equipamentos = this.catalogService.getLocalEquipments();
+
+    afterNextRender(() => {
+      void this.refreshCatalog();
+    });
+  }
+
+  private async refreshCatalog() {
+    const [categorias, equipamentos] = await Promise.all([
+      this.catalogService.listCategories(),
+      this.catalogService.listEquipments(),
+    ]);
+
+    this.categorias = categorias;
+    this.equipamentos = equipamentos;
   }
 
   protected onInput(value: string) {
@@ -71,7 +96,7 @@ export class EquipamentosPage {
         categorySlug: categoria.slug,
       }));
 
-    const itemSuggestions = equipamentosData
+    const itemSuggestions = this.equipamentos
       .filter((equipamento) => equipamento.nome.toLowerCase().includes(q))
       .map((equipamento) => ({
         label: equipamento.nome,

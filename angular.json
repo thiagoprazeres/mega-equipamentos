@@ -32,6 +32,11 @@
             "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
+            },
+            "security": {
+              "allowedHosts": [
+                "megaequip.com.br"
+              ]
             }
           },
           "configurations": {

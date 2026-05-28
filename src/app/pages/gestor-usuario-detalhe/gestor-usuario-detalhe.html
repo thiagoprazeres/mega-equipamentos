@@ -1,0 +1,65 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-5xl space-y-6">
+    <a class="btn btn-ghost w-fit" routerLink="/gestor/usuarios">
+      <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
+      Usuários
+    </a>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    } @else if (user) {
+      <header class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div class="flex items-start gap-4">
+          <div class="grid h-20 w-20 place-items-center rounded-box bg-primary/10 text-primary">
+            <lucide-angular [img]="UserRound" class="h-8 w-8"></lucide-angular>
+          </div>
+          <div>
+            <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Usuário</p>
+            <h1 class="text-3xl font-extrabold text-primary md:text-4xl">{{ user.nome }}</h1>
+            <p class="mt-2 text-base-content/65">{{ value(user.email) }}</p>
+          </div>
+        </div>
+        <span class="badge" [class.badge-success]="user.status !== 'archived'">
+          {{ user.status === 'archived' ? 'Arquivado' : 'Ativo' }}
+        </span>
+      </header>
+
+      <section class="grid gap-4 md:grid-cols-3">
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Role</p>
+          <p class="mt-1 font-semibold">{{ roleLabel(user.role) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">CPF/CNPJ</p>
+          <p class="mt-1 font-semibold">{{ value(user.document) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">E-mail</p>
+          <p class="mt-1 font-semibold">{{ value(user.email) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Telefone</p>
+          <p class="mt-1 font-semibold">{{ value(user.phone) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">WhatsApp</p>
+          <p class="mt-1 font-semibold">{{ value(user.whatsapp) }}</p>
+        </div>
+      </section>
+
+      <section class="rounded-box border border-base-300 bg-base-100 p-5">
+        <h2 class="text-xl font-bold text-primary">Endereço</h2>
+        <p class="mt-3 text-base-content/70">{{ value(user.address) }}</p>
+      </section>
+
+      <section class="rounded-box border border-base-300 bg-base-100 p-5">
+        <h2 class="text-xl font-bold text-primary">Observações</h2>
+        <p class="mt-3 whitespace-pre-line text-base-content/70">{{ value(user.notes) }}</p>
+      </section>
+    }
+  </div>
+</section>

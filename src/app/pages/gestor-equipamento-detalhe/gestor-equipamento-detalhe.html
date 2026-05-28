@@ -1,0 +1,90 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <a class="btn btn-ghost w-fit" routerLink="/gestor/equipamentos">
+      <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
+      Equipamentos
+    </a>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    } @else if (equipment) {
+      <header class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div class="flex items-start gap-4">
+          @if (equipment.avatar) {
+            <img class="h-24 w-24 rounded-box object-cover" [src]="equipment.avatar" [alt]="equipment.nome" />
+          } @else {
+            <div class="grid h-24 w-24 place-items-center rounded-box bg-primary/10 text-primary">
+              <lucide-angular [img]="Package" class="h-9 w-9"></lucide-angular>
+            </div>
+          }
+          <div>
+            <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Equipamento</p>
+            <h1 class="text-3xl font-extrabold text-primary md:text-4xl">{{ equipment.nome }}</h1>
+            <p class="mt-2 text-base-content/65">{{ equipment.equipamentoCategoria.nome }}</p>
+            @if (equipment.nomeTecnico) {
+              <p class="mt-1 text-sm text-base-content/70">{{ equipment.nomeTecnico }}</p>
+            }
+          </div>
+        </div>
+        <span class="badge" [class.badge-success]="equipment.status !== 'archived'">
+          {{ equipment.status === 'archived' ? 'Arquivado' : 'Ativo' }}
+        </span>
+      </header>
+
+      <section class="grid gap-4 md:grid-cols-3">
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Estoque</p>
+          <p class="mt-1 text-2xl font-bold">{{ equipment.stockQuantity ?? 0 }} un.</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Código interno</p>
+          <p class="mt-1 text-2xl font-bold">{{ equipment.codigoInterno || '-' }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Valor do bem</p>
+          <p class="mt-1 text-2xl font-bold">{{ formatMoney(equipment.assetValueCents) }}</p>
+        </div>
+      </section>
+
+      <section class="grid gap-4 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)]">
+        <div class="rounded-box border border-base-300 bg-base-100 p-5">
+          <h2 class="text-xl font-bold text-primary">Descrição comercial</h2>
+          <dl class="mt-4 grid gap-4">
+            <div><dt class="font-semibold">Nome técnico</dt><dd class="text-base-content/70">{{ equipment.nomeTecnico || '-' }}</dd></div>
+            <div><dt class="font-semibold">Código da categoria</dt><dd class="text-base-content/70">{{ equipment.equipamentoCategoria.codigo || '-' }}</dd></div>
+            <div><dt class="font-semibold">Código do equipamento</dt><dd class="text-base-content/70">{{ equipment.codigo || '-' }}</dd></div>
+            <div><dt class="font-semibold">Descrição</dt><dd class="text-base-content/70">{{ equipment.descricao }}</dd></div>
+            <div><dt class="font-semibold">Aplicação</dt><dd class="text-base-content/70">{{ equipment.aplicacao }}</dd></div>
+            <div><dt class="font-semibold">Tipo de serviço</dt><dd class="text-base-content/70">{{ equipment.tipoDeServico }}</dd></div>
+            <div><dt class="font-semibold">Diferenciais</dt><dd class="text-base-content/70">{{ equipment.diferenciais }}</dd></div>
+            <div><dt class="font-semibold">Observação</dt><dd class="text-base-content/70">{{ equipment.notes || '-' }}</dd></div>
+          </dl>
+        </div>
+
+        <div class="rounded-box border border-base-300 bg-base-100 p-5">
+          <h2 class="text-xl font-bold text-primary">Preços</h2>
+          <div class="mt-4 overflow-x-auto">
+            <table class="table table-sm">
+              <tbody>
+                @for (price of priceFields; track price.key) {
+                  <tr>
+                    <th>{{ price.label }}</th>
+                    <td class="text-right font-semibold">{{ formatMoney(equipment.precos?.[price.key]) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-4 border-t border-base-300 pt-4">
+            <p class="text-sm text-base-content/60">Total investido</p>
+            <p class="text-lg font-bold">{{ formatMoney(equipment.totalInvestedCents) }}</p>
+          </div>
+        </div>
+      </section>
+    }
+  </div>
+</section>

@@ -1,0 +1,111 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <a class="btn btn-ghost w-fit" routerLink="/gestor/contratos">
+      <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
+      Contratos
+    </a>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    } @else if (contract) {
+      <header class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div class="flex items-start gap-4">
+          <div class="grid h-20 w-20 place-items-center rounded-box bg-primary/10 text-primary">
+            <lucide-angular [img]="FileText" class="h-8 w-8"></lucide-angular>
+          </div>
+          <div>
+            <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Contrato de locação</p>
+            <h1 class="text-3xl font-extrabold text-primary md:text-4xl">{{ contract.contractNumber }}</h1>
+            <p class="mt-2 text-base-content/65">{{ contract.customerName }}</p>
+            @if (contract.previousContractNumber) {
+              <p class="mt-1 text-sm text-base-content/55">
+                Número anterior: {{ contract.previousContractNumber }}
+              </p>
+            }
+          </div>
+        </div>
+        <span class="badge" [class.badge-success]="contract.status === 'active'">
+          {{ statusLabel(contract.status) }}
+        </span>
+      </header>
+
+      <section class="grid gap-4 md:grid-cols-4">
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Início</p>
+          <p class="mt-1 text-xl font-bold">{{ formatDate(contract.startDate) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Término</p>
+          <p class="mt-1 text-xl font-bold">{{ formatDate(contract.endDate) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Período</p>
+          <p class="mt-1 text-xl font-bold">{{ periodLabel(contract.billingPeriod) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Total</p>
+          <p class="mt-1 text-xl font-bold">{{ formatMoney(contract.totalCents) }}</p>
+        </div>
+      </section>
+
+      <section class="grid gap-4 lg:grid-cols-2">
+        <div class="rounded-box border border-base-300 bg-base-100 p-5">
+          <h2 class="text-xl font-bold text-primary">Cliente</h2>
+          <dl class="mt-4 grid gap-3">
+            <div><dt class="font-semibold">Nome</dt><dd class="text-base-content/70">{{ contract.customerName }}</dd></div>
+            <div><dt class="font-semibold">CPF/CNPJ</dt><dd class="text-base-content/70">{{ contract.customerDocument || '-' }}</dd></div>
+            <div><dt class="font-semibold">Contato</dt><dd class="text-base-content/70">{{ contract.customerPhone || contract.customerEmail || '-' }}</dd></div>
+            <div><dt class="font-semibold">Endereço</dt><dd class="text-base-content/70">{{ contract.customerAddress || '-' }} {{ contract.customerCity || '' }} {{ contract.customerState || '' }}</dd></div>
+          </dl>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-5">
+          <h2 class="text-xl font-bold text-primary">Locação</h2>
+          <dl class="mt-4 grid gap-3">
+            <div><dt class="font-semibold">Vendedor</dt><dd class="text-base-content/70">{{ contract.sellerName || '-' }}</dd></div>
+            <div><dt class="font-semibold">Contato do vendedor</dt><dd class="text-base-content/70">{{ contract.sellerPhone || contract.sellerEmail || '-' }}</dd></div>
+            <div><dt class="font-semibold">Período da locação</dt><dd class="text-base-content/70">{{ periodLabel(contract.billingPeriod) }}</dd></div>
+            <div><dt class="font-semibold">Local de entrega/uso</dt><dd class="text-base-content/70">{{ contract.deliveryAddress || 'A combinar' }}</dd></div>
+            <div><dt class="font-semibold">Endereço da obra</dt><dd class="text-base-content/70">{{ contract.worksiteAddress || contract.deliveryAddress || 'A combinar' }}</dd></div>
+            <div><dt class="font-semibold">Observações</dt><dd class="whitespace-pre-line text-base-content/70">{{ contract.notes || '-' }}</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="rounded-box border border-base-300 bg-base-100 p-5">
+        <h2 class="text-xl font-bold text-primary">Equipamentos</h2>
+        <div class="mt-4 overflow-x-auto">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Equipamento</th>
+                <th>Qtd.</th>
+                <th>Unitário</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of contract.items; track item.id ?? item.equipmentId) {
+                <tr>
+                  <td>{{ item.equipmentName }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ formatMoney(item.unitPriceCents) }}</td>
+                  <td>{{ formatMoney(item.totalPriceCents) }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="text-right font-bold">Total</td>
+                <td class="font-bold">{{ formatMoney(contract.totalCents) }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    }
+  </div>
+</section>

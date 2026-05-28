@@ -1,12 +1,19 @@
 [functions]
   directory = "netlify/functions"
 
+[[redirects]]
+  from = "/area-restrita"
+  to = "/index.csr.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/gestor/*"
+  to = "/index.csr.html"
+  status = 200
+  force = true
+
 [dev]
   command = "npm start"
   targetPort = 4200
   port = 8888
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200

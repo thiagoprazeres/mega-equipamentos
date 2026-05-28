@@ -1,5 +1,6 @@
 import { equipamentosData } from '../../data/equipamentos-data';
 import { Equipamento } from '../../interfaces/equipamento';
+import { formatCurrencyCents, hasAnyRentalPrice, RENTAL_PRICE_FIELDS } from '../../utils/prices';
 import {
   ConsultorAiPromptPayload,
   ConsultorAnswerSegment,
@@ -24,7 +25,7 @@ export const MEGA_CONSULTOR_CONTEXT: ConsultorContext = {
 export const CONSULTOR_INITIAL_MESSAGE =
   'Olá! Sou o consultor virtual da Mega Equipamentos. Me conte sobre a sua obra que eu vou te ajudar por aqui.';
 
-const consultorCatalogItems = equipamentosData.map(mapEquipamentoToCatalogItem);
+const consultorCatalogItems = mapEquipamentosToCatalogItems(equipamentosData);
 const consultorCatalogById = new Map(consultorCatalogItems.map((item) => [item.id, item] as const));
 const equipamentosById = new Map(equipamentosData.map((equipamento) => [equipamento.id, equipamento] as const));
 
@@ -81,13 +82,18 @@ export function getConsultorCatalogItems(): ConsultorCatalogItem[] {
   return consultorCatalogItems.map((item) => ({ ...item }));
 }
 
+export function mapEquipamentosToCatalogItems(equipamentos: Equipamento[]): ConsultorCatalogItem[] {
+  return equipamentos.map(mapEquipamentoToCatalogItem);
+}
+
 export function buildConsultorAiPromptPayload(
-  request: ConsultorEquipamentosRequest
+  request: ConsultorEquipamentosRequest,
+  catalog: ConsultorCatalogItem[] = getConsultorCatalogItems()
 ): ConsultorAiPromptPayload {
   return {
     context: request.context,
     userMessage: request.message,
-    catalog: getConsultorCatalogItems(),
+    catalog,
   };
 }
 
@@ -97,7 +103,8 @@ export function getEquipamentoById(id: number): Equipamento | undefined {
 
 export function normalizeConsultorResponse(
   candidate: Partial<ConsultorEquipamentosResponse>,
-  request: ConsultorEquipamentosRequest
+  request: ConsultorEquipamentosRequest,
+  catalogItems: ConsultorCatalogItem[] = consultorCatalogItems
 ): ConsultorEquipamentosResponse | null {
   if (
     typeof candidate.answer !== 'string' ||
@@ -113,7 +120,13 @@ export function normalizeConsultorResponse(
     return null;
   }
 
-  const selectedEquipmentIds = normalizeSelectedEquipmentIds(candidate.selectedEquipmentIds, answer);
+  const catalogById = new Map(catalogItems.map((item) => [item.id, item] as const));
+  const selectedEquipmentIds = normalizeSelectedEquipmentIds(
+    candidate.selectedEquipmentIds,
+    answer,
+    catalogItems,
+    catalogById
+  );
   const candidateItemReasons = candidate.itemReasons;
   const itemReasons = selectedEquipmentIds.map((equipmentId) => {
     const matchedReason = candidateItemReasons.find(
@@ -128,7 +141,7 @@ export function normalizeConsultorResponse(
     return (
       matchedReason ?? {
         equipmentId,
-        reason: buildFallbackItemReason(equipmentId),
+        reason: buildFallbackItemReason(equipmentId, catalogById),
       }
     );
   });
@@ -140,7 +153,8 @@ export function normalizeConsultorResponse(
   const whatsappPrefill = normalizeWhatsAppPrefill(
     candidate.whatsappPrefill,
     request,
-    selectedEquipmentIds
+    selectedEquipmentIds,
+    catalogById
   );
 
   return {
@@ -269,26 +283,35 @@ function mapEquipamentoToCatalogItem(equipamento: Equipamento): ConsultorCatalog
     descricao: equipamento.descricao,
     aplicacao: equipamento.aplicacao,
     tipoDeServico: equipamento.tipoDeServico,
+    precos: buildCatalogPriceSummary(equipamento),
   };
 }
 
-function normalizeSelectedEquipmentIds(selectedEquipmentIds: number[], answer: string): number[] {
+function normalizeSelectedEquipmentIds(
+  selectedEquipmentIds: number[],
+  answer: string,
+  catalogItems: ConsultorCatalogItem[],
+  catalogById: Map<number, ConsultorCatalogItem>
+): number[] {
   const validSelectedIds = Array.from(
     new Set(
       selectedEquipmentIds
         .map((id) => Number(id))
-        .filter((id) => Number.isInteger(id) && consultorCatalogById.has(id))
+        .filter((id) => Number.isInteger(id) && catalogById.has(id))
     )
   );
-  const mentionedIds = getMentionedEquipmentIdsInText(answer);
+  const mentionedIds = getMentionedEquipmentIdsInText(answer, catalogItems);
 
   return mergeEquipmentIds(mentionedIds, validSelectedIds).slice(0, 5);
 }
 
-function getMentionedEquipmentIdsInText(answer: string): number[] {
+function getMentionedEquipmentIdsInText(
+  answer: string,
+  catalogItems: ConsultorCatalogItem[]
+): number[] {
   const matches: Array<{ equipmentId: number; start: number; end: number }> = [];
 
-  for (const item of [...consultorCatalogItems].sort((left, right) => right.nome.length - left.nome.length)) {
+  for (const item of [...catalogItems].sort((left, right) => right.nome.length - left.nome.length)) {
     const expression = new RegExp(escapeRegExp(item.nome), 'gi');
     let match: RegExpExecArray | null;
 
@@ -344,8 +367,11 @@ function mergeEquipmentIds(primary: number[], secondary: number[]): number[] {
   return merged;
 }
 
-function buildFallbackItemReason(equipmentId: number): string {
-  const catalogItem = consultorCatalogById.get(equipmentId);
+function buildFallbackItemReason(
+  equipmentId: number,
+  catalogById: Map<number, ConsultorCatalogItem>
+): string {
+  const catalogItem = catalogById.get(equipmentId);
 
   if (!catalogItem) {
     return 'Item citado na resposta.';
@@ -357,21 +383,23 @@ function buildFallbackItemReason(equipmentId: number): string {
 function normalizeWhatsAppPrefill(
   value: unknown,
   request: ConsultorEquipamentosRequest,
-  selectedEquipmentIds: number[]
+  selectedEquipmentIds: number[],
+  catalogById: Map<number, ConsultorCatalogItem> = consultorCatalogById
 ): string {
   if (typeof value === 'string' && value.trim()) {
     return value.trim().slice(0, 1000);
   }
 
-  return buildDefaultWhatsAppPrefill(request, selectedEquipmentIds);
+  return buildDefaultWhatsAppPrefill(request, selectedEquipmentIds, catalogById);
 }
 
 function buildDefaultWhatsAppPrefill(
   request: ConsultorEquipamentosRequest,
-  selectedEquipmentIds: number[]
+  selectedEquipmentIds: number[],
+  catalogById: Map<number, ConsultorCatalogItem>
 ): string {
   const selectedNames = selectedEquipmentIds
-    .map((equipmentId) => consultorCatalogById.get(equipmentId)?.nome)
+    .map((equipmentId) => catalogById.get(equipmentId)?.nome)
     .filter((name): name is string => !!name);
   const intro = 'Olá! Vim do consultor virtual da Mega Equipamentos.';
   const need = request.message ? ` Minha necessidade: ${request.message}.` : '';
@@ -380,6 +408,17 @@ function buildDefaultWhatsAppPrefill(
     : '';
 
   return `${intro}${need}${items}`.trim();
+}
+
+function buildCatalogPriceSummary(equipamento: Equipamento): string | undefined {
+  if (!hasAnyRentalPrice(equipamento.precos)) {
+    return undefined;
+  }
+
+  return RENTAL_PRICE_FIELDS
+    .filter(({ key }) => (equipamento.precos?.[key] ?? 0) > 0)
+    .map(({ key, label }) => `${label}: ${formatCurrencyCents(equipamento.precos?.[key] ?? 0)}`)
+    .join(' | ');
 }
 
 function sanitizeAnswer(value: string): string {

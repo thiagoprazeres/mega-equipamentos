@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild, signal } from '@angular/core';
+import { afterNextRender, Component, ElementRef, ViewChild, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, MessageCircleMore, SendHorizontal, Sparkles } from 'lucide-angular';
@@ -9,7 +9,6 @@ import {
   buildConsultorRenderedText,
   buildWhatsAppHref,
   createConsultorRequest,
-  getEquipamentoById,
 } from '../../features/consultor-equipamentos/consultor-equipamentos';
 import type {
   ConsultorAnswerSegment,
@@ -18,6 +17,8 @@ import type {
   ConsultorEquipamentosResponse,
 } from '../../features/consultor-equipamentos/consultor-equipamentos.types';
 import { Equipamento } from '../../interfaces/equipamento';
+import { CatalogService } from '../../services/catalog.service';
+import { equipamentosData } from '../../data/equipamentos-data';
 
 interface ChatTurn {
   id: string;
@@ -57,6 +58,22 @@ export class ConsultorVirtualPage {
   protected readonly isSending = signal(false);
   protected readonly networkNotice = signal<string | null>(null);
   protected readonly messages = signal<ChatTurn[]>([]);
+  private equipamentosById = new Map<number, Equipamento>(
+    equipamentosData.map((equipamento) => [equipamento.id, equipamento])
+  );
+
+  constructor(private readonly catalogService: CatalogService) {
+    afterNextRender(() => {
+      void this.refreshCatalog();
+    });
+  }
+
+  private async refreshCatalog() {
+    const equipamentos = await this.catalogService.listEquipments();
+    this.equipamentosById = new Map(
+      equipamentos.map((equipamento) => [equipamento.id, equipamento])
+    );
+  }
 
   protected onDraftInput(value: string) {
     this.draft.set(value);
@@ -190,7 +207,7 @@ export class ConsultorVirtualPage {
     response: ConsultorEquipamentosResponse
   ): ChatTurn {
     const equipamentos = response.selectedEquipmentIds
-      .map((equipamentoId) => getEquipamentoById(equipamentoId))
+      .map((equipamentoId) => this.equipamentosById.get(equipamentoId))
       .filter((equipamento): equipamento is Equipamento => !!equipamento);
     const renderedText = buildConsultorRenderedText(response.answer, response.followUpQuestion);
 

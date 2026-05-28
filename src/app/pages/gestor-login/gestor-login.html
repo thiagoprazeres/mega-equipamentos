@@ -1,0 +1,43 @@
+<section class="min-h-[70vh] bg-base-200 px-4 py-16">
+  <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-center">
+    <div>
+      <a class="link link-primary text-sm font-semibold" routerLink="/">Voltar para o site</a>
+      <p class="mt-8 text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+      <h1 class="mt-2 max-w-2xl text-4xl font-extrabold text-primary md:text-5xl">
+        Equipamentos e preços da Mega Equipamentos
+      </h1>
+      <p class="mt-5 max-w-2xl text-lg leading-8 text-base-content/75">
+        Acesso restrito aos administradores para cadastrar equipamentos, clientes, usuários, contratos,
+        atualizar valores de locação e manter o catálogo público sincronizado.
+      </p>
+    </div>
+
+    <div class="rounded-box border border-base-300 bg-base-100 p-6 shadow-xl">
+      <h2 class="text-2xl font-extrabold text-primary">Entrar</h2>
+
+      @if (errorMessage) {
+        <div class="alert alert-error mt-5 text-sm">{{ errorMessage }}</div>
+      }
+
+      <button
+        class="btn mt-5 w-full border-base-300 bg-base-100 text-base-content hover:bg-base-200"
+        type="button"
+        (click)="signInWithGoogle()"
+        [disabled]="loading"
+      >
+        @if (loading) {
+          <span class="loading loading-spinner loading-sm"></span>
+        } @else {
+          <span class="grid h-5 w-5 place-items-center rounded-full border border-base-300 text-xs font-bold">
+            G
+          </span>
+        }
+        Entrar com Google
+      </button>
+
+      <p class="mt-4 text-center text-sm text-base-content/60">
+        Use um e-mail autorizado da Mega Equipamentos.
+      </p>
+    </div>
+  </div>
+</section>

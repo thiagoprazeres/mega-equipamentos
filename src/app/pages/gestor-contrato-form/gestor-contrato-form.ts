@@ -14,9 +14,10 @@ import {
   LucideAngularModule,
 } from 'lucide-angular';
 
+import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
 import type { Customer } from '../../interfaces/customer';
 import type { Equipamento } from '../../interfaces/equipamento';
-import type { Seller } from '../../interfaces/seller';
+import type { StaffUser } from '../../interfaces/staff-user';
 import type {
   RentalBillingPeriod,
   RentalContract,
@@ -26,11 +27,13 @@ import type {
 import { AuthService } from '../../services/auth.service';
 import { CatalogService } from '../../services/catalog.service';
 import { CustomerService } from '../../services/customer.service';
+import { CompanyProfileService } from '../../services/company-profile.service';
 import {
   RentalContractEditorInput,
   RentalContractService,
 } from '../../services/rental-contract.service';
-import { SellerService } from '../../services/seller.service';
+import { StaffUserService } from '../../services/staff-user.service';
+import { DEFAULT_CONTRACT_TERMS, normalizeContractTerms } from '../../utils/contract-terms';
 import {
   formatCurrencyCents,
   centsToDecimalInput,
@@ -39,8 +42,6 @@ import {
 } from '../../utils/prices';
 
 const CONTRACT_FORM_LOAD_TIMEOUT_MS = 6500;
-const DEFAULT_TERMS =
-  'O locatário declara receber os equipamentos em condições de uso, comprometendo-se a devolver os bens no prazo acordado e no mesmo estado de conservação, salvo desgaste natural de uso. Danos, perdas, atrasos ou extravios poderão gerar cobranças adicionais conforme orçamento da locadora.';
 type PriceCentsField =
   | 'dailyPriceCents'
   | 'weeklyPriceCents'
@@ -89,7 +90,14 @@ function normalizeCurrencyCentsInput(element: MaskitoElement): void {
 @Component({
   selector: 'app-gestor-contrato-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, LucideAngularModule, MaskitoDirective],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    LucideAngularModule,
+    MaskitoDirective,
+    GestorNavComponent,
+  ],
   templateUrl: './gestor-contrato-form.html',
 })
 export class GestorContratoFormPage implements OnInit {
@@ -116,7 +124,7 @@ export class GestorContratoFormPage implements OnInit {
   ];
 
   protected customers: Customer[] = [];
-  protected sellers: Seller[] = [];
+  protected sellers: StaffUser[] = [];
   protected equipments: Equipamento[] = [];
   protected contractItems: RentalContractItem[] = [];
   protected loading = true;
@@ -137,7 +145,7 @@ export class GestorContratoFormPage implements OnInit {
     worksiteAddress: [''],
     shipping: [centsToDecimalInput(6000), Validators.required],
     notes: [''],
-    terms: [DEFAULT_TERMS],
+    terms: [DEFAULT_CONTRACT_TERMS],
     status: ['draft' as RentalContractStatus, Validators.required],
   });
   protected readonly itemForm = this.formBuilder.nonNullable.group({
@@ -149,11 +157,12 @@ export class GestorContratoFormPage implements OnInit {
     private readonly authService: AuthService,
     private readonly catalogService: CatalogService,
     private readonly changeDetector: ChangeDetectorRef,
+    private readonly companyProfileService: CompanyProfileService,
     private readonly customerService: CustomerService,
     private readonly rentalContractService: RentalContractService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly sellerService: SellerService
+    private readonly staffUserService: StaffUserService
   ) {}
 
   async ngOnInit() {
@@ -217,6 +226,7 @@ export class GestorContratoFormPage implements OnInit {
 
     const billingPeriod = this.form.controls.billingPeriod.value;
     const unitPriceCents = equipment.precos?.[PRICE_FIELD_BY_PERIOD[billingPeriod]] ?? 0;
+    const assetValueCents = Math.max(0, Math.trunc(Number(equipment.assetValueCents) || 0));
     this.contractItems = [
       ...this.contractItems,
       {
@@ -226,6 +236,7 @@ export class GestorContratoFormPage implements OnInit {
         billingPeriod,
         unitPriceCents,
         totalPriceCents: quantity * unitPriceCents,
+        assetValueCents,
         sortOrder: this.contractItems.length + 1,
       },
     ];
@@ -350,12 +361,18 @@ export class GestorContratoFormPage implements OnInit {
     try {
       const editingId = this.editingContractId();
 
-      const [customers, sellers, equipments, contracts] = await withTimeout(
+      const [customers, sellers, equipments, contracts, companyProfile] = await withTimeout(
         Promise.all([
           this.customerService.listCustomers(),
-          this.sellerService.listSellers(),
+          this.staffUserService.listSellers(),
           this.catalogService.listEquipments(),
           editingId ? this.rentalContractService.listContracts() : Promise.resolve([]),
+          editingId
+            ? Promise.resolve(null)
+            : this.companyProfileService.getCompanyProfile().catch((error) => {
+                console.error('company profile for contract terms failed', error);
+                return null;
+              }),
         ]),
         CONTRACT_FORM_LOAD_TIMEOUT_MS
       );
@@ -375,7 +392,7 @@ export class GestorContratoFormPage implements OnInit {
 
         this.populateEditForm(contract);
       } else {
-        this.populateCreateForm();
+        this.populateCreateForm(normalizeContractTerms(companyProfile?.contractTerms));
       }
     } catch (error) {
       console.error('contract form load failed', error);
@@ -392,7 +409,7 @@ export class GestorContratoFormPage implements OnInit {
     return Number.isFinite(id) && id > 0 ? id : null;
   }
 
-  private populateCreateForm() {
+  private populateCreateForm(contractTerms = DEFAULT_CONTRACT_TERMS) {
     this.editingContract = null;
     this.contractItems = [];
     this.worksiteAddressTouched = false;
@@ -406,7 +423,7 @@ export class GestorContratoFormPage implements OnInit {
       worksiteAddress: '',
       shipping: centsToDecimalInput(6000),
       notes: '',
-      terms: DEFAULT_TERMS,
+      terms: normalizeContractTerms(contractTerms),
       status: 'draft',
     });
     this.itemForm.reset({
@@ -421,6 +438,7 @@ export class GestorContratoFormPage implements OnInit {
     this.contractItems = contract.items.map((item) => ({
       ...item,
       billingPeriod: contract.billingPeriod,
+      assetValueCents: this.itemAssetValue(item),
     }));
     this.worksiteAddressTouched = Boolean(
       contract.worksiteAddress && contract.worksiteAddress !== (contract.deliveryAddress ?? '')
@@ -435,7 +453,7 @@ export class GestorContratoFormPage implements OnInit {
       worksiteAddress: contract.worksiteAddress ?? contract.deliveryAddress ?? '',
       shipping: centsToDecimalInput(contract.shippingCents ?? 6000),
       notes: contract.notes ?? '',
-      terms: contract.terms || DEFAULT_TERMS,
+      terms: contract.terms || DEFAULT_CONTRACT_TERMS,
       status: contract.status,
     });
     this.syncEndDateFromRentalPeriod();
@@ -463,8 +481,18 @@ export class GestorContratoFormPage implements OnInit {
     return this.contractItems.map((item) => ({
       ...item,
       billingPeriod,
+      assetValueCents: this.itemAssetValue(item),
       totalPriceCents: item.quantity * item.unitPriceCents,
     }));
+  }
+
+  private itemAssetValue(item: RentalContractItem): number {
+    if ((item.assetValueCents ?? 0) > 0) {
+      return item.assetValueCents ?? 0;
+    }
+
+    const equipment = this.equipments.find((candidate) => candidate.id === item.equipmentId);
+    return Math.max(0, Math.trunc(Number(equipment?.assetValueCents) || 0));
   }
 }
 

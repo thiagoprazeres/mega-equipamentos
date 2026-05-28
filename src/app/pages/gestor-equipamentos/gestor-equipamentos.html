@@ -1,0 +1,206 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-7xl space-y-6">
+    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+        <h1 class="text-3xl font-extrabold text-primary md:text-4xl">Equipamentos e preços</h1>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a class="btn btn-primary" routerLink="/gestor/equipamentos/novo">
+          <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
+          Novo equipamento
+        </a>
+        <button class="btn btn-ghost" type="button" (click)="signOut()">
+          <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+          Sair
+        </button>
+      </div>
+    </header>
+
+    <app-gestor-nav></app-gestor-nav>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
+    <section class="grid gap-3 md:grid-cols-[minmax(0,1fr)_18rem]">
+      <label class="input input-bordered flex items-center gap-2">
+        <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
+        <input
+          class="grow"
+          type="search"
+          placeholder="Buscar por código interno, nome ou slug"
+          [value]="query"
+          (input)="query = $any($event.target).value"
+        />
+      </label>
+
+      <select
+        class="select select-bordered w-full"
+        [value]="selectedCategory"
+        (change)="selectedCategory = $any($event.target).value"
+      >
+        <option value="">Todas as categorias</option>
+        @for (category of categories; track category.id) {
+          <option [value]="category.slug">{{ category.nome }}</option>
+        }
+      </select>
+    </section>
+
+    <div role="tablist" class="tabs tabs-box w-fit">
+      <button
+        role="tab"
+        type="button"
+        class="tab"
+        [class.tab-active]="activeStatus === 'all'"
+        (click)="setStatus('all')"
+      >
+        Todos
+      </button>
+      <button
+        role="tab"
+        type="button"
+        class="tab"
+        [class.tab-active]="activeStatus === 'active'"
+        (click)="setStatus('active')"
+      >
+        Ativos
+      </button>
+      <button
+        role="tab"
+        type="button"
+        class="tab"
+        [class.tab-active]="activeStatus === 'archived'"
+        (click)="setStatus('archived')"
+      >
+        Arquivados
+      </button>
+    </div>
+
+    <p class="text-sm text-base-content/60">
+      {{ filteredEquipmentsCount() }} de {{ equipments.length }} equipamento(s)
+    </p>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else {
+      <section class="rounded-box border border-base-300 bg-base-100">
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('code')">
+                    Código interno <span class="text-xs">{{ sortIndicator('code') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('name')">
+                    Equipamento <span class="text-xs">{{ sortIndicator('name') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('category')">
+                    Categoria <span class="text-xs">{{ sortIndicator('category') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('price')">
+                    Preço <span class="text-xs">{{ sortIndicator('price') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('assetValue')">
+                    Patrimônio <span class="text-xs">{{ sortIndicator('assetValue') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('stock')">
+                    Estoque <span class="text-xs">{{ sortIndicator('stock') }}</span>
+                  </button>
+                </th>
+                <th>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('status')">
+                    Status <span class="text-xs">{{ sortIndicator('status') }}</span>
+                  </button>
+                </th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (equipment of filteredEquipments(); track equipment.id) {
+                <tr>
+                  <td class="font-mono text-sm text-base-content/70">{{ equipment.codigoInterno || '-' }}</td>
+                  <td>
+                    <div class="flex min-w-72 items-center gap-3">
+                      @if (equipment.avatar) {
+                        <img
+                          class="h-14 w-14 rounded-box object-cover"
+                          [src]="equipment.avatar"
+                          [alt]="equipment.nome"
+                        />
+                      }
+                      <div>
+                        <p class="font-bold text-primary">{{ equipment.nome }}</p>
+                        <p class="text-xs text-base-content/60">
+                          {{ equipment.nomeTecnico || equipment.codigoInterno || equipment.slug }}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ equipment.equipamentoCategoria.nome }}</td>
+                  <td>{{ priceLabel(equipment) }}</td>
+                  <td class="text-sm">{{ commercialSummary(equipment) }}</td>
+                  <td>
+                    <span class="badge badge-outline">
+                      {{ equipment.stockQuantity ?? 0 }} un.
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [class.badge-success]="equipment.status !== 'archived'">
+                      {{ equipment.status === 'archived' ? 'Arquivado' : 'Ativo' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <a class="btn btn-square btn-ghost" [routerLink]="['/gestor/equipamentos', equipment.id]">
+                        <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
+                      </a>
+                      <a
+                        class="btn btn-square btn-ghost"
+                        [routerLink]="['/gestor/equipamentos', equipment.id, 'editar']"
+                      >
+                        <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
+                      </a>
+                      @if (equipment.status === 'archived') {
+                        <button class="btn btn-square btn-ghost" type="button" (click)="restore(equipment)">
+                          <lucide-angular [img]="RotateCcw" class="h-4 w-4"></lucide-angular>
+                        </button>
+                      } @else {
+                        <button class="btn btn-square btn-ghost" type="button" (click)="archive(equipment)">
+                          <lucide-angular [img]="Archive" class="h-4 w-4"></lucide-angular>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="9" class="py-10 text-center text-base-content/60">
+                    Nenhum equipamento encontrado.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  </div>
+</section>

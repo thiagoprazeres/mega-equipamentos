@@ -1,0 +1,159 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-7xl space-y-6">
+    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+        <h1 class="text-3xl font-extrabold text-primary md:text-4xl">Dados da empresa</h1>
+      </div>
+      <button class="btn btn-ghost w-fit" type="button" (click)="signOut()">
+        <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+        Sair
+      </button>
+    </header>
+
+    <app-gestor-nav></app-gestor-nav>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else {
+      <section class="rounded-box border border-base-300 bg-base-100 p-5">
+        <div class="mb-5 flex items-center gap-3">
+          <div class="grid h-11 w-11 place-items-center rounded-box bg-primary/10 text-primary">
+            <lucide-angular [img]="Building2" class="h-5 w-5"></lucide-angular>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-primary">Identificação e contato</h2>
+            <p class="text-sm text-base-content/65">
+              Estes dados aparecem nos contratos e comprovantes exportados em PDF.
+            </p>
+          </div>
+        </div>
+
+        <form class="space-y-5" [formGroup]="form" (submit)="saveCompanyProfile()">
+          <div class="grid gap-4 md:grid-cols-2">
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Razão social</span>
+              <input class="input input-bordered w-full" formControlName="legalName" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Nome fantasia</span>
+              <input class="input input-bordered w-full" formControlName="tradeName" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">CNPJ</span>
+              <input class="input input-bordered w-full" formControlName="document" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Chave PIX</span>
+              <input class="input input-bordered w-full" formControlName="pixKey" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">E-mail</span>
+              <input class="input input-bordered w-full" type="email" formControlName="email" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Senha/App password do Gmail</span>
+              <input
+                class="input input-bordered w-full"
+                type="password"
+                autocomplete="new-password"
+                formControlName="gmailPassword"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Telefone</span>
+              <input class="input input-bordered w-full" formControlName="phone" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">WhatsApp</span>
+              <input class="input input-bordered w-full" formControlName="whatsapp" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">CEP</span>
+              <input class="input input-bordered w-full" formControlName="zipCode" />
+            </label>
+
+            <label class="flex flex-col gap-1.5 md:col-span-2">
+              <span class="text-sm font-semibold text-base-content/80">Endereço</span>
+              <input class="input input-bordered w-full" formControlName="address" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Cidade</span>
+              <input class="input input-bordered w-full" formControlName="city" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">UF</span>
+              <input class="input input-bordered w-full" maxlength="2" formControlName="state" />
+            </label>
+          </div>
+
+          <section class="space-y-3">
+            <h3 class="text-lg font-bold text-primary">Instagram</h3>
+            <div class="grid gap-4 md:grid-cols-2">
+              <label class="flex flex-col gap-1.5">
+                <span class="text-sm font-semibold text-base-content/80">Login</span>
+                <input
+                  class="input input-bordered w-full"
+                  autocomplete="off"
+                  formControlName="instagramLogin"
+                />
+              </label>
+
+              <label class="flex flex-col gap-1.5">
+                <span class="text-sm font-semibold text-base-content/80">Senha</span>
+                <input
+                  class="input input-bordered w-full"
+                  type="password"
+                  autocomplete="new-password"
+                  formControlName="instagramPassword"
+                />
+              </label>
+            </div>
+          </section>
+
+          <section class="space-y-3">
+            <h3 class="text-lg font-bold text-primary">Cláusulas do contrato</h3>
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Texto padrão para novos contratos</span>
+              <textarea
+                class="textarea textarea-bordered min-h-72 w-full font-mono text-sm leading-relaxed"
+                formControlName="contractTerms"
+              ></textarea>
+            </label>
+          </section>
+
+          <div class="flex justify-end">
+            <button class="btn btn-primary" type="submit" [disabled]="saving">
+              @if (saving) {
+                <span class="loading loading-spinner loading-sm"></span>
+              } @else {
+                <lucide-angular [img]="Save" class="h-4 w-4"></lucide-angular>
+              }
+              Salvar
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+  </div>
+</section>

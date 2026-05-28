@@ -1,8 +1,19 @@
-import { EquipamentoCategoria } from './equipamento-categoria';
+import type { EquipamentoCategoria } from './equipamento-categoria';
+
+export type CatalogStatus = 'active' | 'archived';
+
+export interface EquipamentoPreco {
+  dailyPriceCents: number;
+  weeklyPriceCents: number;
+  fortnightlyPriceCents: number;
+  monthlyPriceCents: number;
+  currency: 'BRL';
+}
 
 export interface Equipamento {
   id: number;
   nome: string;
+  nomeTecnico?: string;
   avatar?: string;
   slug: string;
   video?: string;
@@ -12,4 +23,13 @@ export interface Equipamento {
   periodoDeLocacao: string;
   diferenciais: string;
   equipamentoCategoria: EquipamentoCategoria;
+  codigo?: string;
+  codigoInterno?: string;
+  precos?: EquipamentoPreco;
+  assetValueCents?: number;
+  totalInvestedCents?: number;
+  notes?: string;
+  stockQuantity?: number;
+  status?: CatalogStatus;
+  sortOrder?: number;
 }
