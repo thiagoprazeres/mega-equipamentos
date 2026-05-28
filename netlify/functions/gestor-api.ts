@@ -194,7 +194,7 @@ async function handleCompanyProfile(event: HandlerEvent) {
 
 async function handleRentalContracts(event: HandlerEvent) {
   if (event.httpMethod === 'GET') {
-    return json(await listRentalContracts());
+    return json(await listRentalContracts(event));
   }
 
   if (event.httpMethod === 'POST') {
@@ -552,10 +552,23 @@ async function saveCompanyProfile(input: Record<string, unknown>) {
   return mapCompanyProfileRow(row);
 }
 
-async function listRentalContracts() {
+async function listRentalContracts(event: HandlerEvent) {
+  const dateFrom = dateQueryValue(event, 'dateFrom');
+  const dateTo = dateQueryValue(event, 'dateTo');
+  const filters: SQL[] = [];
+
+  if (dateFrom) {
+    filters.push(sql`coalesce(${rentalContracts.endDate}, ${rentalContracts.startDate}) >= ${dateFrom}`);
+  }
+
+  if (dateTo) {
+    filters.push(sql`${rentalContracts.startDate} <= ${dateTo}`);
+  }
+
   const contractRows = await getDb()
     .select()
     .from(rentalContracts)
+    .where(filters.length ? and(...filters) : undefined)
     .orderBy(desc(rentalContracts.createdAt), desc(rentalContracts.id));
   const itemsByContractId = await loadContractItemsByContractId(
     contractRows.map((contract) => contract.id)
@@ -1145,6 +1158,20 @@ function queryValue(event: HandlerEvent, key: string): string {
 
 function booleanQuery(event: HandlerEvent, key: string): boolean {
   return ['1', 'true', 'yes'].includes(queryValue(event, key).toLowerCase());
+}
+
+function dateQueryValue(event: HandlerEvent, key: string): string {
+  const value = queryValue(event, key);
+
+  if (!value) {
+    return '';
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw httpError(400, `Parâmetro ${key} inválido.`);
+  }
+
+  return value;
 }
 
 function textInput(value: unknown): string {

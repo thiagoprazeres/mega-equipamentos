@@ -27,7 +27,7 @@
       <div class="alert alert-success">{{ successMessage }}</div>
     }
 
-    <section class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+    <section class="grid gap-3">
       <label class="input input-bordered flex items-center gap-2">
         <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
         <input
@@ -39,7 +39,46 @@
         />
       </label>
 
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+        <div class="grid gap-2 sm:grid-cols-[auto_minmax(0,10rem)_minmax(0,10rem)_auto_auto] sm:items-end">
+          <div class="flex items-center gap-2 pb-1 text-sm font-semibold text-base-content/70">
+            <lucide-angular [img]="CalendarRange" class="h-4 w-4 text-primary"></lucide-angular>
+            Período
+          </div>
+
+          <label class="flex flex-col gap-1">
+            <span class="text-xs font-semibold uppercase tracking-wide text-base-content/60">De</span>
+            <input
+              class="input input-bordered w-full"
+              type="date"
+              [value]="draftDateFrom"
+              (input)="draftDateFrom = $any($event.target).value"
+            />
+          </label>
+
+          <label class="flex flex-col gap-1">
+            <span class="text-xs font-semibold uppercase tracking-wide text-base-content/60">Até</span>
+            <input
+              class="input input-bordered w-full"
+              type="date"
+              [value]="draftDateTo"
+              (input)="draftDateTo = $any($event.target).value"
+            />
+          </label>
+
+          <button class="btn btn-primary" type="button" [disabled]="loading" (click)="applyDateRange()">
+            Consultar
+          </button>
+
+          @if (hasDateRange()) {
+            <button class="btn btn-ghost" type="button" [disabled]="loading" (click)="clearDateRange()">
+              <lucide-angular [img]="X" class="h-4 w-4"></lucide-angular>
+              Limpar
+            </button>
+          }
+        </div>
+
+        <div class="flex flex-wrap gap-2">
         <select
           class="select select-bordered w-full md:w-48"
           [value]="selectedPeriod"
@@ -73,12 +112,14 @@
             </button>
           }
         </div>
+        </div>
       </div>
     </section>
 
-    <p class="text-sm text-base-content/60">
-      {{ filteredContractsCount() }} de {{ contracts.length }} contrato(s)
-    </p>
+    <div class="flex flex-col gap-1 text-sm text-base-content/60 md:flex-row md:items-center md:justify-between">
+      <p>{{ filteredContractsCount() }} de {{ contracts.length }} contrato(s)</p>
+      <p>Consulta: {{ dateRangeLabel() }}</p>
+    </div>
 
     @if (loading) {
       <div class="flex justify-center py-16">

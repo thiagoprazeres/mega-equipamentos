@@ -29,12 +29,29 @@ export interface RentalContractEditorInput {
   surchargeCents?: number;
 }
 
+export interface RentalContractListOptions {
+  dateFrom?: string;
+  dateTo?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RentalContractService {
   private readonly api = inject(GestorApiService);
 
-  async listContracts(): Promise<RentalContract[]> {
-    return this.api.request<RentalContract[]>('/rental-contracts');
+  async listContracts(options: RentalContractListOptions = {}): Promise<RentalContract[]> {
+    const params = new URLSearchParams();
+
+    if (options.dateFrom) {
+      params.set('dateFrom', options.dateFrom);
+    }
+
+    if (options.dateTo) {
+      params.set('dateTo', options.dateTo);
+    }
+
+    return this.api.request<RentalContract[]>(
+      `/rental-contracts${params.size ? `?${params.toString()}` : ''}`
+    );
   }
 
   async saveContract(input: RentalContractEditorInput): Promise<RentalContract> {

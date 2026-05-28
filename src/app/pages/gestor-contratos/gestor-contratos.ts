@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
+  CalendarRange,
   ClipboardList,
   Download,
   Eye,
@@ -13,6 +14,7 @@ import {
   ReceiptText,
   RotateCcw,
   Search,
+  X,
   LucideAngularModule,
 } from 'lucide-angular';
 
@@ -47,6 +49,7 @@ type ContractSortKey = 'number' | 'customer' | 'seller' | 'period' | 'items' | '
   templateUrl: './gestor-contratos.html',
 })
 export class GestorContratosPage implements OnInit {
+  protected readonly CalendarRange = CalendarRange;
   protected readonly ClipboardList = ClipboardList;
   protected readonly Download = Download;
   protected readonly Eye = Eye;
@@ -58,6 +61,7 @@ export class GestorContratosPage implements OnInit {
   protected readonly ReceiptText = ReceiptText;
   protected readonly RotateCcw = RotateCcw;
   protected readonly Search = Search;
+  protected readonly X = X;
   protected readonly periodOptions: Array<{ value: RentalBillingPeriod; label: string }> = [
     { value: 'daily', label: 'Diária' },
     { value: 'weekly', label: 'Semanal' },
@@ -74,6 +78,10 @@ export class GestorContratosPage implements OnInit {
 
   protected contracts: RentalContract[] = [];
   protected query = '';
+  protected draftDateFrom = '';
+  protected draftDateTo = '';
+  protected dateFrom = '';
+  protected dateTo = '';
   protected selectedStatus: RentalContractStatus | 'all' = 'all';
   protected selectedPeriod: RentalBillingPeriod | 'all' = 'all';
   protected loading = false;
@@ -105,6 +113,7 @@ export class GestorContratosPage implements OnInit {
     const filtered = this.contracts.filter((contract) => {
       const matchesStatus = this.selectedStatus === 'all' || contract.status === this.selectedStatus;
       const matchesPeriod = this.selectedPeriod === 'all' || contract.billingPeriod === this.selectedPeriod;
+      const matchesDateRange = contractMatchesDateRange(contract, this.dateFrom, this.dateTo);
       const matchesQuery = matchesSearchQuery(this.query, [
         contract.id,
         contract.contractNumber,
@@ -131,7 +140,7 @@ export class GestorContratosPage implements OnInit {
         ...contract.items.map((item) => item.equipmentName),
       ]);
 
-      return matchesStatus && matchesPeriod && matchesQuery;
+      return matchesStatus && matchesPeriod && matchesDateRange && matchesQuery;
     });
 
     return sortBy(filtered, (contract) => this.contractSortValue(contract), this.sortDirection);
@@ -165,6 +174,45 @@ export class GestorContratosPage implements OnInit {
 
   protected setPeriod(period: RentalBillingPeriod | 'all') {
     this.selectedPeriod = period;
+  }
+
+  protected async applyDateRange() {
+    if (this.draftDateFrom && this.draftDateTo && this.draftDateFrom > this.draftDateTo) {
+      this.errorMessage = 'A data inicial não pode ser maior que a data final.';
+      return;
+    }
+
+    this.dateFrom = this.draftDateFrom;
+    this.dateTo = this.draftDateTo;
+    await this.loadPageData();
+  }
+
+  protected async clearDateRange() {
+    this.draftDateFrom = '';
+    this.draftDateTo = '';
+    this.dateFrom = '';
+    this.dateTo = '';
+    await this.loadPageData();
+  }
+
+  protected hasDateRange(): boolean {
+    return Boolean(this.dateFrom || this.dateTo);
+  }
+
+  protected dateRangeLabel(): string {
+    if (this.dateFrom && this.dateTo) {
+      return `${formatDate(this.dateFrom)} a ${formatDate(this.dateTo)}`;
+    }
+
+    if (this.dateFrom) {
+      return `A partir de ${formatDate(this.dateFrom)}`;
+    }
+
+    if (this.dateTo) {
+      return `Até ${formatDate(this.dateTo)}`;
+    }
+
+    return 'Todos os períodos';
   }
 
   protected async exportPdf(contract: RentalContract) {
@@ -298,7 +346,10 @@ export class GestorContratosPage implements OnInit {
 
     try {
       this.contracts = await withTimeout(
-        this.rentalContractService.listContracts(),
+        this.rentalContractService.listContracts({
+          dateFrom: this.dateFrom,
+          dateTo: this.dateTo,
+        }),
         CONTRACTS_LOAD_TIMEOUT_MS
       );
     } catch (error) {
@@ -371,6 +422,29 @@ function withTimeout<Result>(promise: Promise<Result>, timeoutMs: number): Promi
 function formatDate(value: string): string {
   const [year, month, day] = value.split('-');
   return year && month && day ? `${day}/${month}/${year}` : value;
+}
+
+function contractMatchesDateRange(
+  contract: RentalContract,
+  dateFrom: string,
+  dateTo: string
+): boolean {
+  if (!dateFrom && !dateTo) {
+    return true;
+  }
+
+  const contractStart = contract.startDate;
+  const contractEnd = contract.endDate || contract.startDate;
+
+  if (dateFrom && contractEnd < dateFrom) {
+    return false;
+  }
+
+  if (dateTo && contractStart > dateTo) {
+    return false;
+  }
+
+  return true;
 }
 
 function formatRentalDuration(period: RentalBillingPeriod, countValue: unknown): string {
