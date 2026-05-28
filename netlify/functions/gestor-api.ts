@@ -9,6 +9,7 @@ import {
   inArray,
   like,
   or,
+  sql,
   type SQL,
 } from 'drizzle-orm';
 
@@ -222,7 +223,7 @@ async function listCategories(event: HandlerEvent) {
     .select()
     .from(categories)
     .where(where)
-    .orderBy(asc(categories.categoryCode), asc(categories.sortOrder), asc(categories.nome));
+    .orderBy(categoryCodeOrderSql(), asc(categories.categoryCode), asc(categories.sortOrder), asc(categories.nome));
 
   return json(rows.map(mapCategoryRow));
 }
@@ -252,14 +253,36 @@ async function listEquipments(event: HandlerEvent) {
   }
 
   if (search) {
-    filters.push(
-      or(
-        ilike(equipments.equipmentCode, `%${search}%`),
-        ilike(equipments.nome, `%${search}%`),
-        ilike(equipments.technicalName, `%${search}%`),
-        ilike(equipments.slug, `%${search}%`)
-      ) as SQL
-    );
+    const searchFilters: SQL[] = [
+      ilike(equipments.equipmentCode, `%${search}%`),
+      ilike(equipments.nome, `%${search}%`),
+      ilike(equipments.technicalName, `%${search}%`),
+      ilike(equipments.slug, `%${search}%`),
+    ];
+    const internalCodeSearch = parseInternalCodeSearch(search);
+
+    if (internalCodeSearch) {
+      const matchingCategories = categoryRows.filter(
+        (category) => category.categoryCode === internalCodeSearch.categoryCode
+      );
+
+      if (matchingCategories.length) {
+        const categoryIds = matchingCategories.map((category) => category.id);
+
+        if (internalCodeSearch.equipmentCode) {
+          searchFilters.push(
+            and(
+              inArray(equipments.categoryId, categoryIds),
+              eq(equipments.equipmentCode, internalCodeSearch.equipmentCode)
+            ) as SQL
+          );
+        } else {
+          searchFilters.push(inArray(equipments.categoryId, categoryIds) as SQL);
+        }
+      }
+    }
+
+    filters.push(or(...searchFilters) as SQL);
   }
 
   const equipmentRows = await getDb()
@@ -327,15 +350,70 @@ async function saveEquipment(input: Record<string, unknown>) {
         },
       });
 
+    await renumberActiveEquipmentCodes(tx);
+
     return equipment;
   });
 
-  const [category] = await db.select().from(categories).where(eq(categories.id, saved.categoryId));
-  return mapEquipmentRow(saved, category, prices);
+  const [equipment] = await db.select().from(equipments).where(eq(equipments.id, saved.id));
+
+  if (!equipment) {
+    throw httpError(500, 'Não foi possível recarregar o equipamento salvo.');
+  }
+
+  const [category] = await db.select().from(categories).where(eq(categories.id, equipment.categoryId));
+  return mapEquipmentRow(equipment, category, prices);
 }
 
 async function updateEquipmentStatus(id: number, status: CatalogStatus) {
-  await getDb().update(equipments).set({ status }).where(eq(equipments.id, id));
+  await getDb().transaction(async (tx) => {
+    await tx.update(equipments).set({ status }).where(eq(equipments.id, id));
+    await renumberActiveEquipmentCodes(tx);
+  });
+}
+
+async function renumberActiveEquipmentCodes(executor: { execute: (query: SQL) => Promise<unknown> }) {
+  await executor.execute(sql`
+    with ranked as (
+      select
+        e.id,
+        lpad(row_number() over (
+          partition by e.category_id
+          order by
+            lower(translate(
+              coalesce(e.nome, ''),
+              'ÁÀÂÃÄÅÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑáàâãäåéèêëíìîïóòôõöúùûüçñ',
+              'AAAAAAEEEEIIIIOOOOOUUUUCNaaaaaaeeeeiiiiooooouuuucn'
+            )),
+            lower(coalesce(e.nome, '')),
+            e.id
+        )::text, 3, '0') as equipment_code,
+        row_number() over (
+          partition by e.category_id
+          order by
+            lower(translate(
+              coalesce(e.nome, ''),
+              'ÁÀÂÃÄÅÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑáàâãäåéèêëíìîïóòôõöúùûüçñ',
+              'AAAAAAEEEEIIIIOOOOOUUUUCNaaaaaaeeeeiiiiooooouuuucn'
+            )),
+            lower(coalesce(e.nome, '')),
+            e.id
+        ) as sort_order
+      from public.equipments e
+      where e.status = 'active'
+    )
+    update public.equipments e
+    set
+      equipment_code = ranked.equipment_code,
+      sort_order = ranked.sort_order,
+      updated_at = now()
+    from ranked
+    where e.id = ranked.id
+      and (
+        e.equipment_code is distinct from ranked.equipment_code
+        or e.sort_order is distinct from ranked.sort_order
+      )
+  `);
 }
 
 async function listCustomers(event: HandlerEvent) {
@@ -636,7 +714,7 @@ async function loadCategories(includeArchived: boolean): Promise<CategoryRow[]> 
     .select()
     .from(categories)
     .where(includeArchived ? undefined : eq(categories.status, 'active'))
-    .orderBy(asc(categories.categoryCode), asc(categories.sortOrder), asc(categories.nome));
+    .orderBy(categoryCodeOrderSql(), asc(categories.categoryCode), asc(categories.sortOrder), asc(categories.nome));
 }
 
 async function loadPricesByEquipmentId(
@@ -784,6 +862,10 @@ function rentalTotalCents(
   surchargeCents: number
 ): number {
   return Math.max(0, subtotalCents + shippingCents - discountCents + surchargeCents);
+}
+
+function categoryCodeOrderSql(): SQL {
+  return sql`coalesce(nullif(regexp_replace(${categories.categoryCode}, '\\D', '', 'g'), '')::integer, 2147483647)`;
 }
 
 function mapCategoryRow(row: CategoryRow) {
@@ -1202,4 +1284,27 @@ function formatInternalCode(categoryCode?: string, equipmentCode?: string): stri
   }
 
   return `${normalizedCategoryCode}.${normalizedEquipmentCode}`;
+}
+
+function parseInternalCodeSearch(value: string): { categoryCode: string; equipmentCode?: string } | null {
+  const match = value.trim().match(/^(\d+)(?:[.\s-]+(\d+))?/);
+
+  if (!match) {
+    return null;
+  }
+
+  const categoryCode = match[1];
+  const equipmentCode = match[2] ? normalizeEquipmentCode(match[2]) : undefined;
+
+  return { categoryCode, equipmentCode };
+}
+
+function normalizeEquipmentCode(value: string): string {
+  const digits = value.replace(/\D/g, '');
+
+  if (!digits) {
+    return value.trim();
+  }
+
+  return digits.padStart(3, '0');
 }

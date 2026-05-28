@@ -280,7 +280,7 @@ export class GestorEquipamentoFormPage implements OnInit, OnDestroy {
 
   protected internalCodePreview(): string {
     const categoryCode = this.selectedCategoryCode();
-    const equipmentCode = this.form.controls.codigo.value.trim();
+    const equipmentCode = this.previewEquipmentCode();
 
     if (!categoryCode) {
       return equipmentCode || '-';
@@ -300,6 +300,33 @@ export class GestorEquipamentoFormPage implements OnInit, OnDestroy {
     }
 
     return `${categoryCode}.${equipmentCode}`;
+  }
+
+  private previewEquipmentCode(): string {
+    const categoryId = Number(this.form.controls.categoryId.value);
+    const currentEquipmentId = this.editingEquipment?.id ?? -1;
+    const currentStatus = this.editingEquipment?.status ?? 'active';
+
+    if (!categoryId || currentStatus !== 'active') {
+      return this.form.controls.codigo.value.trim();
+    }
+
+    const draftName = this.form.controls.nome.value.trim() || this.editingEquipment?.nome || 'Novo equipamento';
+    const rankedEquipment = [
+      ...this.equipments
+        .filter(
+          (equipment) =>
+            equipment.status === 'active' &&
+            equipment.equipamentoCategoria.id === categoryId &&
+            equipment.id !== currentEquipmentId
+        )
+        .map((equipment) => ({ id: equipment.id, nome: equipment.nome })),
+      { id: currentEquipmentId, nome: draftName },
+    ].sort(compareEquipmentNames);
+
+    const index = rankedEquipment.findIndex((equipment) => equipment.id === currentEquipmentId);
+
+    return String(Math.max(0, index) + 1).padStart(3, '0');
   }
 
   protected async saveEquipment() {
@@ -332,7 +359,7 @@ export class GestorEquipamentoFormPage implements OnInit, OnDestroy {
         tipoDeServico: value.tipoDeServico,
         periodoDeLocacao: value.periodoDeLocacao,
         diferenciais: value.diferenciais,
-        codigo: value.codigo,
+        codigo: this.previewEquipmentCode(),
         assetValueCents: parseCurrencyToCents(value.assetValue),
         totalInvestedCents: parseCurrencyToCents(value.totalInvested),
         notes: value.notes,
@@ -594,4 +621,16 @@ function normalizeText(value: string): string {
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .trim();
+}
+
+function compareEquipmentNames(
+  left: { id: number; nome: string },
+  right: { id: number; nome: string }
+): number {
+  const nameComparison = normalizeText(left.nome).localeCompare(normalizeText(right.nome), 'pt-BR', {
+    numeric: true,
+    sensitivity: 'base',
+  });
+
+  return nameComparison || left.id - right.id;
 }

@@ -206,7 +206,7 @@ export class CatalogService {
         const params: Record<string, string> = {
           select: '*',
           status: 'eq.active',
-          order: 'sort_order.asc,nome.asc',
+          order: 'category_id.asc,sort_order.asc,nome.asc',
         };
 
         if (selectedCategory) {
@@ -245,6 +245,7 @@ export class CatalogService {
     let query = client
       .from('equipments')
       .select('*')
+      .order('category_id', { ascending: true })
       .order('sort_order', { ascending: true })
       .order('nome', { ascending: true });
 
