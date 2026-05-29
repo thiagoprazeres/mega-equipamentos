@@ -1,6 +1,6 @@
 {
   "name": "mega-equipamentos",
-  "version": "0.2.50",
+  "version": "0.2.51",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

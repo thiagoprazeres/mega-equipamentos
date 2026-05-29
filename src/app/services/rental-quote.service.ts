@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import type { Customer } from '../interfaces/customer';
 import type { StaffUser } from '../interfaces/staff-user';
-import type { RentalBillingPeriod } from '../interfaces/rental-contract';
+import type { RentalBillingPeriod, RentalContract } from '../interfaces/rental-contract';
 import type { RentalQuote, RentalQuoteItem, RentalQuoteStatus } from '../interfaces/rental-quote';
 import { GestorApiService } from './gestor-api.service';
 
@@ -36,6 +36,12 @@ export class RentalQuoteService {
     return this.api.request<RentalQuote>('/rental-quotes', {
       method: 'POST',
       body: input,
+    });
+  }
+
+  async convertToContract(id: number): Promise<RentalContract> {
+    return this.api.request<RentalContract>(`/rental-quotes/${id}/convert-to-contract`, {
+      method: 'POST',
     });
   }
 }

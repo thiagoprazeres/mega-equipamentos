@@ -5,6 +5,7 @@ import {
   ClipboardList,
   Download,
   FilePenLine,
+  FileText,
   LogOut,
   Pencil,
   Plus,
@@ -37,6 +38,7 @@ export class GestorOrcamentosPage implements OnInit {
   protected readonly ClipboardList = ClipboardList;
   protected readonly Download = Download;
   protected readonly FilePenLine = FilePenLine;
+  protected readonly FileText = FileText;
   protected readonly LogOut = LogOut;
   protected readonly Pencil = Pencil;
   protected readonly Plus = Plus;
@@ -61,7 +63,9 @@ export class GestorOrcamentosPage implements OnInit {
   protected selectedPeriod: RentalBillingPeriod | 'all' = 'all';
   protected loading = false;
   protected exportingQuoteId: number | null = null;
+  protected convertingQuoteId: number | null = null;
   protected errorMessage = '';
+  protected successMessage = '';
   protected sortKey: QuoteSortKey = 'number';
   protected sortDirection: SortDirection = 'desc';
 
@@ -152,6 +156,40 @@ export class GestorOrcamentosPage implements OnInit {
       this.exportingQuoteId = null;
       this.changeDetector.detectChanges();
     }
+  }
+
+  protected async convertToContract(quote: RentalQuote) {
+    if (this.convertingQuoteId) {
+      return;
+    }
+
+    if (!this.canConvertQuote(quote)) {
+      this.errorMessage =
+        'Para transformar em contrato, o orçamento precisa ter cliente, vendedor e pelo menos um equipamento.';
+      return;
+    }
+
+    this.convertingQuoteId = quote.id;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    try {
+      const contract = await this.quoteService.convertToContract(quote.id);
+      this.successMessage = `Orçamento ${quote.quoteNumber} transformado no contrato ${contract.contractNumber}.`;
+      void this.router.navigate(['/gestor/contratos', contract.id, 'editar']);
+    } catch (error) {
+      this.errorMessage =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Não foi possível transformar o orçamento em contrato.';
+    } finally {
+      this.convertingQuoteId = null;
+      this.changeDetector.detectChanges();
+    }
+  }
+
+  protected canConvertQuote(quote: RentalQuote): boolean {
+    return Boolean(quote.customerId && quote.sellerId && quote.items.length);
   }
 
   protected periodLabel(period: RentalBillingPeriod): string {

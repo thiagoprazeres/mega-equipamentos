@@ -23,6 +23,10 @@
       <div class="alert alert-error">{{ errorMessage }}</div>
     }
 
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
     <section class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
       <label class="input input-bordered flex items-center gap-2">
         <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
@@ -165,6 +169,20 @@
                       <a class="btn btn-square btn-ghost" [routerLink]="['/gestor/orcamentos', quote.id, 'editar']">
                         <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
                       </a>
+                      <button
+                        class="btn btn-square btn-ghost"
+                        type="button"
+                        title="Transformar em contrato"
+                        aria-label="Transformar orçamento em contrato"
+                        [disabled]="!canConvertQuote(quote) || convertingQuoteId === quote.id"
+                        (click)="convertToContract(quote)"
+                      >
+                        @if (convertingQuoteId === quote.id) {
+                          <span class="loading loading-spinner loading-xs"></span>
+                        } @else {
+                          <lucide-angular [img]="FileText" class="h-4 w-4"></lucide-angular>
+                        }
+                      </button>
                       <button
                         class="btn btn-square btn-ghost"
                         type="button"

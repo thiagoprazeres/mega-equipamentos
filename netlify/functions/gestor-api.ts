@@ -205,6 +205,12 @@ async function handleRentalContracts(event: HandlerEvent) {
 }
 
 async function handleRentalQuotes(event: HandlerEvent) {
+  const [, id, action] = routeSegments(event);
+
+  if (id && action === 'convert-to-contract' && event.httpMethod === 'POST') {
+    return json(await convertRentalQuoteToContract(Number(id)));
+  }
+
   if (event.httpMethod === 'GET') {
     return json(await listRentalQuotes());
   }
@@ -722,6 +728,112 @@ async function saveRentalQuote(input: Record<string, unknown>) {
   return mapQuoteRow(saved.quote, saved.items.map(mapQuoteItemRow));
 }
 
+async function convertRentalQuoteToContract(id: number) {
+  if (!Number.isFinite(id) || id <= 0) {
+    throw httpError(400, 'Orçamento inválido.');
+  }
+
+  const [quote] = await getDb().select().from(rentalQuotes).where(eq(rentalQuotes.id, id));
+
+  if (!quote) {
+    throw httpError(404, 'Orçamento não encontrado.');
+  }
+
+  if (!quote.customerId) {
+    throw httpError(400, 'Selecione um cliente antes de transformar o orçamento em contrato.');
+  }
+
+  const customerId = quote.customerId;
+
+  if (!quote.sellerId) {
+    throw httpError(400, 'Selecione um vendedor antes de transformar o orçamento em contrato.');
+  }
+
+  const quoteItems = await getDb()
+    .select()
+    .from(rentalQuoteItems)
+    .where(eq(rentalQuoteItems.quoteId, quote.id))
+    .orderBy(asc(rentalQuoteItems.sortOrder), asc(rentalQuoteItems.id));
+
+  if (!quoteItems.length) {
+    throw httpError(400, 'Adicione pelo menos um equipamento antes de transformar o orçamento em contrato.');
+  }
+
+  const [profile] = await getDb()
+    .select({ contractTerms: companyProfile.contractTerms })
+    .from(companyProfile)
+    .where(eq(companyProfile.id, 1));
+  const endDate = calculateRentalEndDate(
+    quote.startDate,
+    normalizeBillingPeriod(quote.billingPeriod),
+    periodCountInput(quote.rentalPeriodCount)
+  );
+  const contractNotes = [`Convertido do orçamento ${quote.quoteNumber}.`, quote.notes]
+    .filter(Boolean)
+    .join('\n');
+
+  const saved = await getDb().transaction(async (tx) => {
+    const [contract] = await tx
+      .insert(rentalContracts)
+      .values({
+        customerId,
+        customerName: quote.customerName,
+        customerDocument: quote.customerDocument,
+        customerEmail: quote.customerEmail,
+        customerPhone: quote.customerPhone,
+        customerAddress: quote.customerAddress,
+        customerCity: quote.customerCity,
+        customerState: quote.customerState,
+        sellerId: quote.sellerId,
+        sellerName: quote.sellerName,
+        sellerEmail: quote.sellerEmail,
+        sellerPhone: quote.sellerPhone,
+        billingPeriod: normalizeBillingPeriod(quote.billingPeriod),
+        rentalPeriodCount: periodCountInput(quote.rentalPeriodCount),
+        startDate: quote.startDate,
+        endDate: endDate || null,
+        deliveryAddress: quote.deliveryAddress,
+        worksiteAddress: quote.worksiteAddress,
+        notes: contractNotes,
+        terms: profile?.contractTerms ?? '',
+        subtotalCents: quote.subtotalCents,
+        shippingCents: quote.shippingCents,
+        discountCents: quote.discountCents,
+        surchargeCents: quote.surchargeCents,
+        totalCents: quote.totalCents,
+        status: 'draft',
+      })
+      .returning();
+
+    if (!contract) {
+      throw httpError(500, 'Não foi possível criar o contrato a partir do orçamento.');
+    }
+
+    const savedItems = await tx
+      .insert(rentalContractItems)
+      .values(
+        quoteItems.map((item) => ({
+          contractId: contract.id,
+          equipmentId: item.equipmentId,
+          equipmentName: item.equipmentName,
+          quantity: item.quantity,
+          billingPeriod: normalizeBillingPeriod(item.billingPeriod),
+          unitPriceCents: item.unitPriceCents,
+          totalPriceCents: item.totalPriceCents,
+          assetValueCents: item.assetValueCents,
+          sortOrder: item.sortOrder,
+        }))
+      )
+      .returning();
+
+    await tx.update(rentalQuotes).set({ status: 'approved' }).where(eq(rentalQuotes.id, quote.id));
+
+    return { contract, items: savedItems };
+  });
+
+  return mapContractRow(saved.contract, saved.items.map(mapContractItemRow));
+}
+
 async function loadCategories(includeArchived: boolean): Promise<CategoryRow[]> {
   return getDb()
     .select()
@@ -875,6 +987,55 @@ function rentalTotalCents(
   surchargeCents: number
 ): number {
   return Math.max(0, subtotalCents + shippingCents - discountCents + surchargeCents);
+}
+
+function calculateRentalEndDate(
+  startDate: string,
+  billingPeriod: RentalBillingPeriod,
+  rentalPeriodCount: number
+): string {
+  if (!startDate) {
+    return '';
+  }
+
+  const [year, month, day] = startDate.split('-').map(Number);
+
+  if (!year || !month || !day) {
+    return '';
+  }
+
+  const date = new Date(year, month - 1, day);
+  const periodCount = periodCountInput(rentalPeriodCount);
+
+  if (billingPeriod === 'monthly') {
+    return addMonths(date, periodCount);
+  }
+
+  const daysByPeriod: Record<Exclude<RentalBillingPeriod, 'monthly'>, number> = {
+    daily: 1,
+    weekly: 7,
+    fortnightly: 15,
+  };
+  date.setDate(date.getDate() + daysByPeriod[billingPeriod] * periodCount);
+
+  return dateInputValue(date);
+}
+
+function addMonths(date: Date, months: number): string {
+  const targetYear = date.getFullYear();
+  const targetMonth = date.getMonth() + months;
+  const daysInTargetMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+  const result = new Date(targetYear, targetMonth, Math.min(date.getDate(), daysInTargetMonth));
+
+  return dateInputValue(result);
+}
+
+function dateInputValue(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 }
 
 function categoryCodeOrderSql(): SQL {
