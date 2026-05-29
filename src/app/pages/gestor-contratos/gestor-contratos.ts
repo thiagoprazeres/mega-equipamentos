@@ -295,10 +295,6 @@ export class GestorContratosPage implements OnInit {
       : `A partir de ${formatDate(contract.startDate)}`;
   }
 
-  protected contractPeriodWithBilling(contract: RentalContract): string {
-    return `${this.rentalDurationLabel(contract)} | ${this.contractPeriod(contract)}`;
-  }
-
   protected periodLabel(period: RentalBillingPeriod): string {
     return this.periodOptions.find((option) => option.value === period)?.label ?? period;
   }

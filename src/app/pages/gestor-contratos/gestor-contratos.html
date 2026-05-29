@@ -131,25 +131,40 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>
-                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('number')">
-                    Contrato <span class="text-xs">{{ sortIndicator('number') }}</span>
-                  </button>
-                </th>
-                <th>
-                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('customer')">
-                    Cliente <span class="text-xs">{{ sortIndicator('customer') }}</span>
-                  </button>
-                </th>
-                <th>
-                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('seller')">
-                    Vendedor <span class="text-xs">{{ sortIndicator('seller') }}</span>
-                  </button>
-                </th>
-                <th>
-                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('period')">
-                    Período <span class="text-xs">{{ sortIndicator('period') }}</span>
-                  </button>
+                <th class="min-w-[48rem]">
+                  <div class="flex flex-col gap-2">
+                    <span class="font-bold">Contrato, cliente, vendedor e período</span>
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        class="badge badge-outline gap-1 rounded-md font-semibold"
+                        type="button"
+                        (click)="setSort('number')"
+                      >
+                        Contrato <span class="text-xs">{{ sortIndicator('number') }}</span>
+                      </button>
+                      <button
+                        class="badge badge-outline gap-1 rounded-md font-semibold"
+                        type="button"
+                        (click)="setSort('customer')"
+                      >
+                        Cliente <span class="text-xs">{{ sortIndicator('customer') }}</span>
+                      </button>
+                      <button
+                        class="badge badge-outline gap-1 rounded-md font-semibold"
+                        type="button"
+                        (click)="setSort('seller')"
+                      >
+                        Vendedor <span class="text-xs">{{ sortIndicator('seller') }}</span>
+                      </button>
+                      <button
+                        class="badge badge-outline gap-1 rounded-md font-semibold"
+                        type="button"
+                        (click)="setSort('period')"
+                      >
+                        Período <span class="text-xs">{{ sortIndicator('period') }}</span>
+                      </button>
+                    </div>
+                  </div>
                 </th>
                 <th>
                   <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('items')">
@@ -166,112 +181,137 @@
                     Status <span class="text-xs">{{ sortIndicator('status') }}</span>
                   </button>
                 </th>
-                <th class="text-right">Ações</th>
+                <th class="w-48 text-right">Ações</th>
               </tr>
             </thead>
             <tbody>
               @for (contract of filteredContracts(); track contract.id) {
                 <tr>
-                  <td>
-                    <div class="flex min-w-48 items-center gap-3">
-                      <div class="grid h-11 w-11 place-items-center rounded-box bg-primary/10 text-primary">
-                        <lucide-angular [img]="FileText" class="h-5 w-5"></lucide-angular>
+                  <td class="align-top">
+                    <div class="grid min-w-[48rem] gap-4 py-2 md:grid-cols-4">
+                      <div class="flex items-center gap-3">
+                        <div class="grid h-11 w-11 shrink-0 place-items-center rounded-box bg-primary/10 text-primary">
+                          <lucide-angular [img]="FileText" class="h-5 w-5"></lucide-angular>
+                        </div>
+                        <div>
+                          <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Contrato</p>
+                          <p class="font-bold text-primary">{{ contract.contractNumber }}</p>
+                          <p class="text-xs text-base-content/60">{{ contract.createdAt | date: 'dd/MM/yyyy' }}</p>
+                        </div>
                       </div>
+
                       <div>
-                        <p class="font-bold text-primary">{{ contract.contractNumber }}</p>
-                        <p class="text-xs text-base-content/60">{{ contract.createdAt | date: 'dd/MM/yyyy' }}</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Cliente</p>
+                        <p class="font-semibold leading-snug">{{ contract.customerName }}</p>
+                        <p class="text-xs text-base-content/60">{{ contract.customerPhone || 'Sem contato' }}</p>
+                      </div>
+
+                      <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Vendedor</p>
+                        <p class="font-semibold leading-snug">{{ contract.sellerName || 'Não informado' }}</p>
+                        <p class="text-xs text-base-content/60">
+                          {{ contract.sellerPhone || contract.sellerEmail || 'Sem contato' }}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Período</p>
+                        <p class="font-semibold leading-snug">{{ rentalDurationLabel(contract) }}</p>
+                        <p class="text-xs text-base-content/60">{{ contractPeriod(contract) }}</p>
                       </div>
                     </div>
                   </td>
-                  <td>
-                    <p class="font-semibold">{{ contract.customerName }}</p>
-                    <p class="text-xs text-base-content/60">{{ contract.customerPhone || 'Sem contato' }}</p>
-                  </td>
-                  <td>
-                    <p class="font-semibold">{{ contract.sellerName || 'Não informado' }}</p>
-                    <p class="text-xs text-base-content/60">{{ contract.sellerPhone || contract.sellerEmail || 'Sem contato' }}</p>
-                  </td>
-                  <td>{{ contractPeriodWithBilling(contract) }}</td>
-                  <td>{{ contract.items.length }}</td>
-                  <td>{{ formatMoney(contract.totalCents) }}</td>
-                  <td>
+                  <td class="align-middle">{{ contract.items.length }}</td>
+                  <td class="whitespace-nowrap align-middle">{{ formatMoney(contract.totalCents) }}</td>
+                  <td class="align-middle">
                     <span class="badge" [class.badge-success]="contract.status === 'active'">
                       {{ statusLabel(contract.status) }}
                     </span>
                   </td>
-                  <td>
+                  <td class="align-middle">
                     <div class="flex justify-end gap-2">
-                      <a class="btn btn-square btn-ghost" [routerLink]="['/gestor/contratos', contract.id]">
+                      <a
+                        class="btn btn-square btn-ghost"
+                        title="Ver detalhes"
+                        aria-label="Ver detalhes"
+                        [routerLink]="['/gestor/contratos', contract.id]"
+                      >
                         <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
                       </a>
-                      <a class="btn btn-square btn-ghost" [routerLink]="['/gestor/contratos', contract.id, 'editar']">
+                      <a
+                        class="btn btn-square btn-ghost"
+                        title="Editar"
+                        aria-label="Editar contrato"
+                        [routerLink]="['/gestor/contratos', contract.id, 'editar']"
+                      >
                         <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
                       </a>
-                      <button
-                        class="btn btn-square btn-ghost"
-                        type="button"
-                        title="Orçamento"
-                        aria-label="Exportar orçamento"
-                        (click)="exportQuote(contract)"
-                      >
-                        @if (exportingQuoteId === contract.id) {
-                          <span class="loading loading-spinner loading-xs"></span>
-                        } @else {
-                          <lucide-angular [img]="ClipboardList" class="h-4 w-4"></lucide-angular>
-                        }
-                      </button>
-                      <button
-                        class="btn btn-square btn-ghost"
-                        type="button"
-                        title="Fatura"
-                        aria-label="Exportar fatura"
-                        (click)="exportInvoice(contract)"
-                      >
-                        @if (exportingInvoiceId === contract.id) {
-                          <span class="loading loading-spinner loading-xs"></span>
-                        } @else {
-                          <lucide-angular [img]="ReceiptText" class="h-4 w-4"></lucide-angular>
-                        }
-                      </button>
-                      <button
-                        class="btn btn-square btn-ghost"
-                        type="button"
-                        title="Comprovante de entrega"
-                        aria-label="Exportar comprovante de entrega"
-                        (click)="exportDeliveryReceipt(contract)"
-                      >
-                        @if (exportingDeliveryReceiptId === contract.id) {
-                          <span class="loading loading-spinner loading-xs"></span>
-                        } @else {
-                          <lucide-angular [img]="FileCheck" class="h-4 w-4"></lucide-angular>
-                        }
-                      </button>
-                      <button
-                        class="btn btn-square btn-ghost"
-                        type="button"
-                        title="Comprovante de devolução"
-                        aria-label="Exportar comprovante de devolução"
-                        (click)="exportReturnReceipt(contract)"
-                      >
-                        @if (exportingReturnReceiptId === contract.id) {
-                          <span class="loading loading-spinner loading-xs"></span>
-                        } @else {
-                          <lucide-angular [img]="RotateCcw" class="h-4 w-4"></lucide-angular>
-                        }
-                      </button>
-                      <button class="btn btn-square btn-ghost" type="button" (click)="exportPdf(contract)">
-                        @if (exportingContractId === contract.id) {
-                          <span class="loading loading-spinner loading-xs"></span>
-                        } @else {
+                      <details class="dropdown dropdown-end">
+                        <summary class="btn btn-sm btn-outline list-none">
                           <lucide-angular [img]="Download" class="h-4 w-4"></lucide-angular>
-                        }
-                      </button>
+                          PDFs
+                        </summary>
+                        <ul
+                          class="menu dropdown-content z-20 mt-2 w-72 rounded-box border border-base-300 bg-base-100 p-2 text-left shadow-xl"
+                        >
+                          <li>
+                            <button type="button" (click)="exportQuote(contract)">
+                              @if (exportingQuoteId === contract.id) {
+                                <span class="loading loading-spinner loading-xs"></span>
+                              } @else {
+                                <lucide-angular [img]="ClipboardList" class="h-4 w-4"></lucide-angular>
+                              }
+                              Orçamento
+                            </button>
+                          </li>
+                          <li>
+                            <button type="button" (click)="exportInvoice(contract)">
+                              @if (exportingInvoiceId === contract.id) {
+                                <span class="loading loading-spinner loading-xs"></span>
+                              } @else {
+                                <lucide-angular [img]="ReceiptText" class="h-4 w-4"></lucide-angular>
+                              }
+                              Fatura
+                            </button>
+                          </li>
+                          <li>
+                            <button type="button" (click)="exportDeliveryReceipt(contract)">
+                              @if (exportingDeliveryReceiptId === contract.id) {
+                                <span class="loading loading-spinner loading-xs"></span>
+                              } @else {
+                                <lucide-angular [img]="FileCheck" class="h-4 w-4"></lucide-angular>
+                              }
+                              Comprovante de entrega
+                            </button>
+                          </li>
+                          <li>
+                            <button type="button" (click)="exportReturnReceipt(contract)">
+                              @if (exportingReturnReceiptId === contract.id) {
+                                <span class="loading loading-spinner loading-xs"></span>
+                              } @else {
+                                <lucide-angular [img]="RotateCcw" class="h-4 w-4"></lucide-angular>
+                              }
+                              Comprovante de devolução
+                            </button>
+                          </li>
+                          <li>
+                            <button type="button" (click)="exportPdf(contract)">
+                              @if (exportingContractId === contract.id) {
+                                <span class="loading loading-spinner loading-xs"></span>
+                              } @else {
+                                <lucide-angular [img]="Download" class="h-4 w-4"></lucide-angular>
+                              }
+                              Contrato de locação
+                            </button>
+                          </li>
+                        </ul>
+                      </details>
                     </div>
                   </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="8" class="py-10 text-center text-base-content/60">
+                  <td colspan="5" class="py-10 text-center text-base-content/60">
                     Nenhum contrato encontrado.
                   </td>
                 </tr>
