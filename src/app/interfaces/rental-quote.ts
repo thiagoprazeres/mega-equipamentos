@@ -1,4 +1,5 @@
 import type { RentalBillingPeriod, RentalContractItem } from './rental-contract';
+import type { LeadOrigin } from './lead';
 
 export type RentalQuoteStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired';
 
@@ -9,6 +10,17 @@ export interface RentalQuoteItem extends RentalContractItem {
 export interface RentalQuote {
   id: number;
   quoteNumber: string;
+  leadId: number;
+  leadName: string;
+  leadDocument?: string;
+  leadEmail?: string;
+  leadPhone?: string;
+  leadAddress?: string;
+  leadCity?: string;
+  leadState?: string;
+  leadOrigin?: LeadOrigin;
+  leadInterestCategoryId?: number;
+  leadInterestCategoryName?: string;
   customerId?: number;
   customerName: string;
   customerDocument?: string;

@@ -33,7 +33,7 @@
         <input
           class="grow"
           type="search"
-          placeholder="Buscar por nº do orçamento, CPF/CNPJ, cliente, vendedor, contato ou equipamento"
+          placeholder="Buscar por nº do orçamento, lead, origem, grupo, vendedor, contato ou equipamento"
           [value]="query"
           (input)="query = $any($event.target).value"
         />
@@ -96,8 +96,8 @@
                   </button>
                 </th>
                 <th>
-                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('customer')">
-                    Cliente <span class="text-xs">{{ sortIndicator('customer') }}</span>
+                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('lead')">
+                    Lead <span class="text-xs">{{ sortIndicator('lead') }}</span>
                   </button>
                 </th>
                 <th>
@@ -148,8 +148,8 @@
                     </div>
                   </td>
                   <td>
-                    <p class="font-semibold">{{ quote.customerName || 'Não informado' }}</p>
-                    <p class="text-xs text-base-content/60">{{ quote.customerPhone || 'Sem contato' }}</p>
+                    <p class="font-semibold">{{ quote.leadName || 'Não informado' }}</p>
+                    <p class="text-xs text-base-content/60">{{ quote.leadPhone || 'Sem contato' }}</p>
                   </td>
                   <td>
                     <p class="font-semibold">{{ quote.sellerName || 'Não informado' }}</p>

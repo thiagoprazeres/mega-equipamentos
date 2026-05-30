@@ -43,11 +43,11 @@
 
           <div class="mt-4 grid gap-4 md:grid-cols-2">
             <label class="flex flex-col gap-1.5">
-              <span class="text-sm font-semibold text-base-content/80">Cliente</span>
-              <select class="select select-bordered w-full" formControlName="customerId">
-                <option [value]="0">Sem cliente cadastrado</option>
-                @for (customer of customers; track customer.id) {
-                  <option [value]="customer.id">{{ customer.nome }}</option>
+              <span class="text-sm font-semibold text-base-content/80">Lead/interessado</span>
+              <select class="select select-bordered w-full" formControlName="leadId">
+                <option [value]="0">Selecione um lead</option>
+                @for (lead of leads; track lead.id) {
+                  <option [value]="lead.id">{{ lead.nome }}</option>
                 }
               </select>
             </label>
@@ -107,46 +107,6 @@
             <label class="flex flex-col gap-1.5">
               <span class="text-sm font-semibold text-base-content/80">Validade do orçamento</span>
               <input class="input input-bordered w-full" type="date" formControlName="validUntil" />
-            </label>
-
-            <label class="flex flex-col gap-1.5">
-              <span class="text-sm font-semibold text-base-content/80">Local de entrega/uso</span>
-              <input class="input input-bordered w-full" formControlName="deliveryAddress" />
-            </label>
-
-            <label class="flex flex-col gap-1.5">
-              <span class="text-sm font-semibold text-base-content/80">Endereço da obra</span>
-              <input class="input input-bordered w-full" formControlName="worksiteAddress" />
-            </label>
-
-            <label class="flex flex-col gap-1.5">
-              <span class="text-sm font-semibold text-base-content/80">Frete</span>
-              <input
-                class="input input-bordered w-full"
-                inputmode="numeric"
-                formControlName="shipping"
-                [maskito]="currencyMask"
-              />
-            </label>
-
-            <label class="flex flex-col gap-1.5">
-              <span class="text-sm font-semibold text-base-content/80">Desconto</span>
-              <input
-                class="input input-bordered w-full"
-                inputmode="numeric"
-                formControlName="discount"
-                [maskito]="currencyMask"
-              />
-            </label>
-
-            <label class="flex flex-col gap-1.5">
-              <span class="text-sm font-semibold text-base-content/80">Acréscimo</span>
-              <input
-                class="input input-bordered w-full"
-                inputmode="numeric"
-                formControlName="surcharge"
-                [maskito]="currencyMask"
-              />
             </label>
           </div>
         </section>
@@ -226,12 +186,51 @@
         </section>
 
         <section class="rounded-box border border-base-300 bg-base-100 p-5">
-          <h2 class="text-xl font-bold text-primary">Observações e totais</h2>
+          <h2 class="text-xl font-bold text-primary">Entrega, valores e observações</h2>
 
-          <label class="mt-4 flex flex-col gap-1.5">
-            <span class="text-sm font-semibold text-base-content/80">Observações</span>
-            <textarea class="textarea textarea-bordered min-h-28 w-full" formControlName="notes"></textarea>
-          </label>
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Local de entrega/uso</span>
+              <input class="input input-bordered w-full" formControlName="deliveryAddress" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Endereço da obra</span>
+              <input class="input input-bordered w-full" formControlName="worksiteAddress" />
+            </label>
+          </div>
+
+          <div class="mt-4 grid gap-4 md:grid-cols-3">
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Frete</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="numeric"
+                formControlName="shipping"
+                [maskito]="currencyMask"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Desconto</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="numeric"
+                formControlName="discount"
+                [maskito]="currencyMask"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Acréscimo</span>
+              <input
+                class="input input-bordered w-full"
+                inputmode="numeric"
+                formControlName="surcharge"
+                [maskito]="currencyMask"
+              />
+            </label>
+          </div>
 
           <div class="mt-5 grid gap-3 text-right md:grid-cols-5">
             <div>
@@ -255,6 +254,11 @@
               <p class="text-2xl font-extrabold text-primary">{{ formatMoney(quoteTotal()) }}</p>
             </div>
           </div>
+
+          <label class="mt-5 flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Observações</span>
+            <textarea class="textarea textarea-bordered min-h-28 w-full" formControlName="notes"></textarea>
+          </label>
         </section>
 
         <div class="flex justify-end gap-3">

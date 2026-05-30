@@ -15,14 +15,14 @@ import {
 } from 'lucide-angular';
 
 import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
-import type { Customer } from '../../interfaces/customer';
 import type { Equipamento } from '../../interfaces/equipamento';
+import type { Lead } from '../../interfaces/lead';
 import type { RentalBillingPeriod } from '../../interfaces/rental-contract';
 import type { RentalQuote, RentalQuoteItem, RentalQuoteStatus } from '../../interfaces/rental-quote';
 import type { StaffUser } from '../../interfaces/staff-user';
 import { AuthService } from '../../services/auth.service';
 import { CatalogService } from '../../services/catalog.service';
-import { CustomerService } from '../../services/customer.service';
+import { LeadService } from '../../services/lead.service';
 import {
   RentalQuoteEditorInput,
   RentalQuoteService,
@@ -118,7 +118,7 @@ export class GestorOrcamentoFormPage implements OnInit {
     { value: 'expired', label: 'Expirado' },
   ];
 
-  protected customers: Customer[] = [];
+  protected leads: Lead[] = [];
   protected sellers: StaffUser[] = [];
   protected equipments: Equipamento[] = [];
   protected quoteItems: RentalQuoteItem[] = [];
@@ -130,7 +130,7 @@ export class GestorOrcamentoFormPage implements OnInit {
   protected successMessage = '';
 
   protected readonly form = this.formBuilder.nonNullable.group({
-    customerId: [0],
+    leadId: [0, [Validators.required, Validators.min(1)]],
     sellerId: [0],
     billingPeriod: ['daily' as RentalBillingPeriod, Validators.required],
     rentalPeriodCount: [1, [Validators.required, Validators.min(1)]],
@@ -154,7 +154,7 @@ export class GestorOrcamentoFormPage implements OnInit {
     private readonly authService: AuthService,
     private readonly catalogService: CatalogService,
     private readonly changeDetector: ChangeDetectorRef,
-    private readonly customerService: CustomerService,
+    private readonly leadService: LeadService,
     private readonly quoteService: RentalQuoteService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -327,8 +327,13 @@ export class GestorOrcamentoFormPage implements OnInit {
     }
 
     const value = this.form.getRawValue();
-    const customer = this.customers.find((item) => item.id === Number(value.customerId)) ?? null;
+    const lead = this.leads.find((item) => item.id === Number(value.leadId)) ?? null;
     const seller = this.sellers.find((item) => item.id === Number(value.sellerId)) ?? null;
+
+    if (!lead) {
+      this.errorMessage = 'Selecione um lead/interessado para o orçamento.';
+      return;
+    }
 
     this.saving = true;
     this.errorMessage = '';
@@ -337,7 +342,7 @@ export class GestorOrcamentoFormPage implements OnInit {
     try {
       const payload: RentalQuoteEditorInput = {
         id: this.editingQuote?.id,
-        customer,
+        lead,
         seller,
         billingPeriod: value.billingPeriod,
         rentalPeriodCount: normalizeRentalPeriodCount(value.rentalPeriodCount),
@@ -377,9 +382,9 @@ export class GestorOrcamentoFormPage implements OnInit {
 
     try {
       const editingId = this.editingQuoteId();
-      const [customers, sellers, equipments, quotes] = await withTimeout(
+      const [leads, sellers, equipments, quotes] = await withTimeout(
         Promise.all([
-          this.customerService.listCustomers(),
+          this.leadService.listLeads(),
           this.staffUserService.listSellers(),
           this.catalogService.listEquipments(),
           editingId ? this.quoteService.listQuotes() : Promise.resolve([]),
@@ -387,7 +392,7 @@ export class GestorOrcamentoFormPage implements OnInit {
         QUOTE_FORM_LOAD_TIMEOUT_MS
       );
 
-      this.customers = customers;
+      this.leads = leads;
       this.sellers = sellers;
       this.equipments = equipments;
 
@@ -423,7 +428,7 @@ export class GestorOrcamentoFormPage implements OnInit {
     this.editingQuote = null;
     this.quoteItems = [];
     this.form.reset({
-      customerId: 0,
+      leadId: 0,
       sellerId: this.sellers[0]?.id ?? 0,
       billingPeriod: 'daily',
       rentalPeriodCount: 1,
@@ -448,7 +453,7 @@ export class GestorOrcamentoFormPage implements OnInit {
     this.editingQuote = quote;
     this.quoteItems = quote.items;
     this.form.reset({
-      customerId: quote.customerId ?? 0,
+      leadId: quote.leadId ?? 0,
       sellerId: quote.sellerId ?? 0,
       billingPeriod: quote.billingPeriod,
       rentalPeriodCount: normalizeRentalPeriodCount(quote.rentalPeriodCount),

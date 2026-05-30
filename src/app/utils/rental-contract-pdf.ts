@@ -394,14 +394,14 @@ export async function exportStandaloneQuotePdf(
     y
   );
 
-  y = sectionTitle(doc, 'Cliente', marginX, y + 10);
+  y = sectionTitle(doc, 'Interessado', marginX, y + 10);
   y = paragraph(
     doc,
     [
-      `Cliente: ${quote.customerName || 'Não informado'}`,
-      `CPF/CNPJ: ${quote.customerDocument || 'Não informado'}`,
-      `Contato: ${quote.customerPhone || quote.customerEmail || 'Não informado'}`,
-      `Endereço: ${formatQuoteCustomerAddress(quote)}`,
+      `Nome: ${quote.leadName || 'Não informado'}`,
+      `CPF/CNPJ: ${quote.leadDocument || 'Não informado'}`,
+      `Contato: ${quote.leadPhone || quote.leadEmail || 'Não informado'}`,
+      `Endereço: ${formatQuoteLeadAddress(quote)}`,
     ],
     marginX,
     y
@@ -1058,9 +1058,9 @@ function formatCustomerAddress(contract: RentalContract): string {
   return [contract.customerAddress, city].filter(Boolean).join(' - ') || 'Não informado';
 }
 
-function formatQuoteCustomerAddress(quote: RentalQuote): string {
-  const city = [quote.customerCity, quote.customerState].filter(Boolean).join(' / ');
-  return [quote.customerAddress, city].filter(Boolean).join(' - ') || 'Não informado';
+function formatQuoteLeadAddress(quote: RentalQuote): string {
+  const city = [quote.leadCity, quote.leadState].filter(Boolean).join(' / ');
+  return [quote.leadAddress, city].filter(Boolean).join(' - ') || 'Não informado';
 }
 
 function formatCustomerCityState(contract: RentalContract): string {

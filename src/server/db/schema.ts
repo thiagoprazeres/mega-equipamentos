@@ -17,6 +17,16 @@ export type StaffUserRole = 'admin' | 'vendedor' | 'operador' | 'financeiro';
 export type RentalBillingPeriod = 'daily' | 'weekly' | 'fortnightly' | 'monthly';
 export type RentalContractStatus = 'draft' | 'active' | 'closed' | 'returned' | 'cancelled';
 export type RentalQuoteStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired';
+export type LeadOrigin =
+  | 'indicacao'
+  | 'google'
+  | 'instagram'
+  | 'facebook'
+  | 'visita_comercial'
+  | 'ligacao_comercial'
+  | 'cliente'
+  | 'loja'
+  | 'whatsapp';
 
 export const catalogStatus = pgEnum('catalog_status', ['active', 'archived']);
 
@@ -119,6 +129,34 @@ export const customers = pgTable('customers', {
   index('customers_status_idx').on(table.status),
   index('customers_nome_idx').on(table.nome),
   index('customers_document_idx').on(table.document),
+]);
+
+export const leads = pgTable('leads', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  nome: text('nome').notNull(),
+  document: text('document').notNull().default(''),
+  email: text('email').notNull().default(''),
+  phone: text('phone').notNull().default(''),
+  whatsapp: text('whatsapp').notNull().default(''),
+  zipCode: text('zip_code').notNull().default(''),
+  address: text('address').notNull().default(''),
+  city: text('city').notNull().default(''),
+  state: text('state').notNull().default(''),
+  origin: text('origin').notNull().default('whatsapp').$type<LeadOrigin>(),
+  interestCategoryId: integer('interest_category_id').references(() => categories.id, { onUpdate: 'cascade' }),
+  interestCategoryName: text('interest_category_name').notNull().default(''),
+  notes: text('notes').notNull().default(''),
+  customerId: integer('customer_id').references(() => customers.id, { onUpdate: 'cascade' }),
+  status: catalogStatus('status').notNull().default('active'),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (table) => [
+  index('leads_status_idx').on(table.status),
+  index('leads_nome_idx').on(table.nome),
+  index('leads_origin_idx').on(table.origin),
+  index('leads_interest_category_id_idx').on(table.interestCategoryId),
+  index('leads_customer_id_idx').on(table.customerId),
+  check('leads_origin_check', sql`${table.origin} in ('indicacao', 'google', 'instagram', 'facebook', 'visita_comercial', 'ligacao_comercial', 'cliente', 'loja', 'whatsapp')`),
 ]);
 
 export const staffUsers = pgTable('staff_users', {
@@ -254,6 +292,19 @@ export const rentalContractItems = pgTable('rental_contract_items', {
 export const rentalQuotes = pgTable('rental_quotes', {
   id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
   quoteNumber: text('quote_number').notNull().default(sql`public.next_rental_quote_number()`),
+  leadId: integer('lead_id')
+    .notNull()
+    .references(() => leads.id, { onUpdate: 'cascade' }),
+  leadName: text('lead_name').notNull().default(''),
+  leadDocument: text('lead_document').notNull().default(''),
+  leadEmail: text('lead_email').notNull().default(''),
+  leadPhone: text('lead_phone').notNull().default(''),
+  leadAddress: text('lead_address').notNull().default(''),
+  leadCity: text('lead_city').notNull().default(''),
+  leadState: text('lead_state').notNull().default(''),
+  leadOrigin: text('lead_origin').notNull().default('whatsapp').$type<LeadOrigin>(),
+  leadInterestCategoryId: integer('lead_interest_category_id').references(() => categories.id, { onUpdate: 'cascade' }),
+  leadInterestCategoryName: text('lead_interest_category_name').notNull().default(''),
   customerId: integer('customer_id').references(() => customers.id, { onUpdate: 'cascade' }),
   customerName: text('customer_name').notNull().default(''),
   customerDocument: text('customer_document').notNull().default(''),
@@ -287,12 +338,14 @@ export const rentalQuotes = pgTable('rental_quotes', {
 }, (table) => [
   uniqueIndex('rental_quotes_quote_number_key').on(table.quoteNumber),
   index('rental_quotes_quote_number_idx').on(table.quoteNumber),
+  index('rental_quotes_lead_id_idx').on(table.leadId),
   index('rental_quotes_customer_id_idx').on(table.customerId),
   index('rental_quotes_seller_id_idx').on(table.sellerId),
   index('rental_quotes_status_idx').on(table.status),
   check('rental_quotes_billing_period_check', sql`${table.billingPeriod} in ('daily', 'weekly', 'fortnightly', 'monthly')`),
   check('rental_quotes_rental_period_count_check', sql`${table.rentalPeriodCount} > 0`),
   check('rental_quotes_status_check', sql`${table.status} in ('draft', 'sent', 'approved', 'rejected', 'expired')`),
+  check('rental_quotes_lead_origin_check', sql`${table.leadOrigin} in ('indicacao', 'google', 'instagram', 'facebook', 'visita_comercial', 'ligacao_comercial', 'cliente', 'loja', 'whatsapp')`),
   check('rental_quotes_amounts_check', sql`${table.subtotalCents} >= 0 and ${table.shippingCents} >= 0 and ${table.totalCents} >= 0`),
   check('rental_quotes_discount_cents_check', sql`${table.discountCents} >= 0`),
   check('rental_quotes_surcharge_cents_check', sql`${table.surchargeCents} >= 0`),

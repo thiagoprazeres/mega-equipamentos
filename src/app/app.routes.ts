@@ -65,6 +65,12 @@ export const routes: Routes = [
     title: 'Clientes | Área Gestora Mega Equipamentos',
   },
   {
+    path: 'gestor/leads',
+    canActivate: [gestorAuthGuard],
+    loadComponent: () => import('./pages/gestor-leads/gestor-leads').then(m => m.GestorLeadsPage),
+    title: 'Leads | Área Gestora Mega Equipamentos',
+  },
+  {
     path: 'gestor/clientes/:id',
     canActivate: [gestorAuthGuard],
     loadComponent: () => import('./pages/gestor-cliente-detalhe/gestor-cliente-detalhe').then(m => m.GestorClienteDetalhePage),

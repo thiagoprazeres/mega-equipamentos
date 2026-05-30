@@ -44,6 +44,7 @@ export class GestorNavComponent {
   protected readonly navItems: GestorNavItem[] = [
     { label: 'Equipamentos', route: '/gestor/equipamentos', icon: Package },
     { label: 'Clientes', route: '/gestor/clientes', icon: UsersRound },
+    { label: 'Leads', route: '/gestor/leads', icon: UserRound },
     { label: 'Orçamentos', route: '/gestor/orcamentos', icon: ClipboardList },
     { label: 'Contratos', route: '/gestor/contratos', icon: FileText },
     { label: 'Empresa', route: '/gestor/empresa', icon: Building2 },

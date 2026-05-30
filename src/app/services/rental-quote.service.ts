@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import type { Customer } from '../interfaces/customer';
+import type { Lead } from '../interfaces/lead';
 import type { StaffUser } from '../interfaces/staff-user';
 import type { RentalBillingPeriod, RentalContract } from '../interfaces/rental-contract';
 import type { RentalQuote, RentalQuoteItem, RentalQuoteStatus } from '../interfaces/rental-quote';
@@ -8,7 +8,7 @@ import { GestorApiService } from './gestor-api.service';
 
 export interface RentalQuoteEditorInput {
   id?: number;
-  customer?: Customer | null;
+  lead: Lead;
   seller?: StaffUser | null;
   billingPeriod: RentalBillingPeriod;
   rentalPeriodCount: number;

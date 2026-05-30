@@ -20,12 +20,14 @@ import {
   customers,
   equipmentPrices,
   equipments,
+  leads,
   rentalContractItems,
   rentalContracts,
   rentalQuoteItems,
   rentalQuotes,
   staffUsers,
   type CatalogStatus,
+  type LeadOrigin,
   type RentalBillingPeriod,
   type RentalContractStatus,
   type RentalQuoteStatus,
@@ -42,6 +44,7 @@ type CategoryRow = typeof categories.$inferSelect;
 type EquipmentRow = typeof equipments.$inferSelect;
 type EquipmentPriceRow = typeof equipmentPrices.$inferSelect;
 type CustomerRow = typeof customers.$inferSelect;
+type LeadRow = typeof leads.$inferSelect;
 type StaffUserRow = typeof staffUsers.$inferSelect;
 type CompanyProfileRow = typeof companyProfile.$inferSelect;
 type RentalContractRow = typeof rentalContracts.$inferSelect;
@@ -66,6 +69,8 @@ export const handler: Handler = async (event) => {
         return handleEquipments(event, id, action);
       case 'customers':
         return handleCustomers(event, id, action);
+      case 'leads':
+        return handleLeads(event, id, action);
       case 'staff-users':
         return handleStaffUsers(event, id, action);
       case 'company-profile':
@@ -158,6 +163,26 @@ async function handleCustomers(event: HandlerEvent, id?: string, action?: string
   }
 
   return json({ error: 'Operação de cliente não suportada.' }, 405);
+}
+
+async function handleLeads(event: HandlerEvent, id?: string, action?: string) {
+  if (!id) {
+    if (event.httpMethod === 'GET') {
+      return json(await listLeads(event));
+    }
+
+    if (event.httpMethod === 'POST') {
+      return json(await saveLead(await readJson(event)));
+    }
+  }
+
+  if (id && action === 'status' && event.httpMethod === 'PATCH') {
+    const body = await readJson(event);
+    await updateLeadStatus(Number(id), normalizeCatalogStatus(body.status));
+    return json({ ok: true });
+  }
+
+  return json({ error: 'Operação de lead não suportada.' }, 405);
 }
 
 async function handleStaffUsers(event: HandlerEvent, id?: string, action?: string) {
@@ -463,6 +488,63 @@ async function updateCustomerStatus(id: number, status: CatalogStatus) {
   await getDb().update(customers).set({ status }).where(eq(customers.id, id));
 }
 
+async function listLeads(event: HandlerEvent) {
+  const filters = booleanQuery(event, 'includeArchived') ? [] : [eq(leads.status, 'active')];
+  const rows = await getDb()
+    .select()
+    .from(leads)
+    .where(filters.length ? and(...filters) : undefined)
+    .orderBy(desc(leads.createdAt), desc(leads.id));
+
+  return rows.map(mapLeadRow);
+}
+
+async function saveLead(input: Record<string, unknown>) {
+  const id = optionalNumber(input.id);
+  const interestCategoryId = optionalNumber(input.interestCategoryId) ?? null;
+  const interestCategory = interestCategoryId ? await loadCategoryById(interestCategoryId) : null;
+
+  if (interestCategoryId && !interestCategory) {
+    throw httpError(400, 'Grupo de interesse inválido.');
+  }
+
+  const payload = {
+    nome: textInput(input.nome),
+    document: textInput(input.document),
+    email: textInput(input.email).toLowerCase(),
+    phone: textInput(input.phone),
+    whatsapp: textInput(input.whatsapp),
+    zipCode: textInput(input.zipCode),
+    address: textInput(input.address),
+    city: textInput(input.city),
+    state: textInput(input.state).toUpperCase(),
+    origin: normalizeLeadOrigin(input.origin),
+    interestCategoryId,
+    interestCategoryName: interestCategory?.nome ?? '',
+    notes: textInput(input.notes),
+    customerId: optionalNumber(input.customerId) ?? null,
+    status: normalizeCatalogStatus(input.status),
+  };
+
+  if (!payload.nome) {
+    throw httpError(400, 'Informe o nome do lead.');
+  }
+
+  const [row] = id
+    ? await getDb().update(leads).set(payload).where(eq(leads.id, id)).returning()
+    : await getDb().insert(leads).values(payload).returning();
+
+  if (!row) {
+    throw httpError(500, 'Não foi possível salvar o lead.');
+  }
+
+  return mapLeadRow(row);
+}
+
+async function updateLeadStatus(id: number, status: CatalogStatus) {
+  await getDb().update(leads).set({ status }).where(eq(leads.id, id));
+}
+
 async function listStaffUsers(event: HandlerEvent) {
   const filters: SQL[] = [];
   const role = queryValue(event, 'role');
@@ -663,7 +745,7 @@ async function listRentalQuotes() {
 
 async function saveRentalQuote(input: Record<string, unknown>) {
   const id = optionalNumber(input.id);
-  const customer = optionalRecordInput(input.customer);
+  const lead = await requiredLeadInput(input.lead);
   const seller = optionalRecordInput(input.seller);
   const billingPeriod = normalizeBillingPeriod(input.billingPeriod);
   const rentalPeriodCount = periodCountInput(input.rentalPeriodCount);
@@ -675,14 +757,25 @@ async function saveRentalQuote(input: Record<string, unknown>) {
   const discountCents = centsInput(input.discountCents);
   const surchargeCents = centsInput(input.surchargeCents);
   const payload = {
-    customerId: optionalNumber(customer?.id) ?? null,
-    customerName: textInput(customer?.nome),
-    customerDocument: textInput(customer?.document),
-    customerEmail: textInput(customer?.email),
-    customerPhone: textInput(customer?.whatsapp) || textInput(customer?.phone),
-    customerAddress: textInput(customer?.address),
-    customerCity: textInput(customer?.city),
-    customerState: textInput(customer?.state),
+    leadId: lead.id,
+    leadName: lead.nome,
+    leadDocument: lead.document,
+    leadEmail: lead.email,
+    leadPhone: lead.whatsapp || lead.phone,
+    leadAddress: lead.address,
+    leadCity: lead.city,
+    leadState: lead.state,
+    leadOrigin: normalizeLeadOrigin(lead.origin),
+    leadInterestCategoryId: lead.interestCategoryId ?? null,
+    leadInterestCategoryName: lead.interestCategoryName,
+    customerId: lead.customerId ?? null,
+    customerName: lead.nome,
+    customerDocument: lead.document,
+    customerEmail: lead.email,
+    customerPhone: lead.whatsapp || lead.phone,
+    customerAddress: lead.address,
+    customerCity: lead.city,
+    customerState: lead.state,
     sellerId: optionalNumber(seller?.id) ?? null,
     sellerName: textInput(seller?.nome),
     sellerEmail: textInput(seller?.email),
@@ -728,6 +821,35 @@ async function saveRentalQuote(input: Record<string, unknown>) {
   return mapQuoteRow(saved.quote, saved.items.map(mapQuoteItemRow));
 }
 
+async function requiredLeadInput(value: unknown): Promise<LeadRow> {
+  const input = optionalRecordInput(value);
+
+  if (!input) {
+    throw httpError(400, 'Selecione um lead/interessado para o orçamento.');
+  }
+
+  const leadId = numberInput(input.id);
+  const [lead] = await getDb().select().from(leads).where(eq(leads.id, leadId));
+
+  if (!lead || lead.status === 'archived') {
+    throw httpError(400, 'Lead/interessado inválido.');
+  }
+
+  return lead;
+}
+
+function quoteCustomerSnapshotFromLead(quote: RentalQuoteRow, lead: LeadRow) {
+  return {
+    name: quote.leadName || lead.nome,
+    document: quote.leadDocument || lead.document,
+    email: quote.leadEmail || lead.email,
+    phone: quote.leadPhone || lead.whatsapp || lead.phone,
+    address: quote.leadAddress || lead.address,
+    city: quote.leadCity || lead.city,
+    state: quote.leadState || lead.state,
+  };
+}
+
 async function convertRentalQuoteToContract(id: number) {
   if (!Number.isFinite(id) || id <= 0) {
     throw httpError(400, 'Orçamento inválido.');
@@ -739,11 +861,15 @@ async function convertRentalQuoteToContract(id: number) {
     throw httpError(404, 'Orçamento não encontrado.');
   }
 
-  if (!quote.customerId) {
-    throw httpError(400, 'Selecione um cliente antes de transformar o orçamento em contrato.');
+  if (!quote.leadId) {
+    throw httpError(400, 'Selecione um lead/interessado antes de transformar o orçamento em contrato.');
   }
 
-  const customerId = quote.customerId;
+  const [lead] = await getDb().select().from(leads).where(eq(leads.id, quote.leadId));
+
+  if (!lead) {
+    throw httpError(400, 'Lead/interessado não encontrado.');
+  }
 
   if (!quote.sellerId) {
     throw httpError(400, 'Selecione um vendedor antes de transformar o orçamento em contrato.');
@@ -771,19 +897,54 @@ async function convertRentalQuoteToContract(id: number) {
   const contractNotes = [`Convertido do orçamento ${quote.quoteNumber}.`, quote.notes]
     .filter(Boolean)
     .join('\n');
+  const customerSnapshot = quoteCustomerSnapshotFromLead(quote, lead);
 
   const saved = await getDb().transaction(async (tx) => {
+    let customerId = lead.customerId ?? quote.customerId ?? null;
+
+    if (!customerId) {
+      const [customer] = await tx
+        .insert(customers)
+        .values({
+          nome: customerSnapshot.name,
+          document: customerSnapshot.document,
+          email: customerSnapshot.email,
+          phone: customerSnapshot.phone,
+          whatsapp: customerSnapshot.phone,
+          zipCode: '',
+          address: customerSnapshot.address,
+          city: customerSnapshot.city,
+          state: customerSnapshot.state,
+          notes: [`Criado automaticamente a partir do lead #${lead.id}.`, lead.notes]
+            .filter(Boolean)
+            .join('\n'),
+          status: 'active',
+        })
+        .returning();
+
+      if (!customer) {
+        throw httpError(500, 'Não foi possível criar o cliente a partir do lead.');
+      }
+
+      customerId = customer.id;
+      await tx.update(leads).set({ customerId }).where(eq(leads.id, lead.id));
+    }
+
+    if (!customerId) {
+      throw httpError(500, 'Não foi possível definir o cliente do contrato.');
+    }
+
     const [contract] = await tx
       .insert(rentalContracts)
       .values({
         customerId,
-        customerName: quote.customerName,
-        customerDocument: quote.customerDocument,
-        customerEmail: quote.customerEmail,
-        customerPhone: quote.customerPhone,
-        customerAddress: quote.customerAddress,
-        customerCity: quote.customerCity,
-        customerState: quote.customerState,
+        customerName: customerSnapshot.name,
+        customerDocument: customerSnapshot.document,
+        customerEmail: customerSnapshot.email,
+        customerPhone: customerSnapshot.phone,
+        customerAddress: customerSnapshot.address,
+        customerCity: customerSnapshot.city,
+        customerState: customerSnapshot.state,
         sellerId: quote.sellerId,
         sellerName: quote.sellerName,
         sellerEmail: quote.sellerEmail,
@@ -840,6 +1001,11 @@ async function loadCategories(includeArchived: boolean): Promise<CategoryRow[]> 
     .from(categories)
     .where(includeArchived ? undefined : eq(categories.status, 'active'))
     .orderBy(categoryCodeOrderSql(), asc(categories.categoryCode), asc(categories.sortOrder), asc(categories.nome));
+}
+
+async function loadCategoryById(id: number): Promise<CategoryRow | null> {
+  const [row] = await getDb().select().from(categories).where(eq(categories.id, id));
+  return row ?? null;
 }
 
 async function loadPricesByEquipmentId(
@@ -1125,6 +1291,29 @@ function mapCustomerRow(row: CustomerRow) {
   };
 }
 
+function mapLeadRow(row: LeadRow) {
+  return {
+    id: row.id,
+    nome: row.nome,
+    document: row.document || undefined,
+    email: row.email || undefined,
+    phone: row.phone || undefined,
+    whatsapp: row.whatsapp || undefined,
+    zipCode: row.zipCode || undefined,
+    address: row.address || undefined,
+    city: row.city || undefined,
+    state: row.state || undefined,
+    origin: normalizeLeadOrigin(row.origin),
+    interestCategoryId: row.interestCategoryId ?? undefined,
+    interestCategoryName: row.interestCategoryName || undefined,
+    notes: row.notes || undefined,
+    customerId: row.customerId ?? undefined,
+    status: row.status,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
 function mapStaffUserRow(row: StaffUserRow) {
   return {
     id: row.id,
@@ -1222,6 +1411,17 @@ function mapQuoteRow(row: RentalQuoteRow, items: ReturnType<typeof mapQuoteItemR
   return {
     id: row.id,
     quoteNumber: row.quoteNumber,
+    leadId: row.leadId,
+    leadName: row.leadName || row.customerName,
+    leadDocument: row.leadDocument || row.customerDocument || undefined,
+    leadEmail: row.leadEmail || row.customerEmail || undefined,
+    leadPhone: row.leadPhone || row.customerPhone || undefined,
+    leadAddress: row.leadAddress || row.customerAddress || undefined,
+    leadCity: row.leadCity || row.customerCity || undefined,
+    leadState: row.leadState || row.customerState || undefined,
+    leadOrigin: normalizeLeadOrigin(row.leadOrigin),
+    leadInterestCategoryId: row.leadInterestCategoryId ?? undefined,
+    leadInterestCategoryName: row.leadInterestCategoryName || undefined,
     customerId: row.customerId ?? undefined,
     customerName: row.customerName,
     customerDocument: row.customerDocument || undefined,
@@ -1418,6 +1618,30 @@ function normalizeStaffUserRole(value: unknown): StaffUserRole {
   return value === 'admin' || value === 'operador' || value === 'financeiro'
     ? value
     : 'vendedor';
+}
+
+function normalizeLeadOrigin(value: unknown): LeadOrigin {
+  const normalized = textInput(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  switch (normalized) {
+    case 'indicacao':
+    case 'google':
+    case 'instagram':
+    case 'facebook':
+    case 'visita_comercial':
+    case 'ligacao_comercial':
+    case 'cliente':
+    case 'loja':
+    case 'whatsapp':
+      return normalized;
+    default:
+      return 'whatsapp';
+  }
 }
 
 function normalizeBillingPeriod(value: unknown): RentalBillingPeriod {

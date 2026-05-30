@@ -14,6 +14,7 @@ import {
 } from 'lucide-angular';
 
 import type { CompanyProfile } from '../../interfaces/company-profile';
+import { leadOriginLabel } from '../../interfaces/lead';
 import type { RentalBillingPeriod } from '../../interfaces/rental-contract';
 import type { RentalQuote, RentalQuoteStatus } from '../../interfaces/rental-quote';
 import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
@@ -26,7 +27,7 @@ import { matchesSearchQuery } from '../../utils/search';
 
 const QUOTES_LOAD_TIMEOUT_MS = 6500;
 type SortDirection = 'asc' | 'desc';
-type QuoteSortKey = 'number' | 'customer' | 'seller' | 'period' | 'validUntil' | 'items' | 'total' | 'status';
+type QuoteSortKey = 'number' | 'lead' | 'seller' | 'period' | 'validUntil' | 'items' | 'total' | 'status';
 
 @Component({
   selector: 'app-gestor-orcamentos',
@@ -90,10 +91,12 @@ export class GestorOrcamentosPage implements OnInit {
       const matchesQuery = matchesSearchQuery(this.query, [
         quote.id,
         quote.quoteNumber,
-        quote.customerName,
-        quote.customerDocument,
-        quote.customerEmail,
-        quote.customerPhone,
+        quote.leadName,
+        quote.leadDocument,
+        quote.leadEmail,
+        quote.leadPhone,
+        quote.leadInterestCategoryName,
+        leadOriginLabel(quote.leadOrigin),
         quote.sellerName,
         quote.sellerEmail,
         quote.sellerPhone,
@@ -165,7 +168,7 @@ export class GestorOrcamentosPage implements OnInit {
 
     if (!this.canConvertQuote(quote)) {
       this.errorMessage =
-        'Para transformar em contrato, o orçamento precisa ter cliente, vendedor e pelo menos um equipamento.';
+        'Para transformar em contrato, o orçamento precisa ter lead/interessado, vendedor e pelo menos um equipamento.';
       return;
     }
 
@@ -189,7 +192,7 @@ export class GestorOrcamentosPage implements OnInit {
   }
 
   protected canConvertQuote(quote: RentalQuote): boolean {
-    return Boolean(quote.customerId && quote.sellerId && quote.items.length);
+    return Boolean(quote.leadId && quote.sellerId && quote.items.length);
   }
 
   protected periodLabel(period: RentalBillingPeriod): string {
@@ -224,8 +227,8 @@ export class GestorOrcamentosPage implements OnInit {
 
   private quoteSortValue(quote: RentalQuote): string | number {
     switch (this.sortKey) {
-      case 'customer':
-        return quote.customerName;
+      case 'lead':
+        return quote.leadName;
       case 'seller':
         return quote.sellerName ?? '';
       case 'period':
