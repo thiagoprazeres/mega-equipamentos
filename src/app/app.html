@@ -1,65 +1,66 @@
-@if (!isRestrictedArea()) {
+@if (isRestrictedArea()) {
+  <div class="drawer drawer-open" data-testid="restricted-drawer">
+    <input id="gestor-drawer" type="checkbox" class="drawer-toggle" aria-label="Alternar menu da área gestora" />
+
+    <div class="drawer-content flex min-h-screen flex-col bg-base-200 text-base-content">
+      <header
+        class="border-b border-white/10 bg-neutral px-4 py-3 text-neutral-content"
+        data-testid="restricted-header"
+      >
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center gap-3">
+            <label
+              for="gestor-drawer"
+              class="btn btn-ghost btn-square btn-sm text-neutral-content/80 hover:bg-white/10 hover:text-neutral-content"
+              aria-label="Abrir ou recolher menu"
+            >
+              <lucide-angular
+                [img]="PanelLeftOpen"
+                class="h-5 w-5 transition-transform duration-200 is-drawer-open:rotate-180"
+              ></lucide-angular>
+            </label>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/55">Área gestora</p>
+              <p class="text-lg font-extrabold leading-tight">Mega Equipamentos</p>
+            </div>
+          </div>
+
+          <a
+            class="btn btn-ghost btn-sm gap-2 text-neutral-content/80 hover:bg-white/10 hover:text-neutral-content"
+            routerLink="/"
+          >
+            Site público
+            <lucide-angular [img]="ExternalLink" class="h-4 w-4"></lucide-angular>
+          </a>
+        </div>
+      </header>
+
+      <main class="flex-1">
+        <router-outlet></router-outlet>
+      </main>
+
+      <footer
+        class="border-t border-white/10 bg-neutral px-4 py-4 text-neutral-content"
+        data-testid="restricted-footer"
+      >
+        <div class="flex flex-col gap-2 text-sm text-neutral-content/65 sm:flex-row sm:items-center sm:justify-between">
+          <p class="font-semibold text-neutral-content">Mega Equipamentos · Área gestora</p>
+          <p class="inline-flex items-center gap-2">
+            <lucide-angular [img]="ShieldCheck" class="h-4 w-4 text-primary"></lucide-angular>
+            Uso interno
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <div class="drawer-side z-20 is-drawer-close:overflow-visible">
+      <label for="gestor-drawer" aria-label="Fechar menu" class="drawer-overlay"></label>
+      <app-gestor-nav></app-gestor-nav>
+    </div>
+  </div>
+} @else {
   <app-header></app-header>
-}
-
-@if (isRestrictedArea()) {
-  <header
-    class="border-b border-white/10 bg-neutral px-4 py-3 text-neutral-content"
-    data-testid="restricted-header"
-  >
-    <div class="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex items-center gap-3">
-        <div class="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-primary text-base font-black text-primary-content">
-          ME
-        </div>
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/55">Área gestora</p>
-          <p class="text-lg font-extrabold leading-tight">Mega Equipamentos</p>
-        </div>
-      </div>
-
-      <div class="flex flex-wrap gap-2">
-        <a
-          class="btn btn-ghost btn-sm gap-2 text-neutral-content/80 hover:bg-white/10 hover:text-neutral-content"
-          routerLink="/gestor/equipamentos"
-        >
-          <lucide-angular [img]="LayoutDashboard" class="h-4 w-4"></lucide-angular>
-          Painel
-        </a>
-        <a
-          class="btn btn-ghost btn-sm gap-2 text-neutral-content/80 hover:bg-white/10 hover:text-neutral-content"
-          routerLink="/"
-        >
-          <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
-          Site
-        </a>
-      </div>
-    </div>
-  </header>
-}
-
-<main
-  [class]="isRestrictedArea() ? 'min-h-[calc(100vh-8.5rem)] bg-base-200 text-base-content' : ''"
->
   <router-outlet></router-outlet>
-</main>
-
-@if (isRestrictedArea()) {
-  <footer
-    class="border-t border-white/10 bg-neutral px-4 py-4 text-neutral-content"
-    data-testid="restricted-footer"
-  >
-    <div class="mx-auto flex max-w-7xl flex-col gap-2 text-sm text-neutral-content/65 sm:flex-row sm:items-center sm:justify-between">
-      <p class="font-semibold text-neutral-content">Mega Equipamentos · Área gestora</p>
-      <p class="inline-flex items-center gap-2">
-        <lucide-angular [img]="ShieldCheck" class="h-4 w-4 text-primary"></lucide-angular>
-        Uso interno
-      </p>
-    </div>
-  </footer>
-}
-
-@if (!isRestrictedArea()) {
   <app-footer></app-footer>
   <app-whats-app-button></app-whats-app-button>
 }

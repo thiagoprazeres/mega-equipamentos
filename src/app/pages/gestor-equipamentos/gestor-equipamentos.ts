@@ -22,7 +22,6 @@ import {
   RENTAL_PRICE_FIELDS,
 } from '../../utils/prices';
 import { matchesSearchQuery } from '../../utils/search';
-import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
 
 const CATALOG_LOAD_TIMEOUT_MS = 4500;
 type SortDirection = 'asc' | 'desc';
@@ -38,7 +37,7 @@ type EquipmentSortKey =
 @Component({
   selector: 'app-gestor-equipamentos',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, GestorNavComponent],
+  imports: [CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './gestor-equipamentos.html',
 })
 export class GestorEquipamentosPage implements OnInit {

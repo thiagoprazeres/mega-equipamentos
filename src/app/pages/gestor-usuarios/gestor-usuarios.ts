@@ -13,7 +13,6 @@ import {
   LucideAngularModule,
 } from 'lucide-angular';
 
-import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
 import type { CatalogStatus } from '../../interfaces/equipamento';
 import type { StaffUser, StaffUserRole } from '../../interfaces/staff-user';
 import { AuthService } from '../../services/auth.service';
@@ -27,7 +26,7 @@ type UserSortKey = 'name' | 'role' | 'document' | 'contact' | 'address' | 'statu
 @Component({
   selector: 'app-gestor-usuarios',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, GestorNavComponent],
+  imports: [CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './gestor-usuarios.html',
 })
 export class GestorUsuariosPage implements OnInit {

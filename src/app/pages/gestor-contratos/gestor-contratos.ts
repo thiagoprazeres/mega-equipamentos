@@ -24,7 +24,6 @@ import type {
   RentalContract,
   RentalContractStatus,
 } from '../../interfaces/rental-contract';
-import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
 import { AuthService } from '../../services/auth.service';
 import { CompanyProfileService } from '../../services/company-profile.service';
 import { RentalContractService } from '../../services/rental-contract.service';
@@ -45,7 +44,7 @@ type ContractSortKey = 'number' | 'customer' | 'seller' | 'period' | 'items' | '
 @Component({
   selector: 'app-gestor-contratos',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, GestorNavComponent],
+  imports: [CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './gestor-contratos.html',
 })
 export class GestorContratosPage implements OnInit {

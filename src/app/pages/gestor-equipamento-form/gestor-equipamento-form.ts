@@ -23,7 +23,6 @@ import {
   LucideAngularModule,
 } from 'lucide-angular';
 
-import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
 import type { Equipamento } from '../../interfaces/equipamento';
 import type { EquipamentoCategoria } from '../../interfaces/equipamento-categoria';
 import { AuthService } from '../../services/auth.service';
@@ -86,7 +85,6 @@ function normalizeCurrencyCentsInput(element: MaskitoElement): void {
     RouterLink,
     LucideAngularModule,
     MaskitoDirective,
-    GestorNavComponent,
   ],
   templateUrl: './gestor-equipamento-form.html',
 })

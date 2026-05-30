@@ -17,7 +17,6 @@ import type { CompanyProfile } from '../../interfaces/company-profile';
 import { leadOriginLabel } from '../../interfaces/lead';
 import type { RentalBillingPeriod } from '../../interfaces/rental-contract';
 import type { RentalQuote, RentalQuoteStatus } from '../../interfaces/rental-quote';
-import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
 import { AuthService } from '../../services/auth.service';
 import { CompanyProfileService } from '../../services/company-profile.service';
 import { RentalQuoteService } from '../../services/rental-quote.service';
@@ -32,7 +31,7 @@ type QuoteSortKey = 'number' | 'lead' | 'seller' | 'period' | 'validUntil' | 'it
 @Component({
   selector: 'app-gestor-orcamentos',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule, GestorNavComponent],
+  imports: [CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './gestor-orcamentos.html',
 })
 export class GestorOrcamentosPage implements OnInit {

@@ -54,5 +54,7 @@ describe('App', () => {
     expect(compiled.querySelector('app-whats-app-button')).toBeNull();
     expect(compiled.querySelector('[data-testid="restricted-header"]')).not.toBeNull();
     expect(compiled.querySelector('[data-testid="restricted-footer"]')).not.toBeNull();
+    expect(compiled.querySelector('[data-testid="restricted-drawer"]')).not.toBeNull();
+    expect(compiled.querySelector('app-gestor-nav')).not.toBeNull();
   });
 });

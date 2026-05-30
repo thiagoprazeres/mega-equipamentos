@@ -4,20 +4,21 @@ import { Header } from "./components/header/header";
 import { Footer } from "./components/footer/footer";
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { WhatsAppButton } from './components/whats-app-button/whats-app-button';
-import { ArrowLeft, LayoutDashboard, LucideAngularModule, ShieldCheck } from 'lucide-angular';
+import { ExternalLink, LucideAngularModule, PanelLeftOpen, ShieldCheck } from 'lucide-angular';
 import { filter } from 'rxjs';
+import { GestorNavComponent } from './components/gestor-nav/gestor-nav';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
-  imports: [Header, Footer, RouterLink, RouterOutlet, WhatsAppButton, LucideAngularModule]
+  imports: [Header, Footer, GestorNavComponent, RouterLink, RouterOutlet, WhatsAppButton, LucideAngularModule]
 })
 export class App {
   protected readonly title = signal('mega-equipamentos');
   protected readonly isRestrictedArea = signal(false);
-  protected readonly ArrowLeft = ArrowLeft;
-  protected readonly LayoutDashboard = LayoutDashboard;
+  protected readonly ExternalLink = ExternalLink;
+  protected readonly PanelLeftOpen = PanelLeftOpen;
   protected readonly ShieldCheck = ShieldCheck;
 
   constructor(private readonly router: Router) {

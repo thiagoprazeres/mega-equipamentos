@@ -22,7 +22,6 @@ import {
 
 import type { Customer } from '../../interfaces/customer';
 import type { CatalogStatus } from '../../interfaces/equipamento';
-import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
 import { AuthService } from '../../services/auth.service';
 import { CustomerService, CustomerEditorInput } from '../../services/customer.service';
 import { matchesSearchQuery } from '../../utils/search';
@@ -73,7 +72,6 @@ type CustomerSortKey = 'code' | 'name' | 'contact' | 'document' | 'city' | 'stat
     RouterLink,
     LucideAngularModule,
     MaskitoDirective,
-    GestorNavComponent,
   ],
   templateUrl: './gestor-clientes.html',
 })

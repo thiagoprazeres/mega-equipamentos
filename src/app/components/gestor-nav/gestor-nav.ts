@@ -23,20 +23,36 @@ interface GestorNavItem {
   imports: [RouterLink, RouterLinkActive, LucideAngularModule],
   template: `
     <nav
-      class="flex max-w-full flex-wrap gap-2 rounded-box border border-base-300 bg-base-100 p-2 shadow-sm"
+      class="flex min-h-full flex-col border-r border-base-300 bg-base-100 text-base-content shadow-sm transition-[width] duration-200 is-drawer-close:w-16 is-drawer-open:w-72"
       aria-label="Menu da área gestora"
     >
-      @for (item of navItems; track item.route) {
-        <a
-          class="btn btn-ghost btn-sm justify-start gap-2 whitespace-nowrap"
-          routerLinkActive="btn-active"
-          [routerLink]="item.route"
-          [routerLinkActiveOptions]="{ exact: false }"
-        >
-          <lucide-angular [img]="item.icon" class="h-4 w-4"></lucide-angular>
-          {{ item.label }}
-        </a>
-      }
+      <div class="flex h-16 items-center gap-3 border-b border-base-300 px-3">
+        <div class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary text-sm font-black text-primary-content">
+          ME
+        </div>
+        <div class="min-w-0 is-drawer-close:hidden">
+          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-base-content/55">Área gestora</p>
+          <p class="truncate text-sm font-extrabold text-primary">Mega Equipamentos</p>
+        </div>
+      </div>
+
+      <ul class="menu w-full grow gap-1 p-2">
+        @for (item of navItems; track item.route) {
+          <li>
+            <a
+              class="is-drawer-close:tooltip is-drawer-close:tooltip-right gap-3 rounded-lg"
+              routerLinkActive="menu-active"
+              [attr.aria-label]="item.label"
+              [attr.data-tip]="item.label"
+              [routerLink]="item.route"
+              [routerLinkActiveOptions]="{ exact: false }"
+            >
+              <lucide-angular [img]="item.icon" class="h-5 w-5 shrink-0"></lucide-angular>
+              <span class="truncate is-drawer-close:hidden">{{ item.label }}</span>
+            </a>
+          </li>
+        }
+      </ul>
     </nav>
   `,
 })

@@ -4,7 +4,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Building2, LogOut, Save, LucideAngularModule } from 'lucide-angular';
 
-import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
 import { AuthService } from '../../services/auth.service';
 import {
   CompanyProfileEditorInput,
@@ -17,7 +16,7 @@ const COMPANY_LOAD_TIMEOUT_MS = 4500;
 @Component({
   selector: 'app-gestor-empresa',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, GestorNavComponent],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './gestor-empresa.html',
 })
 export class GestorEmpresaPage implements OnInit {

@@ -15,7 +15,6 @@ import {
   LucideAngularModule,
 } from 'lucide-angular';
 
-import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
 import type { CatalogStatus } from '../../interfaces/equipamento';
 import type { EquipamentoCategoria } from '../../interfaces/equipamento-categoria';
 import {
@@ -40,7 +39,6 @@ type LeadSortKey = 'code' | 'name' | 'origin' | 'interest' | 'contact' | 'status
     CommonModule,
     ReactiveFormsModule,
     LucideAngularModule,
-    GestorNavComponent,
   ],
   templateUrl: './gestor-leads.html',
 })

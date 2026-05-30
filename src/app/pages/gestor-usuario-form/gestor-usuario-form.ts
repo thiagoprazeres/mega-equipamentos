@@ -7,7 +7,6 @@ import { maskitoUpdateElement, type MaskitoElement, type MaskitoOptions } from '
 import { maskitoEventHandler } from '@maskito/kit';
 import { ArrowLeft, LogOut, Save, LucideAngularModule } from 'lucide-angular';
 
-import { GestorNavComponent } from '../../components/gestor-nav/gestor-nav';
 import type { StaffUser, StaffUserRole } from '../../interfaces/staff-user';
 import { AuthService } from '../../services/auth.service';
 import { StaffUserEditorInput, StaffUserService } from '../../services/staff-user.service';
@@ -26,7 +25,6 @@ const PHONE_MASK = createFormatterMask(formatPhone);
     RouterLink,
     LucideAngularModule,
     MaskitoDirective,
-    GestorNavComponent,
   ],
   templateUrl: './gestor-usuario-form.html',
 })
