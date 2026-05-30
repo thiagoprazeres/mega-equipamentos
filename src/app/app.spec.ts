@@ -1,13 +1,26 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 import { App } from './app';
+
+@Component({
+  standalone: true,
+  template: '',
+})
+class EmptyRouteComponent {}
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([
+          { path: '', component: EmptyRouteComponent },
+          { path: 'area-restrita', component: EmptyRouteComponent },
+          { path: 'gestor/equipamentos', component: EmptyRouteComponent },
+        ]),
+      ],
     }).compileComponents();
   });
 
@@ -23,5 +36,19 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('app-header')).not.toBeNull();
     expect(compiled.querySelector('app-footer')).not.toBeNull();
+    expect(compiled.querySelector('app-whats-app-button')).not.toBeNull();
+  });
+
+  it('should not render the public shell on restricted routes', async () => {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+
+    await router.navigateByUrl('/area-restrita');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('app-header')).toBeNull();
+    expect(compiled.querySelector('app-footer')).toBeNull();
+    expect(compiled.querySelector('app-whats-app-button')).toBeNull();
   });
 });

@@ -1,43 +1,88 @@
-<section class="min-h-[70vh] bg-base-200 px-4 py-16">
-  <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-center">
-    <div>
-      <a class="link link-primary text-sm font-semibold" routerLink="/">Voltar para o site</a>
-      <p class="mt-8 text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
-      <h1 class="mt-2 max-w-2xl text-4xl font-extrabold text-primary md:text-5xl">
-        Equipamentos e preços da Mega Equipamentos
-      </h1>
-      <p class="mt-5 max-w-2xl text-lg leading-8 text-base-content/75">
-        Acesso restrito aos administradores para cadastrar equipamentos, clientes, usuários, contratos,
-        atualizar valores de locação e manter o catálogo público sincronizado.
-      </p>
-    </div>
+<section class="min-h-screen bg-neutral px-4 py-6 text-neutral-content md:py-10">
+  <div class="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl flex-col gap-8">
+    <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-center gap-3">
+        <div class="grid h-12 w-12 place-items-center rounded-lg bg-primary text-lg font-black text-primary-content">
+          ME
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/55">Área gestora</p>
+          <p class="text-lg font-extrabold">Mega Equipamentos</p>
+        </div>
+      </div>
 
-    <div class="rounded-box border border-base-300 bg-base-100 p-6 shadow-xl">
-      <h2 class="text-2xl font-extrabold text-primary">Entrar</h2>
+      <a class="btn btn-ghost btn-sm w-fit text-neutral-content/80 hover:bg-white/10 hover:text-neutral-content" routerLink="/">
+        <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
+        Voltar ao site
+      </a>
+    </header>
 
-      @if (errorMessage) {
-        <div class="alert alert-error mt-5 text-sm">{{ errorMessage }}</div>
-      }
+    <div class="grid flex-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_25rem]">
+      <div class="max-w-2xl">
+        <span class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-neutral-content/75">
+          <lucide-angular [img]="ShieldCheck" class="h-4 w-4 text-primary"></lucide-angular>
+          Acesso restrito
+        </span>
 
-      <button
-        class="btn mt-5 w-full border-base-300 bg-base-100 text-base-content hover:bg-base-200"
-        type="button"
-        (click)="signInWithGoogle()"
-        [disabled]="loading"
-      >
-        @if (loading) {
-          <span class="loading loading-spinner loading-sm"></span>
-        } @else {
-          <span class="grid h-5 w-5 place-items-center rounded-full border border-base-300 text-xs font-bold">
-            G
-          </span>
+        <h1 class="mt-6 text-4xl font-extrabold leading-tight md:text-5xl">
+          Painel comercial e operacional
+        </h1>
+
+        <p class="mt-5 max-w-xl text-base leading-7 text-neutral-content/70 md:text-lg">
+          Ambiente interno para gerir leads, orçamentos, contratos, clientes, equipamentos e preços.
+        </p>
+
+        <div class="mt-8 grid gap-3 sm:grid-cols-3">
+          <div class="rounded-lg border border-white/10 bg-white/5 p-4">
+            <p class="text-2xl font-black text-primary">01</p>
+            <p class="mt-1 text-sm text-neutral-content/70">Leads</p>
+          </div>
+          <div class="rounded-lg border border-white/10 bg-white/5 p-4">
+            <p class="text-2xl font-black text-primary">02</p>
+            <p class="mt-1 text-sm text-neutral-content/70">Orçamentos</p>
+          </div>
+          <div class="rounded-lg border border-white/10 bg-white/5 p-4">
+            <p class="text-2xl font-black text-primary">03</p>
+            <p class="mt-1 text-sm text-neutral-content/70">Contratos</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg border border-base-300 bg-base-100 p-6 text-base-content shadow-2xl">
+        <div class="flex items-center gap-3">
+          <div class="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
+            <lucide-angular [img]="KeyRound" class="h-5 w-5"></lucide-angular>
+          </div>
+          <div>
+            <h2 class="text-2xl font-extrabold text-primary">Entrar</h2>
+            <p class="text-sm text-base-content/60">Use sua conta autorizada.</p>
+          </div>
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert alert-error mt-5 text-sm">{{ errorMessage }}</div>
         }
-        Entrar com Google
-      </button>
 
-      <p class="mt-4 text-center text-sm text-base-content/60">
-        Use um e-mail autorizado da Mega Equipamentos.
-      </p>
+        <button
+          class="btn mt-6 w-full border-base-300 bg-base-100 text-base-content hover:bg-base-200"
+          type="button"
+          (click)="signInWithGoogle()"
+          [disabled]="loading"
+        >
+          @if (loading) {
+            <span class="loading loading-spinner loading-sm"></span>
+          } @else {
+            <span class="grid h-5 w-5 place-items-center rounded-full border border-base-300 text-xs font-bold">
+              G
+            </span>
+          }
+          Entrar com Google
+        </button>
+
+        <p class="mt-4 text-center text-sm text-base-content/60">
+          O acesso é liberado apenas para e-mails cadastrados.
+        </p>
+      </div>
     </div>
   </div>
 </section>
