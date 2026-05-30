@@ -1,6 +1,7 @@
 import type { CompanyProfile } from '../interfaces/company-profile';
 import type { RentalContract, RentalContractItem, RentalBillingPeriod } from '../interfaces/rental-contract';
 import type { RentalQuote } from '../interfaces/rental-quote';
+import { markdownToContractText } from './contract-terms';
 import { formatCurrencyCents } from './prices';
 
 const DEFAULT_COMPANY_PROFILE: CompanyProfile = {
@@ -703,9 +704,10 @@ function drawLegacyContractTermsPage(doc: unknown, contract: RentalContract): vo
   const pdf = doc as LegacyPdfDoc;
   const x = 28;
   let y = 38;
-  const clauses = contract.terms?.trim()
+  const rawClauses = contract.terms?.trim()
     ? contract.terms.trim()
     : '1.0 - Do objeto da locação: o objeto do presente contrato é a locação dos equipamentos descritos neste instrumento.\n\n2.0 - Da guarda, uso e conservação dos equipamentos: durante todo o período da locação, o(a) LOCATÁRIO(A) ficará responsável pela guarda, conservação e manutenção dos equipamentos, desde a retirada ou entrega até a efetiva devolução.\n\n2.1 - O(A) LOCATÁRIO(A), após vistoriar o equipamento e constatar que se encontra em perfeito estado de conservação, limpeza e apto ao uso, responsabiliza-se por qualquer dano ou perda total ou parcial, inclusive por furto, roubo, incêndio, acidente, uso indevido ou qualquer outra causa.\n\n2.2 - O(s) equipamento(s) descrito(s) no contrato será(ão) utilizado(s) única e exclusivamente na obra descrita e caracterizada neste contrato, ficando o(a) LOCATÁRIO(A) responsável por montagem, desmontagem, uso adequado e segurança da operação.\n\n2.3 - Fica proibida a utilização dos equipamentos por terceiros estranhos ao presente contrato, bem como sublocação, transferência ou cessão sem consentimento da LOCADORA, sob pena de rescisão.\n\n2.4 - O(A) LOCATÁRIO(A) assume responsabilidade pelas condições de uso, providenciando equipamentos de segurança necessários e indispensáveis, tais como cintos, capacetes, cordas e demais EPIs aplicáveis.\n\n2.5 - Em contratos superiores a 30 dias, o(a) LOCATÁRIO(A) poderá ficar sujeito à cobrança de manutenção, conforme estado do equipamento após perícia da LOCADORA.\n\n3.0 - Do prazo de locação: o prazo inicia-se na data de retirada ou entrega dos equipamentos e termina na data pactuada para devolução.\n\n3.1 - Findo o período de vigência, o contrato poderá ser prorrogado desde que a LOCADORA consinta expressamente, com emissão de novo contrato ou aditivo aplicável.\n\n3.2 - Caso o contrato não seja renovado e o(a) LOCATÁRIO(A) permaneça na posse dos equipamentos após o prazo, pagará aluguel conforme pactuado, sem prejuízo de multas e demais cobranças cabíveis.\n\n4.0 - Do foro: as partes elegem o foro de Caruaru/PE para dirimir questões oriundas deste contrato, com renúncia a qualquer outro por mais privilegiado que seja.\n\nOBS.: DECLARO TER LIDO O PRESENTE CONTRATO E ACEITO TODAS AS CLÁUSULAS NELE CONTIDAS.';
+  const clauses = markdownToContractText(rawClauses);
 
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8.2);

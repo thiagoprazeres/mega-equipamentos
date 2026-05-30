@@ -129,14 +129,144 @@
           </section>
 
           <section class="space-y-3">
-            <h3 class="text-lg font-bold text-primary">Cláusulas do contrato</h3>
-            <label class="flex flex-col gap-1.5">
-              <span class="text-sm font-semibold text-base-content/80">Texto padrão para novos contratos</span>
-              <textarea
-                class="textarea textarea-bordered min-h-72 w-full font-mono text-sm leading-relaxed"
-                formControlName="contractTerms"
-              ></textarea>
-            </label>
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-primary/70">Markdown</p>
+                <h3 class="text-lg font-bold text-primary">Cláusulas do contrato</h3>
+              </div>
+              <div role="tablist" class="tabs tabs-box w-fit">
+                <button
+                  class="tab gap-2"
+                  role="tab"
+                  type="button"
+                  [class.tab-active]="contractTermsView === 'editor'"
+                  (click)="contractTermsView = 'editor'"
+                >
+                  <lucide-angular [img]="PencilLine" class="h-4 w-4"></lucide-angular>
+                  Editor
+                </button>
+                <button
+                  class="tab gap-2"
+                  role="tab"
+                  type="button"
+                  [class.tab-active]="contractTermsView === 'preview'"
+                  (click)="contractTermsView = 'preview'"
+                >
+                  <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
+                  Prévia
+                </button>
+                <button
+                  class="tab"
+                  role="tab"
+                  type="button"
+                  [class.tab-active]="contractTermsView === 'split'"
+                  (click)="contractTermsView = 'split'"
+                >
+                  Dividido
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-hidden rounded-lg border border-base-300 bg-base-100 shadow-sm">
+              <div
+                class="flex flex-wrap items-center gap-1 border-b border-base-300 bg-base-200/70 p-2"
+                [class.hidden]="contractTermsView === 'preview'"
+              >
+                <button
+                  class="btn btn-ghost btn-sm btn-square tooltip"
+                  data-tip="Título"
+                  type="button"
+                  (click)="insertMarkdown('h1', contractTermsTextarea)"
+                >
+                  <lucide-angular [img]="Heading1" class="h-4 w-4"></lucide-angular>
+                </button>
+                <button
+                  class="btn btn-ghost btn-sm btn-square tooltip"
+                  data-tip="Subtítulo"
+                  type="button"
+                  (click)="insertMarkdown('h2', contractTermsTextarea)"
+                >
+                  <lucide-angular [img]="Heading2" class="h-4 w-4"></lucide-angular>
+                </button>
+                <button
+                  class="btn btn-ghost btn-sm btn-square tooltip"
+                  data-tip="Negrito"
+                  type="button"
+                  (click)="insertMarkdown('bold', contractTermsTextarea)"
+                >
+                  <lucide-angular [img]="Bold" class="h-4 w-4"></lucide-angular>
+                </button>
+                <button
+                  class="btn btn-ghost btn-sm btn-square tooltip"
+                  data-tip="Itálico"
+                  type="button"
+                  (click)="insertMarkdown('italic', contractTermsTextarea)"
+                >
+                  <lucide-angular [img]="Italic" class="h-4 w-4"></lucide-angular>
+                </button>
+                <div class="mx-1 h-6 w-px bg-base-300"></div>
+                <button
+                  class="btn btn-ghost btn-sm btn-square tooltip"
+                  data-tip="Lista"
+                  type="button"
+                  (click)="insertMarkdown('unorderedList', contractTermsTextarea)"
+                >
+                  <lucide-angular [img]="List" class="h-4 w-4"></lucide-angular>
+                </button>
+                <button
+                  class="btn btn-ghost btn-sm btn-square tooltip"
+                  data-tip="Lista numerada"
+                  type="button"
+                  (click)="insertMarkdown('orderedList', contractTermsTextarea)"
+                >
+                  <lucide-angular [img]="ListOrdered" class="h-4 w-4"></lucide-angular>
+                </button>
+                <button
+                  class="btn btn-ghost btn-sm btn-square tooltip"
+                  data-tip="Citação"
+                  type="button"
+                  (click)="insertMarkdown('quote', contractTermsTextarea)"
+                >
+                  <lucide-angular [img]="Quote" class="h-4 w-4"></lucide-angular>
+                </button>
+                <button
+                  class="btn btn-ghost btn-sm btn-square tooltip"
+                  data-tip="Link"
+                  type="button"
+                  (click)="insertMarkdown('link', contractTermsTextarea)"
+                >
+                  <lucide-angular [img]="Link" class="h-4 w-4"></lucide-angular>
+                </button>
+              </div>
+
+              <div class="grid min-h-[26rem]" [class.lg:grid-cols-2]="contractTermsView === 'split'">
+                <label
+                  class="flex min-h-96 flex-col border-b border-base-300 lg:border-b-0"
+                  [class.hidden]="contractTermsView === 'preview'"
+                  [class.lg:border-r]="contractTermsView === 'split'"
+                >
+                  <span class="border-b border-base-300 px-4 py-3 text-sm font-semibold text-base-content/80">
+                    Texto padrão para novos contratos
+                  </span>
+                  <textarea
+                    #contractTermsTextarea
+                    class="min-h-96 flex-1 resize-none bg-base-100 px-4 py-4 font-mono text-sm leading-7 outline-none"
+                    formControlName="contractTerms"
+                    spellcheck="true"
+                  ></textarea>
+                </label>
+
+                <section class="min-h-96 bg-base-100" [class.hidden]="contractTermsView === 'editor'">
+                  <div class="border-b border-base-300 px-4 py-3 text-sm font-semibold text-base-content/80">
+                    Visualização
+                  </div>
+                  <div
+                    class="min-h-80 px-5 py-4 text-sm leading-7 text-base-content/80 [&_a]:font-semibold [&_a]:text-primary [&_blockquote]:border-l-4 [&_blockquote]:border-primary/40 [&_blockquote]:bg-base-200/70 [&_blockquote]:px-4 [&_blockquote]:py-3 [&_blockquote]:text-base-content/70 [&_code]:rounded [&_code]:bg-base-200 [&_code]:px-1.5 [&_code]:py-0.5 [&_h1]:mb-4 [&_h1]:text-2xl [&_h1]:font-black [&_h1]:text-primary [&_h2]:mb-3 [&_h2]:mt-5 [&_h2]:text-xl [&_h2]:font-extrabold [&_h2]:text-primary [&_h3]:mb-2 [&_h3]:mt-4 [&_h3]:text-lg [&_h3]:font-bold [&_hr]:my-5 [&_hr]:border-base-300 [&_li]:my-1.5 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-3 [&_strong]:font-extrabold [&_ul]:list-disc [&_ul]:pl-6"
+                    [innerHTML]="contractTermsPreviewHtml()"
+                  ></div>
+                </section>
+              </div>
+            </div>
           </section>
 
           <div class="flex justify-end">
