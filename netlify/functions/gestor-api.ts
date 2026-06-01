@@ -320,7 +320,7 @@ async function listEquipments(event: HandlerEvent) {
     .select()
     .from(equipments)
     .where(filters.length ? and(...filters) : undefined)
-    .orderBy(asc(equipments.categoryId), asc(equipments.equipmentCode), asc(equipments.sortOrder), asc(equipments.nome));
+    .orderBy(desc(equipments.createdAt), desc(equipments.id));
   const pricesByEquipmentId = await loadPricesByEquipmentId(equipmentRows.map((item) => item.id));
 
   return json(
@@ -453,7 +453,7 @@ async function listCustomers(event: HandlerEvent) {
     .select()
     .from(customers)
     .where(filters.length ? and(...filters) : undefined)
-    .orderBy(asc(customers.nome), asc(customers.id));
+    .orderBy(desc(customers.createdAt), desc(customers.id));
 
   return rows.map(mapCustomerRow);
 }
@@ -561,7 +561,7 @@ async function listStaffUsers(event: HandlerEvent) {
     .select()
     .from(staffUsers)
     .where(filters.length ? and(...filters) : undefined)
-    .orderBy(asc(staffUsers.nome), asc(staffUsers.id));
+    .orderBy(desc(staffUsers.createdAt), desc(staffUsers.id));
 
   return rows.map(mapStaffUserRow);
 }
@@ -1278,6 +1278,8 @@ function mapEquipmentRow(
     stockQuantity: row.stockQuantity,
     status: row.status,
     sortOrder: row.sortOrder,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 

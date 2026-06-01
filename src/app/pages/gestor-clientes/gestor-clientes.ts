@@ -61,7 +61,7 @@ const DOCUMENT_MASK = createFormatterMask(formatCpfCnpj);
 const PHONE_MASK = createFormatterMask(formatPhone);
 const ZIP_CODE_MASK = createFormatterMask(formatZipCode);
 type SortDirection = 'asc' | 'desc';
-type CustomerSortKey = 'code' | 'name' | 'contact' | 'document' | 'city' | 'status';
+type CustomerSortKey = 'createdAt' | 'code' | 'name' | 'contact' | 'document' | 'city' | 'status';
 
 @Component({
   selector: 'app-gestor-clientes',
@@ -103,8 +103,8 @@ export class GestorClientesPage implements OnInit {
   protected editingCustomer: Customer | null = null;
   protected errorMessage = '';
   protected successMessage = '';
-  protected sortKey: CustomerSortKey = 'name';
-  protected sortDirection: SortDirection = 'asc';
+  protected sortKey: CustomerSortKey = 'createdAt';
+  protected sortDirection: SortDirection = 'desc';
 
   protected readonly form = this.formBuilder.nonNullable.group({
     nome: ['', Validators.required],
@@ -291,8 +291,10 @@ export class GestorClientesPage implements OnInit {
     return customer.whatsapp || customer.phone || customer.email || 'Sem contato';
   }
 
-  private customerSortValue(customer: Customer): string {
+  private customerSortValue(customer: Customer): string | number {
     switch (this.sortKey) {
+      case 'createdAt':
+        return newestSortValue(customer.createdAt, customer.id);
       case 'code':
         return String(customer.id).padStart(8, '0');
       case 'contact':
@@ -360,6 +362,11 @@ function sortBy<Item>(
       sensitivity: 'base',
     }) * multiplier;
   });
+}
+
+function newestSortValue(createdAt: string | undefined, id: number): number {
+  const timestamp = createdAt ? Date.parse(createdAt) : Number.NaN;
+  return Number.isFinite(timestamp) ? timestamp + id / 1_000_000 : id;
 }
 
 function withTimeout<Result>(promise: Promise<Result>, timeoutMs: number): Promise<Result> {

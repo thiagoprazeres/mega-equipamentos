@@ -21,7 +21,7 @@ import { matchesSearchQuery } from '../../utils/search';
 
 const USERS_LOAD_TIMEOUT_MS = 4500;
 type SortDirection = 'asc' | 'desc';
-type UserSortKey = 'name' | 'role' | 'document' | 'contact' | 'address' | 'status';
+type UserSortKey = 'createdAt' | 'name' | 'role' | 'document' | 'contact' | 'address' | 'status';
 
 @Component({
   selector: 'app-gestor-usuarios',
@@ -46,8 +46,8 @@ export class GestorUsuariosPage implements OnInit {
   protected loading = false;
   protected errorMessage = '';
   protected successMessage = '';
-  protected sortKey: UserSortKey = 'name';
-  protected sortDirection: SortDirection = 'asc';
+  protected sortKey: UserSortKey = 'createdAt';
+  protected sortDirection: SortDirection = 'desc';
   protected readonly roleOptions: Array<{ value: StaffUserRole | 'all'; label: string }> = [
     { value: 'all', label: 'Todos' },
     { value: 'admin', label: 'Admin' },
@@ -154,8 +154,10 @@ export class GestorUsuariosPage implements OnInit {
     void this.router.navigateByUrl('/gestor/login');
   }
 
-  private userSortValue(user: StaffUser): string {
+  private userSortValue(user: StaffUser): string | number {
     switch (this.sortKey) {
+      case 'createdAt':
+        return newestSortValue(user.createdAt, user.id);
       case 'role':
         return this.roleLabel(user.role);
       case 'document':
@@ -218,6 +220,11 @@ function sortBy<Item>(
       sensitivity: 'base',
     }) * multiplier;
   });
+}
+
+function newestSortValue(createdAt: string | undefined, id: number): number {
+  const timestamp = createdAt ? Date.parse(createdAt) : Number.NaN;
+  return Number.isFinite(timestamp) ? timestamp + id / 1_000_000 : id;
 }
 
 function withTimeout<Result>(promise: Promise<Result>, timeoutMs: number): Promise<Result> {

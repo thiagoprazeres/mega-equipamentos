@@ -42,7 +42,7 @@ import { matchesSearchQuery } from '../../utils/search';
 
 const CONTRACTS_LOAD_TIMEOUT_MS = 6500;
 type SortDirection = 'asc' | 'desc';
-type ContractSortKey = 'number' | 'customer' | 'seller' | 'period' | 'items' | 'total' | 'status';
+type ContractSortKey = 'createdAt' | 'number' | 'customer' | 'seller' | 'period' | 'items' | 'total' | 'status';
 
 @Component({
   selector: 'app-gestor-contratos',
@@ -101,7 +101,7 @@ export class GestorContratosPage implements OnInit {
   protected exportingQuoteId: number | null = null;
   protected errorMessage = '';
   protected successMessage = '';
-  protected sortKey: ContractSortKey = 'number';
+  protected sortKey: ContractSortKey = 'createdAt';
   protected sortDirection: SortDirection = 'desc';
 
   constructor(
@@ -339,6 +339,8 @@ export class GestorContratosPage implements OnInit {
 
   private contractSortValue(contract: RentalContract): string | number {
     switch (this.sortKey) {
+      case 'createdAt':
+        return newestSortValue(contract.createdAt, contract.id);
       case 'customer':
         return contract.customerName;
       case 'seller':
@@ -416,6 +418,11 @@ function sortBy<Item>(
       sensitivity: 'base',
     }) * multiplier;
   });
+}
+
+function newestSortValue(createdAt: string | undefined, id: number): number {
+  const timestamp = createdAt ? Date.parse(createdAt) : Number.NaN;
+  return Number.isFinite(timestamp) ? timestamp + id / 1_000_000 : id;
 }
 
 function withTimeout<Result>(promise: Promise<Result>, timeoutMs: number): Promise<Result> {

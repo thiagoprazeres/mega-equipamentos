@@ -32,4 +32,6 @@ export interface Equipamento {
   stockQuantity?: number;
   status?: CatalogStatus;
   sortOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }

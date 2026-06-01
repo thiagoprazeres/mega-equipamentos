@@ -52,6 +52,8 @@ interface EquipmentRow {
   stock_quantity?: number | null;
   status: CatalogStatus;
   sort_order: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface EquipmentPriceRow {
@@ -501,6 +503,8 @@ function mapEquipmentRow(
     stockQuantity: normalizeStockQuantity(row.stock_quantity),
     status: row.status,
     sortOrder: row.sort_order,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 

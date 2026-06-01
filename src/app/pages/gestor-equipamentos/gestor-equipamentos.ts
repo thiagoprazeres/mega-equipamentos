@@ -26,6 +26,7 @@ import { matchesSearchQuery } from '../../utils/search';
 const CATALOG_LOAD_TIMEOUT_MS = 4500;
 type SortDirection = 'asc' | 'desc';
 type EquipmentSortKey =
+  | 'createdAt'
   | 'code'
   | 'name'
   | 'category'
@@ -57,8 +58,8 @@ export class GestorEquipamentosPage implements OnInit {
   protected loading = false;
   protected errorMessage = '';
   protected successMessage = '';
-  protected sortKey: EquipmentSortKey = 'code';
-  protected sortDirection: SortDirection = 'asc';
+  protected sortKey: EquipmentSortKey = 'createdAt';
+  protected sortDirection: SortDirection = 'desc';
   private catalogLoadStarted = false;
 
   constructor(
@@ -175,6 +176,8 @@ export class GestorEquipamentosPage implements OnInit {
 
   private equipmentSortValue(equipment: Equipamento): string | number {
     switch (this.sortKey) {
+      case 'createdAt':
+        return newestSortValue(equipment.createdAt, equipment.id);
       case 'code':
         return equipment.codigoInterno ?? equipment.id;
       case 'category':
@@ -264,6 +267,11 @@ function sortBy<Item>(
       sensitivity: 'base',
     }) * multiplier;
   });
+}
+
+function newestSortValue(createdAt: string | undefined, id: number): number {
+  const timestamp = createdAt ? Date.parse(createdAt) : Number.NaN;
+  return Number.isFinite(timestamp) ? timestamp + id / 1_000_000 : id;
 }
 
 function compareCategoryByCode(left: EquipamentoCategoria, right: EquipamentoCategoria): number {

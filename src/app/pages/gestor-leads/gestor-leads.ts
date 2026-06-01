@@ -31,7 +31,7 @@ import { matchesSearchQuery } from '../../utils/search';
 
 const LEADS_LOAD_TIMEOUT_MS = 6500;
 type SortDirection = 'asc' | 'desc';
-type LeadSortKey = 'code' | 'name' | 'origin' | 'interest' | 'contact' | 'status';
+type LeadSortKey = 'createdAt' | 'code' | 'name' | 'origin' | 'interest' | 'contact' | 'status';
 
 @Component({
   selector: 'app-gestor-leads',
@@ -69,8 +69,8 @@ export class GestorLeadsPage implements OnInit {
   protected editingLead: Lead | null = null;
   protected errorMessage = '';
   protected successMessage = '';
-  protected sortKey: LeadSortKey = 'name';
-  protected sortDirection: SortDirection = 'asc';
+  protected sortKey: LeadSortKey = 'createdAt';
+  protected sortDirection: SortDirection = 'desc';
 
   protected readonly form = this.formBuilder.nonNullable.group({
     nome: ['', Validators.required],
@@ -281,8 +281,10 @@ export class GestorLeadsPage implements OnInit {
     void this.router.navigateByUrl('/gestor/login');
   }
 
-  private leadSortValue(lead: Lead): string {
+  private leadSortValue(lead: Lead): string | number {
     switch (this.sortKey) {
+      case 'createdAt':
+        return newestSortValue(lead.createdAt, lead.id);
       case 'code':
         return String(lead.id).padStart(8, '0');
       case 'origin':
@@ -350,6 +352,11 @@ function sortBy<Item>(
       sensitivity: 'base',
     }) * multiplier;
   });
+}
+
+function newestSortValue(createdAt: string | undefined, id: number): number {
+  const timestamp = createdAt ? Date.parse(createdAt) : Number.NaN;
+  return Number.isFinite(timestamp) ? timestamp + id / 1_000_000 : id;
 }
 
 function withTimeout<Result>(promise: Promise<Result>, timeoutMs: number): Promise<Result> {

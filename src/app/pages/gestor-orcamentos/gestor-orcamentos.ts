@@ -27,7 +27,7 @@ import { matchesSearchQuery } from '../../utils/search';
 
 const QUOTES_LOAD_TIMEOUT_MS = 6500;
 type SortDirection = 'asc' | 'desc';
-type QuoteSortKey = 'number' | 'lead' | 'seller' | 'period' | 'validUntil' | 'items' | 'total' | 'status';
+type QuoteSortKey = 'createdAt' | 'number' | 'lead' | 'seller' | 'period' | 'validUntil' | 'items' | 'total' | 'status';
 
 @Component({
   selector: 'app-gestor-orcamentos',
@@ -68,7 +68,7 @@ export class GestorOrcamentosPage implements OnInit {
   protected convertingQuoteId: number | null = null;
   protected errorMessage = '';
   protected successMessage = '';
-  protected sortKey: QuoteSortKey = 'number';
+  protected sortKey: QuoteSortKey = 'createdAt';
   protected sortDirection: SortDirection = 'desc';
 
   constructor(
@@ -228,6 +228,8 @@ export class GestorOrcamentosPage implements OnInit {
 
   private quoteSortValue(quote: RentalQuote): string | number {
     switch (this.sortKey) {
+      case 'createdAt':
+        return newestSortValue(quote.createdAt, quote.id);
       case 'lead':
         return quote.leadName;
       case 'seller':
@@ -297,6 +299,11 @@ function sortBy<Item>(
       sensitivity: 'base',
     }) * multiplier;
   });
+}
+
+function newestSortValue(createdAt: string | undefined, id: number): number {
+  const timestamp = createdAt ? Date.parse(createdAt) : Number.NaN;
+  return Number.isFinite(timestamp) ? timestamp + id / 1_000_000 : id;
 }
 
 function withTimeout<Result>(promise: Promise<Result>, timeoutMs: number): Promise<Result> {
