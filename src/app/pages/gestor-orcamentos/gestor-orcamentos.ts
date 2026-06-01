@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import {
   ClipboardList,
   Download,
+  Eye,
   FilePenLine,
   FileText,
   LogOut,
@@ -37,6 +38,7 @@ type QuoteSortKey = 'number' | 'lead' | 'seller' | 'period' | 'validUntil' | 'it
 export class GestorOrcamentosPage implements OnInit {
   protected readonly ClipboardList = ClipboardList;
   protected readonly Download = Download;
+  protected readonly Eye = Eye;
   protected readonly FilePenLine = FilePenLine;
   protected readonly FileText = FileText;
   protected readonly LogOut = LogOut;

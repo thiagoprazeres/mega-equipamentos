@@ -139,6 +139,14 @@
                   </td>
                   <td>
                     <div class="flex justify-end gap-2">
+                      <a
+                        class="btn btn-square btn-ghost"
+                        title="Visualizar lead"
+                        aria-label="Visualizar lead"
+                        [routerLink]="['/gestor/leads', lead.id]"
+                      >
+                        <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
+                      </a>
                       <button class="btn btn-square btn-ghost" type="button" (click)="openEditModal(lead)">
                         <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
                       </button>

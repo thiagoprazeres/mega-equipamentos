@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   Archive,
+  Eye,
   LogOut,
   Pencil,
   Plus,
@@ -38,6 +39,7 @@ type LeadSortKey = 'code' | 'name' | 'origin' | 'interest' | 'contact' | 'status
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterLink,
     LucideAngularModule,
   ],
   templateUrl: './gestor-leads.html',
@@ -46,6 +48,7 @@ export class GestorLeadsPage implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
 
   protected readonly Archive = Archive;
+  protected readonly Eye = Eye;
   protected readonly LogOut = LogOut;
   protected readonly Pencil = Pencil;
   protected readonly Plus = Plus;

@@ -1,0 +1,161 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <a class="btn btn-ghost w-fit" routerLink="/gestor/orcamentos">
+      <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
+      Orçamentos
+    </a>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else if (errorMessage && !quote) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    } @else if (quote) {
+      @if (errorMessage) {
+        <div class="alert alert-error">{{ errorMessage }}</div>
+      }
+
+      @if (successMessage) {
+        <div class="alert alert-success">{{ successMessage }}</div>
+      }
+
+      <header class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div class="flex items-start gap-4">
+          <div class="grid h-20 w-20 place-items-center rounded-box bg-primary/10 text-primary">
+            <lucide-angular [img]="ClipboardList" class="h-8 w-8"></lucide-angular>
+          </div>
+          <div>
+            <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Orçamento</p>
+            <h1 class="text-3xl font-extrabold text-primary md:text-4xl">{{ quote.quoteNumber }}</h1>
+            <p class="mt-2 text-base-content/65">{{ quote.leadName || quote.customerName || 'Interessado não informado' }}</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="badge" [class.badge-success]="quote.status === 'approved'">
+            {{ statusLabel(quote.status) }}
+          </span>
+          <a class="btn btn-outline" [routerLink]="['/gestor/orcamentos', quote.id, 'editar']">
+            <lucide-angular [img]="FilePenLine" class="h-4 w-4"></lucide-angular>
+            Editar
+          </a>
+          <button
+            class="btn btn-outline"
+            type="button"
+            [disabled]="!canConvertQuote(quote) || converting"
+            (click)="convertToContract()"
+          >
+            @if (converting) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              <lucide-angular [img]="FileText" class="h-4 w-4"></lucide-angular>
+            }
+            Gerar contrato
+          </button>
+          <button class="btn btn-primary" type="button" [disabled]="exporting" (click)="exportPdf()">
+            @if (exporting) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              <lucide-angular [img]="Download" class="h-4 w-4"></lucide-angular>
+            }
+            PDF
+          </button>
+        </div>
+      </header>
+
+      <section class="grid gap-4 md:grid-cols-4">
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Início previsto</p>
+          <p class="mt-1 text-xl font-bold">{{ formatDate(quote.startDate) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Validade</p>
+          <p class="mt-1 text-xl font-bold">{{ formatDate(quote.validUntil) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Período</p>
+          <p class="mt-1 text-xl font-bold">{{ rentalDurationLabel(quote) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Total</p>
+          <p class="mt-1 text-xl font-bold">{{ formatMoney(quote.totalCents) }}</p>
+        </div>
+      </section>
+
+      <section class="grid gap-4 lg:grid-cols-2">
+        <div class="rounded-box border border-base-300 bg-base-100 p-5">
+          <h2 class="text-xl font-bold text-primary">Interessado</h2>
+          <dl class="mt-4 grid gap-3">
+            <div><dt class="font-semibold">Nome</dt><dd class="text-base-content/70">{{ value(quote.leadName || quote.customerName) }}</dd></div>
+            <div><dt class="font-semibold">CPF/CNPJ</dt><dd class="text-base-content/70">{{ value(quote.leadDocument || quote.customerDocument) }}</dd></div>
+            <div><dt class="font-semibold">Contato</dt><dd class="text-base-content/70">{{ value(quote.leadPhone || quote.leadEmail || quote.customerPhone || quote.customerEmail) }}</dd></div>
+            <div><dt class="font-semibold">Origem</dt><dd class="text-base-content/70">{{ leadOrigin(quote.leadOrigin) }}</dd></div>
+            <div><dt class="font-semibold">Grupo de interesse</dt><dd class="text-base-content/70">{{ value(quote.leadInterestCategoryName) }}</dd></div>
+            <div><dt class="font-semibold">Endereço</dt><dd class="text-base-content/70">{{ value(quote.leadAddress || quote.customerAddress) }} {{ quote.leadCity || quote.customerCity || '' }} {{ quote.leadState || quote.customerState || '' }}</dd></div>
+          </dl>
+        </div>
+
+        <div class="rounded-box border border-base-300 bg-base-100 p-5">
+          <h2 class="text-xl font-bold text-primary">Locação</h2>
+          <dl class="mt-4 grid gap-3">
+            <div><dt class="font-semibold">Vendedor</dt><dd class="text-base-content/70">{{ value(quote.sellerName) }}</dd></div>
+            <div><dt class="font-semibold">Contato do vendedor</dt><dd class="text-base-content/70">{{ value(quote.sellerPhone || quote.sellerEmail) }}</dd></div>
+            <div><dt class="font-semibold">Período da locação</dt><dd class="text-base-content/70">{{ rentalDurationLabel(quote) }} | {{ periodLabel(quote.billingPeriod) }}</dd></div>
+            <div><dt class="font-semibold">Local de entrega/uso</dt><dd class="text-base-content/70">{{ value(quote.deliveryAddress) }}</dd></div>
+            <div><dt class="font-semibold">Endereço da obra</dt><dd class="text-base-content/70">{{ quote.worksiteAddress || quote.deliveryAddress || 'A combinar' }}</dd></div>
+            <div><dt class="font-semibold">Observações</dt><dd class="whitespace-pre-line text-base-content/70">{{ value(quote.notes) }}</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="rounded-box border border-base-300 bg-base-100 p-5">
+        <h2 class="text-xl font-bold text-primary">Equipamentos</h2>
+        <div class="mt-4 overflow-x-auto">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Equipamento</th>
+                <th>Qtd.</th>
+                <th>Unit./período</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of quote.items; track item.id ?? item.equipmentId) {
+                <tr>
+                  <td>{{ item.equipmentName }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ formatMoney(item.unitPriceCents) }}</td>
+                  <td>{{ formatMoney(item.totalPriceCents) }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="text-right text-base-content/70">Subtotal</td>
+                <td>{{ formatMoney(quote.subtotalCents) }}</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-right text-base-content/70">Frete</td>
+                <td>{{ formatMoney(quote.shippingCents) }}</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-right text-base-content/70">Desconto</td>
+                <td>- {{ formatMoney(quote.discountCents) }}</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-right text-base-content/70">Acréscimo</td>
+                <td>{{ formatMoney(quote.surchargeCents) }}</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-right font-bold">Total</td>
+                <td class="font-bold">{{ formatMoney(quote.totalCents) }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    }
+  </div>
+</section>

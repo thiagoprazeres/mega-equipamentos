@@ -71,6 +71,12 @@ export const routes: Routes = [
     title: 'Leads | Área Gestora Mega Equipamentos',
   },
   {
+    path: 'gestor/leads/:id',
+    canActivate: [gestorAuthGuard],
+    loadComponent: () => import('./pages/gestor-lead-detalhe/gestor-lead-detalhe').then(m => m.GestorLeadDetalhePage),
+    title: 'Detalhes do Lead | Área Gestora Mega Equipamentos',
+  },
+  {
     path: 'gestor/clientes/:id',
     canActivate: [gestorAuthGuard],
     loadComponent: () => import('./pages/gestor-cliente-detalhe/gestor-cliente-detalhe').then(m => m.GestorClienteDetalhePage),
@@ -117,6 +123,12 @@ export const routes: Routes = [
     canActivate: [gestorAuthGuard],
     loadComponent: () => import('./pages/gestor-orcamento-form/gestor-orcamento-form').then(m => m.GestorOrcamentoFormPage),
     title: 'Editar Orçamento | Área Gestora Mega Equipamentos',
+  },
+  {
+    path: 'gestor/orcamentos/:id',
+    canActivate: [gestorAuthGuard],
+    loadComponent: () => import('./pages/gestor-orcamento-detalhe/gestor-orcamento-detalhe').then(m => m.GestorOrcamentoDetalhePage),
+    title: 'Detalhes do Orçamento | Área Gestora Mega Equipamentos',
   },
   {
     path: 'gestor/contratos',

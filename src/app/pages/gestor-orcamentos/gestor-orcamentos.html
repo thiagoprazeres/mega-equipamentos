@@ -163,6 +163,14 @@
                   </td>
                   <td>
                     <div class="flex justify-end gap-2">
+                      <a
+                        class="btn btn-square btn-ghost"
+                        title="Visualizar orçamento"
+                        aria-label="Visualizar orçamento"
+                        [routerLink]="['/gestor/orcamentos', quote.id]"
+                      >
+                        <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
+                      </a>
                       <a class="btn btn-square btn-ghost" [routerLink]="['/gestor/orcamentos', quote.id, 'editar']">
                         <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
                       </a>
