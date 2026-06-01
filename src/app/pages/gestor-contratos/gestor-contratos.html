@@ -137,11 +137,11 @@
       </div>
     } @else {
       <section class="rounded-box border border-base-300 bg-base-100">
-        <div class="overflow-x-auto lg:overflow-visible">
+        <div class="overflow-x-auto">
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th class="min-w-[42rem]">
+                <th class="min-w-[36rem]">
                   <div class="flex flex-col gap-2">
                     <span class="font-bold">Contrato, cliente e vendedor</span>
                     <div class="flex flex-wrap gap-2">
@@ -169,9 +169,9 @@
                     </div>
                   </div>
                 </th>
-                <th class="min-w-[28rem]">
+                <th class="min-w-[36rem]">
                   <div class="flex flex-col gap-2">
-                    <span class="font-bold">Locação</span>
+                    <span class="font-bold">Locação e ações</span>
                     <div class="flex flex-wrap gap-2">
                       <button
                         class="badge badge-outline gap-1 rounded-md font-semibold"
@@ -204,14 +204,13 @@
                     </div>
                   </div>
                 </th>
-                <th class="w-32 text-right">Ações</th>
               </tr>
             </thead>
             <tbody>
               @for (contract of filteredContracts(); track contract.id) {
                 <tr>
                   <td class="align-top">
-                    <div class="grid min-w-[42rem] gap-4 py-2 md:grid-cols-[11rem_minmax(0,1fr)_minmax(0,1fr)]">
+                    <div class="grid min-w-[36rem] gap-4 py-2 md:grid-cols-[11rem_minmax(0,1fr)_minmax(0,1fr)]">
                       <div class="flex items-center gap-3">
                         <div class="grid h-11 w-11 shrink-0 place-items-center rounded-box bg-primary/10 text-primary">
                           <lucide-angular [img]="FileText" class="h-5 w-5"></lucide-angular>
@@ -239,7 +238,7 @@
                     </div>
                   </td>
                   <td class="align-top">
-                    <div class="grid min-w-[28rem] gap-3 py-2 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="grid min-w-[36rem] gap-3 py-2 sm:grid-cols-2 lg:grid-cols-[minmax(8rem,1.4fr)_4rem_7rem_7rem_7rem]">
                       <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Período</p>
                         <p class="font-semibold leading-snug">{{ rentalDurationLabel(contract) }}</p>
@@ -259,89 +258,88 @@
                           {{ statusLabel(contract.status) }}
                         </span>
                       </div>
-                    </div>
-                  </td>
-                  <td class="align-middle">
-                    <div class="flex justify-end">
-                      <details class="dropdown dropdown-end">
-                        <summary class="btn btn-sm btn-outline list-none">
-                          <lucide-angular [img]="FileText" class="h-4 w-4"></lucide-angular>
-                          Ações
-                        </summary>
-                        <ul
-                          class="menu dropdown-content z-20 mt-2 w-72 rounded-box border border-base-300 bg-base-100 p-2 text-left shadow-xl"
-                        >
-                          <li>
-                            <a [routerLink]="['/gestor/contratos', contract.id]">
-                              <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
-                              Visualizar
-                            </a>
-                          </li>
-                          <li>
-                            <a [routerLink]="['/gestor/contratos', contract.id, 'editar']">
-                              <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
-                              Editar
-                            </a>
-                          </li>
-                          <li class="menu-title">PDFs</li>
-                          <li>
-                            <button type="button" (click)="exportQuote(contract)">
-                              @if (exportingQuoteId === contract.id) {
-                                <span class="loading loading-spinner loading-xs"></span>
-                              } @else {
-                                <lucide-angular [img]="ClipboardList" class="h-4 w-4"></lucide-angular>
-                              }
-                              Orçamento
-                            </button>
-                          </li>
-                          <li>
-                            <button type="button" (click)="exportInvoice(contract)">
-                              @if (exportingInvoiceId === contract.id) {
-                                <span class="loading loading-spinner loading-xs"></span>
-                              } @else {
-                                <lucide-angular [img]="ReceiptText" class="h-4 w-4"></lucide-angular>
-                              }
-                              Fatura
-                            </button>
-                          </li>
-                          <li>
-                            <button type="button" (click)="exportDeliveryReceipt(contract)">
-                              @if (exportingDeliveryReceiptId === contract.id) {
-                                <span class="loading loading-spinner loading-xs"></span>
-                              } @else {
-                                <lucide-angular [img]="FileCheck" class="h-4 w-4"></lucide-angular>
-                              }
-                              Comprovante de entrega
-                            </button>
-                          </li>
-                          <li>
-                            <button type="button" (click)="exportReturnReceipt(contract)">
-                              @if (exportingReturnReceiptId === contract.id) {
-                                <span class="loading loading-spinner loading-xs"></span>
-                              } @else {
-                                <lucide-angular [img]="RotateCcw" class="h-4 w-4"></lucide-angular>
-                              }
-                              Comprovante de devolução
-                            </button>
-                          </li>
-                          <li>
-                            <button type="button" (click)="exportPdf(contract)">
-                              @if (exportingContractId === contract.id) {
-                                <span class="loading loading-spinner loading-xs"></span>
-                              } @else {
-                                <lucide-angular [img]="Download" class="h-4 w-4"></lucide-angular>
-                              }
-                              Contrato de locação
-                            </button>
-                          </li>
-                        </ul>
-                      </details>
+                      <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Ações</p>
+                        <details class="dropdown dropdown-end mt-1">
+                          <summary class="btn btn-sm btn-outline list-none">
+                            <lucide-angular [img]="FileText" class="h-4 w-4"></lucide-angular>
+                            Ações
+                          </summary>
+                          <ul
+                            class="menu dropdown-content z-20 mt-2 w-72 rounded-box border border-base-300 bg-base-100 p-2 text-left shadow-xl"
+                          >
+                            <li>
+                              <a [routerLink]="['/gestor/contratos', contract.id]">
+                                <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
+                                Visualizar
+                              </a>
+                            </li>
+                            <li>
+                              <a [routerLink]="['/gestor/contratos', contract.id, 'editar']">
+                                <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
+                                Editar
+                              </a>
+                            </li>
+                            <li class="menu-title">PDFs</li>
+                            <li>
+                              <button type="button" (click)="exportQuote(contract)">
+                                @if (exportingQuoteId === contract.id) {
+                                  <span class="loading loading-spinner loading-xs"></span>
+                                } @else {
+                                  <lucide-angular [img]="ClipboardList" class="h-4 w-4"></lucide-angular>
+                                }
+                                Orçamento
+                              </button>
+                            </li>
+                            <li>
+                              <button type="button" (click)="exportInvoice(contract)">
+                                @if (exportingInvoiceId === contract.id) {
+                                  <span class="loading loading-spinner loading-xs"></span>
+                                } @else {
+                                  <lucide-angular [img]="ReceiptText" class="h-4 w-4"></lucide-angular>
+                                }
+                                Fatura
+                              </button>
+                            </li>
+                            <li>
+                              <button type="button" (click)="exportDeliveryReceipt(contract)">
+                                @if (exportingDeliveryReceiptId === contract.id) {
+                                  <span class="loading loading-spinner loading-xs"></span>
+                                } @else {
+                                  <lucide-angular [img]="FileCheck" class="h-4 w-4"></lucide-angular>
+                                }
+                                Comprovante de entrega
+                              </button>
+                            </li>
+                            <li>
+                              <button type="button" (click)="exportReturnReceipt(contract)">
+                                @if (exportingReturnReceiptId === contract.id) {
+                                  <span class="loading loading-spinner loading-xs"></span>
+                                } @else {
+                                  <lucide-angular [img]="RotateCcw" class="h-4 w-4"></lucide-angular>
+                                }
+                                Comprovante de devolução
+                              </button>
+                            </li>
+                            <li>
+                              <button type="button" (click)="exportPdf(contract)">
+                                @if (exportingContractId === contract.id) {
+                                  <span class="loading loading-spinner loading-xs"></span>
+                                } @else {
+                                  <lucide-angular [img]="Download" class="h-4 w-4"></lucide-angular>
+                                }
+                                Contrato de locação
+                              </button>
+                            </li>
+                          </ul>
+                        </details>
+                      </div>
                     </div>
                   </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="3" class="py-10 text-center text-base-content/60">
+                  <td colspan="2" class="py-10 text-center text-base-content/60">
                     Nenhum contrato encontrado.
                   </td>
                 </tr>
