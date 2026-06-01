@@ -26,7 +26,10 @@ import type {
 } from '../../interfaces/rental-contract';
 import { AuthService } from '../../services/auth.service';
 import { CompanyProfileService } from '../../services/company-profile.service';
-import { RentalContractService } from '../../services/rental-contract.service';
+import {
+  type RentalContractDateMode,
+  RentalContractService,
+} from '../../services/rental-contract.service';
 import {
   exportDeliveryReceiptPdf,
   exportInvoicePdf,
@@ -74,13 +77,20 @@ export class GestorContratosPage implements OnInit {
     { value: 'returned', label: 'Devolvido' },
     { value: 'cancelled', label: 'Cancelado' },
   ];
+  protected readonly dateModeOptions: Array<{ value: RentalContractDateMode; label: string }> = [
+    { value: 'overlap', label: 'Início ou término' },
+    { value: 'start', label: 'Data de início' },
+    { value: 'end', label: 'Data de término' },
+  ];
 
   protected contracts: RentalContract[] = [];
   protected query = '';
   protected draftDateFrom = '';
   protected draftDateTo = '';
+  protected draftDateMode: RentalContractDateMode = 'overlap';
   protected dateFrom = '';
   protected dateTo = '';
+  protected dateMode: RentalContractDateMode = 'overlap';
   protected selectedStatus: RentalContractStatus | 'all' = 'all';
   protected selectedPeriod: RentalBillingPeriod | 'all' = 'all';
   protected loading = false;
@@ -92,7 +102,7 @@ export class GestorContratosPage implements OnInit {
   protected errorMessage = '';
   protected successMessage = '';
   protected sortKey: ContractSortKey = 'number';
-  protected sortDirection: SortDirection = 'asc';
+  protected sortDirection: SortDirection = 'desc';
 
   constructor(
     private readonly authService: AuthService,
@@ -112,7 +122,12 @@ export class GestorContratosPage implements OnInit {
     const filtered = this.contracts.filter((contract) => {
       const matchesStatus = this.selectedStatus === 'all' || contract.status === this.selectedStatus;
       const matchesPeriod = this.selectedPeriod === 'all' || contract.billingPeriod === this.selectedPeriod;
-      const matchesDateRange = contractMatchesDateRange(contract, this.dateFrom, this.dateTo);
+      const matchesDateRange = contractMatchesDateRange(
+        contract,
+        this.dateFrom,
+        this.dateTo,
+        this.dateMode
+      );
       const matchesQuery = matchesSearchQuery(this.query, [
         contract.id,
         contract.contractNumber,
@@ -156,7 +171,7 @@ export class GestorContratosPage implements OnInit {
     }
 
     this.sortKey = key;
-    this.sortDirection = 'asc';
+    this.sortDirection = key === 'number' ? 'desc' : 'asc';
   }
 
   protected sortIndicator(key: ContractSortKey): string {
@@ -183,14 +198,17 @@ export class GestorContratosPage implements OnInit {
 
     this.dateFrom = this.draftDateFrom;
     this.dateTo = this.draftDateTo;
+    this.dateMode = this.draftDateMode;
     await this.loadPageData();
   }
 
   protected async clearDateRange() {
     this.draftDateFrom = '';
     this.draftDateTo = '';
+    this.draftDateMode = 'overlap';
     this.dateFrom = '';
     this.dateTo = '';
+    this.dateMode = 'overlap';
     await this.loadPageData();
   }
 
@@ -200,15 +218,15 @@ export class GestorContratosPage implements OnInit {
 
   protected dateRangeLabel(): string {
     if (this.dateFrom && this.dateTo) {
-      return `${formatDate(this.dateFrom)} a ${formatDate(this.dateTo)}`;
+      return `${this.dateModeLabel(this.dateMode)}: ${formatDate(this.dateFrom)} a ${formatDate(this.dateTo)}`;
     }
 
     if (this.dateFrom) {
-      return `A partir de ${formatDate(this.dateFrom)}`;
+      return `${this.dateModeLabel(this.dateMode)}: a partir de ${formatDate(this.dateFrom)}`;
     }
 
     if (this.dateTo) {
-      return `Até ${formatDate(this.dateTo)}`;
+      return `${this.dateModeLabel(this.dateMode)}: até ${formatDate(this.dateTo)}`;
     }
 
     return 'Todos os períodos';
@@ -298,6 +316,10 @@ export class GestorContratosPage implements OnInit {
     return this.periodOptions.find((option) => option.value === period)?.label ?? period;
   }
 
+  protected dateModeLabel(mode: RentalContractDateMode): string {
+    return this.dateModeOptions.find((option) => option.value === mode)?.label ?? mode;
+  }
+
   protected rentalDurationLabel(contract: RentalContract): string {
     return formatRentalDuration(contract.billingPeriod, contract.rentalPeriodCount);
   }
@@ -344,6 +366,7 @@ export class GestorContratosPage implements OnInit {
         this.rentalContractService.listContracts({
           dateFrom: this.dateFrom,
           dateTo: this.dateTo,
+          dateMode: this.dateMode,
         }),
         CONTRACTS_LOAD_TIMEOUT_MS
       );
@@ -422,7 +445,8 @@ function formatDate(value: string): string {
 function contractMatchesDateRange(
   contract: RentalContract,
   dateFrom: string,
-  dateTo: string
+  dateTo: string,
+  dateMode: RentalContractDateMode
 ): boolean {
   if (!dateFrom && !dateTo) {
     return true;
@@ -431,11 +455,31 @@ function contractMatchesDateRange(
   const contractStart = contract.startDate;
   const contractEnd = contract.endDate || contract.startDate;
 
+  if (dateMode === 'start') {
+    return dateWithinRange(contractStart, dateFrom, dateTo);
+  }
+
+  if (dateMode === 'end') {
+    return dateWithinRange(contractEnd, dateFrom, dateTo);
+  }
+
   if (dateFrom && contractEnd < dateFrom) {
     return false;
   }
 
   if (dateTo && contractStart > dateTo) {
+    return false;
+  }
+
+  return true;
+}
+
+function dateWithinRange(value: string, dateFrom: string, dateTo: string): boolean {
+  if (dateFrom && value < dateFrom) {
+    return false;
+  }
+
+  if (dateTo && value > dateTo) {
     return false;
   }
 

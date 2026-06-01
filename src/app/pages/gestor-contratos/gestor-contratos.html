@@ -37,7 +37,7 @@
       </label>
 
       <div class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
-        <div class="grid gap-2 sm:grid-cols-[auto_minmax(0,10rem)_minmax(0,10rem)_auto_auto] sm:items-end">
+        <div class="grid gap-2 sm:grid-cols-[auto_minmax(0,10rem)_minmax(0,10rem)_minmax(0,12rem)_auto_auto] sm:items-end">
           <div class="flex items-center gap-2 pb-1 text-sm font-semibold text-base-content/70">
             <lucide-angular [img]="CalendarRange" class="h-4 w-4 text-primary"></lucide-angular>
             Período
@@ -61,6 +61,19 @@
               [value]="draftDateTo"
               (input)="draftDateTo = $any($event.target).value"
             />
+          </label>
+
+          <label class="flex flex-col gap-1">
+            <span class="text-xs font-semibold uppercase tracking-wide text-base-content/60">Filtrar por</span>
+            <select
+              class="select select-bordered w-full"
+              [value]="draftDateMode"
+              (change)="draftDateMode = $any($event.target).value"
+            >
+              @for (option of dateModeOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
           </label>
 
           <button class="btn btn-primary" type="button" [disabled]="loading" (click)="applyDateRange()">
@@ -124,13 +137,13 @@
       </div>
     } @else {
       <section class="rounded-box border border-base-300 bg-base-100">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto lg:overflow-visible">
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th class="min-w-[48rem]">
+                <th class="min-w-[42rem]">
                   <div class="flex flex-col gap-2">
-                    <span class="font-bold">Contrato, cliente, vendedor e período</span>
+                    <span class="font-bold">Contrato, cliente e vendedor</span>
                     <div class="flex flex-wrap gap-2">
                       <button
                         class="badge badge-outline gap-1 rounded-md font-semibold"
@@ -153,6 +166,13 @@
                       >
                         Vendedor <span class="text-xs">{{ sortIndicator('seller') }}</span>
                       </button>
+                    </div>
+                  </div>
+                </th>
+                <th class="min-w-[28rem]">
+                  <div class="flex flex-col gap-2">
+                    <span class="font-bold">Locação</span>
+                    <div class="flex flex-wrap gap-2">
                       <button
                         class="badge badge-outline gap-1 rounded-md font-semibold"
                         type="button"
@@ -160,32 +180,38 @@
                       >
                         Período <span class="text-xs">{{ sortIndicator('period') }}</span>
                       </button>
+                      <button
+                        class="badge badge-outline gap-1 rounded-md font-semibold"
+                        type="button"
+                        (click)="setSort('items')"
+                      >
+                        Itens <span class="text-xs">{{ sortIndicator('items') }}</span>
+                      </button>
+                      <button
+                        class="badge badge-outline gap-1 rounded-md font-semibold"
+                        type="button"
+                        (click)="setSort('total')"
+                      >
+                        Total <span class="text-xs">{{ sortIndicator('total') }}</span>
+                      </button>
+                      <button
+                        class="badge badge-outline gap-1 rounded-md font-semibold"
+                        type="button"
+                        (click)="setSort('status')"
+                      >
+                        Status <span class="text-xs">{{ sortIndicator('status') }}</span>
+                      </button>
                     </div>
                   </div>
                 </th>
-                <th>
-                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('items')">
-                    Itens <span class="text-xs">{{ sortIndicator('items') }}</span>
-                  </button>
-                </th>
-                <th>
-                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('total')">
-                    Total <span class="text-xs">{{ sortIndicator('total') }}</span>
-                  </button>
-                </th>
-                <th>
-                  <button class="flex items-center gap-1 font-bold" type="button" (click)="setSort('status')">
-                    Status <span class="text-xs">{{ sortIndicator('status') }}</span>
-                  </button>
-                </th>
-                <th class="w-48 text-right">Ações</th>
+                <th class="w-32 text-right">Ações</th>
               </tr>
             </thead>
             <tbody>
               @for (contract of filteredContracts(); track contract.id) {
                 <tr>
                   <td class="align-top">
-                    <div class="grid min-w-[48rem] gap-4 py-2 md:grid-cols-4">
+                    <div class="grid min-w-[42rem] gap-4 py-2 md:grid-cols-[11rem_minmax(0,1fr)_minmax(0,1fr)]">
                       <div class="flex items-center gap-3">
                         <div class="grid h-11 w-11 shrink-0 place-items-center rounded-box bg-primary/10 text-primary">
                           <lucide-angular [img]="FileText" class="h-5 w-5"></lucide-angular>
@@ -210,47 +236,54 @@
                           {{ contract.sellerPhone || contract.sellerEmail || 'Sem contato' }}
                         </p>
                       </div>
-
+                    </div>
+                  </td>
+                  <td class="align-top">
+                    <div class="grid min-w-[28rem] gap-3 py-2 sm:grid-cols-2 lg:grid-cols-4">
                       <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Período</p>
                         <p class="font-semibold leading-snug">{{ rentalDurationLabel(contract) }}</p>
                         <p class="text-xs text-base-content/60">{{ contractPeriod(contract) }}</p>
                       </div>
+                      <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Itens</p>
+                        <p class="font-semibold">{{ contract.items.length }}</p>
+                      </div>
+                      <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Total</p>
+                        <p class="whitespace-nowrap font-semibold">{{ formatMoney(contract.totalCents) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Status</p>
+                        <span class="badge mt-1" [class.badge-success]="contract.status === 'active'">
+                          {{ statusLabel(contract.status) }}
+                        </span>
+                      </div>
                     </div>
                   </td>
-                  <td class="align-middle">{{ contract.items.length }}</td>
-                  <td class="whitespace-nowrap align-middle">{{ formatMoney(contract.totalCents) }}</td>
                   <td class="align-middle">
-                    <span class="badge" [class.badge-success]="contract.status === 'active'">
-                      {{ statusLabel(contract.status) }}
-                    </span>
-                  </td>
-                  <td class="align-middle">
-                    <div class="flex justify-end gap-2">
-                      <a
-                        class="btn btn-square btn-ghost"
-                        title="Ver detalhes"
-                        aria-label="Ver detalhes"
-                        [routerLink]="['/gestor/contratos', contract.id]"
-                      >
-                        <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
-                      </a>
-                      <a
-                        class="btn btn-square btn-ghost"
-                        title="Editar"
-                        aria-label="Editar contrato"
-                        [routerLink]="['/gestor/contratos', contract.id, 'editar']"
-                      >
-                        <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
-                      </a>
+                    <div class="flex justify-end">
                       <details class="dropdown dropdown-end">
                         <summary class="btn btn-sm btn-outline list-none">
-                          <lucide-angular [img]="Download" class="h-4 w-4"></lucide-angular>
-                          PDFs
+                          <lucide-angular [img]="FileText" class="h-4 w-4"></lucide-angular>
+                          Ações
                         </summary>
                         <ul
                           class="menu dropdown-content z-20 mt-2 w-72 rounded-box border border-base-300 bg-base-100 p-2 text-left shadow-xl"
                         >
+                          <li>
+                            <a [routerLink]="['/gestor/contratos', contract.id]">
+                              <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
+                              Visualizar
+                            </a>
+                          </li>
+                          <li>
+                            <a [routerLink]="['/gestor/contratos', contract.id, 'editar']">
+                              <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
+                              Editar
+                            </a>
+                          </li>
+                          <li class="menu-title">PDFs</li>
                           <li>
                             <button type="button" (click)="exportQuote(contract)">
                               @if (exportingQuoteId === contract.id) {
@@ -308,7 +341,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="5" class="py-10 text-center text-base-content/60">
+                  <td colspan="3" class="py-10 text-center text-base-content/60">
                     Nenhum contrato encontrado.
                   </td>
                 </tr>

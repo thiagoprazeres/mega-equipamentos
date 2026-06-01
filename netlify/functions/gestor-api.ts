@@ -643,14 +643,33 @@ async function saveCompanyProfile(input: Record<string, unknown>) {
 async function listRentalContracts(event: HandlerEvent) {
   const dateFrom = dateQueryValue(event, 'dateFrom');
   const dateTo = dateQueryValue(event, 'dateTo');
+  const dateMode = contractDateModeQuery(event);
   const filters: SQL[] = [];
 
-  if (dateFrom) {
-    filters.push(sql`coalesce(${rentalContracts.endDate}, ${rentalContracts.startDate}) >= ${dateFrom}`);
-  }
+  if (dateMode === 'start') {
+    if (dateFrom) {
+      filters.push(sql`${rentalContracts.startDate} >= ${dateFrom}`);
+    }
 
-  if (dateTo) {
-    filters.push(sql`${rentalContracts.startDate} <= ${dateTo}`);
+    if (dateTo) {
+      filters.push(sql`${rentalContracts.startDate} <= ${dateTo}`);
+    }
+  } else if (dateMode === 'end') {
+    if (dateFrom) {
+      filters.push(sql`coalesce(${rentalContracts.endDate}, ${rentalContracts.startDate}) >= ${dateFrom}`);
+    }
+
+    if (dateTo) {
+      filters.push(sql`coalesce(${rentalContracts.endDate}, ${rentalContracts.startDate}) <= ${dateTo}`);
+    }
+  } else {
+    if (dateFrom) {
+      filters.push(sql`coalesce(${rentalContracts.endDate}, ${rentalContracts.startDate}) >= ${dateFrom}`);
+    }
+
+    if (dateTo) {
+      filters.push(sql`${rentalContracts.startDate} <= ${dateTo}`);
+    }
   }
 
   const contractRows = await getDb()
@@ -1533,6 +1552,20 @@ function dateQueryValue(event: HandlerEvent, key: string): string {
   }
 
   return value;
+}
+
+function contractDateModeQuery(event: HandlerEvent): 'overlap' | 'start' | 'end' {
+  const value = queryValue(event, 'dateMode');
+
+  if (!value) {
+    return 'overlap';
+  }
+
+  if (value === 'overlap' || value === 'start' || value === 'end') {
+    return value;
+  }
+
+  throw httpError(400, 'Parâmetro dateMode inválido.');
 }
 
 function textInput(value: unknown): string {

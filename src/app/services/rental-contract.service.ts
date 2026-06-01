@@ -32,7 +32,10 @@ export interface RentalContractEditorInput {
 export interface RentalContractListOptions {
   dateFrom?: string;
   dateTo?: string;
+  dateMode?: RentalContractDateMode;
 }
+
+export type RentalContractDateMode = 'overlap' | 'start' | 'end';
 
 @Injectable({ providedIn: 'root' })
 export class RentalContractService {
@@ -47,6 +50,10 @@ export class RentalContractService {
 
     if (options.dateTo) {
       params.set('dateTo', options.dateTo);
+    }
+
+    if (options.dateMode && options.dateMode !== 'overlap') {
+      params.set('dateMode', options.dateMode);
     }
 
     return this.api.request<RentalContract[]>(
