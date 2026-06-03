@@ -620,26 +620,19 @@ function drawLegacyPeriodBox(doc: LegacyPdfDoc, contract: RentalContract, x: num
   doc.line(x + colWidth, y, x + colWidth, y + rowHeight * 2);
   doc.line(x + colWidth * 2, y, x + colWidth * 2, y + rowHeight * 2);
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  centerCellText(doc, `Início: ${formatDate(contract.startDate)}`, x, y + 13, colWidth);
-  centerCellText(
+  drawLegacyInfoCell(doc, 'Início', formatDate(contract.startDate), x, y, colWidth);
+  drawLegacyInfoCell(doc, 'Término', contract.endDate ? formatDate(contract.endDate) : '-', x + colWidth, y, colWidth);
+  drawLegacyInfoCell(doc, 'Período', rentalDurationLabel(contract), x + colWidth * 2, y, colWidth);
+  drawLegacyInfoCell(
     doc,
-    `Término: ${contract.endDate ? formatDate(contract.endDate) : '-'}`,
-    x + colWidth,
-    y + 13,
+    'Locação',
+    formatCurrencyCents(contract.subtotalCents || contract.totalCents),
+    x,
+    y + rowHeight,
     colWidth
   );
-  centerCellText(
-    doc,
-    `Período: ${rentalDurationLabel(contract)}`,
-    x + colWidth * 2,
-    y + 13,
-    colWidth
-  );
-  centerCellText(doc, `Locação: ${formatCurrencyCents(contract.subtotalCents || contract.totalCents)}`, x, y + rowHeight + 13, colWidth);
-  centerCellText(doc, `Frete: ${formatCurrencyCents(contract.shippingCents ?? 0)}`, x + colWidth, y + rowHeight + 13, colWidth);
-  centerCellText(doc, `Total: ${formatCurrencyCents(contract.totalCents)}`, x + colWidth * 2, y + rowHeight + 13, colWidth);
+  drawLegacyInfoCell(doc, 'Frete', formatCurrencyCents(contract.shippingCents ?? 0), x + colWidth, y + rowHeight, colWidth);
+  drawLegacyInfoCell(doc, 'Total', formatCurrencyCents(contract.totalCents), x + colWidth * 2, y + rowHeight, colWidth);
 }
 
 function drawLegacyNotesBox(doc: LegacyPdfDoc, contract: RentalContract, x: number, y: number, width: number): void {
@@ -1094,6 +1087,22 @@ function centerCellText(
   width: number
 ): void {
   drawFittedText(doc, text, x + width / 2, y, width - 6, 'center');
+}
+
+function drawLegacyInfoCell(
+  doc: LegacyPdfDoc,
+  label: string,
+  value: string,
+  x: number,
+  y: number,
+  width: number
+): void {
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.7);
+  drawFittedText(doc, label, x + width / 2, y + 7, width - 8, 'center');
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  drawFittedText(doc, value, x + width / 2, y + 16, width - 8, 'center');
 }
 
 function drawFittedText(
