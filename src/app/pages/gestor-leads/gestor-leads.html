@@ -6,10 +6,10 @@
         <h1 class="text-3xl font-extrabold text-primary md:text-4xl">Leads</h1>
       </div>
       <div class="flex flex-wrap gap-2">
-        <button class="btn btn-primary" type="button" (click)="openCreateModal()">
+        <a class="btn btn-primary" routerLink="/gestor/leads/novo">
           <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
           Novo lead
-        </button>
+        </a>
         <button class="btn btn-ghost" type="button" (click)="signOut()">
           <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
           Sair
@@ -147,9 +147,23 @@
                       >
                         <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
                       </a>
-                      <button class="btn btn-square btn-ghost" type="button" (click)="openEditModal(lead)">
+                      <a
+                        class="btn btn-square btn-ghost"
+                        title="Gerar orçamento"
+                        aria-label="Gerar orçamento"
+                        [routerLink]="['/gestor/orcamentos/novo']"
+                        [queryParams]="{ leadId: lead.id }"
+                      >
+                        <lucide-angular [img]="ReceiptText" class="h-4 w-4"></lucide-angular>
+                      </a>
+                      <a
+                        class="btn btn-square btn-ghost"
+                        title="Editar lead"
+                        aria-label="Editar lead"
+                        [routerLink]="['/gestor/leads', lead.id, 'editar']"
+                      >
                         <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
-                      </button>
+                      </a>
                       @if (lead.status === 'archived') {
                         <button class="btn btn-square btn-ghost" type="button" (click)="restore(lead)">
                           <lucide-angular [img]="RotateCcw" class="h-4 w-4"></lucide-angular>

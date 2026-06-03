@@ -8,6 +8,7 @@ import {
   LogOut,
   Pencil,
   Plus,
+  ReceiptText,
   RotateCcw,
   Save,
   Search,
@@ -52,6 +53,7 @@ export class GestorLeadsPage implements OnInit {
   protected readonly LogOut = LogOut;
   protected readonly Pencil = Pencil;
   protected readonly Plus = Plus;
+  protected readonly ReceiptText = ReceiptText;
   protected readonly RotateCcw = RotateCcw;
   protected readonly Save = Save;
   protected readonly Search = Search;

@@ -293,7 +293,6 @@ export const rentalQuotes = pgTable('rental_quotes', {
   id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
   quoteNumber: text('quote_number').notNull().default(sql`public.next_rental_quote_number()`),
   leadId: integer('lead_id')
-    .notNull()
     .references(() => leads.id, { onUpdate: 'cascade' }),
   leadName: text('lead_name').notNull().default(''),
   leadDocument: text('lead_document').notNull().default(''),

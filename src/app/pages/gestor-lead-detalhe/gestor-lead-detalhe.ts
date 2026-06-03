@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { ArrowLeft, UserRound, LucideAngularModule } from 'lucide-angular';
+import { ArrowLeft, Pencil, ReceiptText, UserRound, LucideAngularModule } from 'lucide-angular';
 
 import type { CatalogStatus } from '../../interfaces/equipamento';
 import type { EquipamentoCategoria } from '../../interfaces/equipamento-categoria';
@@ -17,6 +17,8 @@ import { LeadService } from '../../services/lead.service';
 })
 export class GestorLeadDetalhePage implements OnInit {
   protected readonly ArrowLeft = ArrowLeft;
+  protected readonly Pencil = Pencil;
+  protected readonly ReceiptText = ReceiptText;
   protected readonly UserRound = UserRound;
 
   protected lead: Lead | null = null;

@@ -24,9 +24,23 @@
           </div>
         </div>
 
-        <span class="badge" [class.badge-success]="lead.status !== 'archived'">
-          {{ statusLabel(lead.status) }}
-        </span>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="badge" [class.badge-success]="lead.status !== 'archived'">
+            {{ statusLabel(lead.status) }}
+          </span>
+          <a
+            class="btn btn-outline btn-primary"
+            [routerLink]="['/gestor/orcamentos/novo']"
+            [queryParams]="{ leadId: lead.id }"
+          >
+            <lucide-angular [img]="ReceiptText" class="h-4 w-4"></lucide-angular>
+            Gerar orçamento
+          </a>
+          <a class="btn btn-primary" [routerLink]="['/gestor/leads', lead.id, 'editar']">
+            <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
+            Editar
+          </a>
+        </div>
       </header>
 
       <section class="grid gap-4 md:grid-cols-4">

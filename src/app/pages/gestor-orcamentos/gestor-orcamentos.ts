@@ -169,7 +169,7 @@ export class GestorOrcamentosPage implements OnInit {
 
     if (!this.canConvertQuote(quote)) {
       this.errorMessage =
-        'Para transformar em contrato, o orçamento precisa ter lead/interessado, vendedor e pelo menos um equipamento.';
+        'Para transformar em contrato, o orçamento precisa ter interessado, vendedor e pelo menos um equipamento.';
       return;
     }
 
@@ -193,7 +193,7 @@ export class GestorOrcamentosPage implements OnInit {
   }
 
   protected canConvertQuote(quote: RentalQuote): boolean {
-    return Boolean(quote.leadId && quote.sellerId && quote.items.length);
+    return Boolean(quote.leadName && quote.sellerId && quote.items.length);
   }
 
   protected periodLabel(period: RentalBillingPeriod): string {

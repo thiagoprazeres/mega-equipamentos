@@ -1,0 +1,130 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-4xl space-y-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div class="space-y-3">
+        <a class="btn btn-ghost w-fit" routerLink="/gestor/leads">
+          <lucide-angular [img]="ArrowLeft" class="h-4 w-4"></lucide-angular>
+          Leads
+        </a>
+        <div>
+          <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+          <h1 class="text-3xl font-extrabold text-primary md:text-4xl">{{ pageTitle }}</h1>
+          <p class="mt-1 text-sm text-base-content/65">
+            Leads podem virar orçamento, cliente e contrato sem perder o histórico comercial.
+          </p>
+        </div>
+      </div>
+      <button class="btn btn-ghost w-fit" type="button" (click)="signOut()">
+        <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+        Sair
+      </button>
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else if (loadFailed) {
+      <div class="rounded-box border border-base-300 bg-base-100 p-6">
+        <a class="btn btn-primary" routerLink="/gestor/leads">Voltar para leads</a>
+      </div>
+    } @else {
+      <form class="space-y-6 rounded-box border border-base-300 bg-base-100 p-5" [formGroup]="form" (submit)="saveLead()">
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Nome</span>
+            <input class="input input-bordered w-full" formControlName="nome" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">CPF/CNPJ</span>
+            <input class="input input-bordered w-full" inputmode="numeric" formControlName="document" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">E-mail</span>
+            <input class="input input-bordered w-full" type="email" formControlName="email" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Telefone</span>
+            <input class="input input-bordered w-full" inputmode="tel" formControlName="phone" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">WhatsApp</span>
+            <input class="input input-bordered w-full" inputmode="tel" formControlName="whatsapp" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Origem</span>
+            <select class="select select-bordered w-full" formControlName="origin">
+              @for (option of originOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Grupo de interesse</span>
+            <select class="select select-bordered w-full" formControlName="interestCategoryId">
+              <option [ngValue]="0">Não informado</option>
+              @for (category of interestCategories; track category.id) {
+                <option [ngValue]="category.id">{{ category.nome }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">CEP</span>
+            <input class="input input-bordered w-full" inputmode="numeric" formControlName="zipCode" />
+          </label>
+
+          <label class="flex flex-col gap-1.5 md:col-span-2">
+            <span class="text-sm font-semibold text-base-content/80">Endereço</span>
+            <input class="input input-bordered w-full" formControlName="address" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">Cidade</span>
+            <input class="input input-bordered w-full" formControlName="city" />
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-sm font-semibold text-base-content/80">UF</span>
+            <select class="select select-bordered w-full" formControlName="state">
+              @for (state of stateOptions; track state) {
+                <option [value]="state">{{ state }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-1.5 md:col-span-2">
+            <span class="text-sm font-semibold text-base-content/80">Observações</span>
+            <textarea class="textarea textarea-bordered h-28 w-full" formControlName="notes"></textarea>
+          </label>
+        </div>
+
+        <div class="flex flex-wrap justify-end gap-2">
+          <a class="btn btn-ghost" routerLink="/gestor/leads">Cancelar</a>
+          <button class="btn btn-primary" type="submit" [disabled]="saving">
+            @if (saving) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              <lucide-angular [img]="Save" class="h-4 w-4"></lucide-angular>
+            }
+            Salvar
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</section>

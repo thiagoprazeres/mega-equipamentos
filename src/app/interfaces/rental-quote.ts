@@ -10,7 +10,7 @@ export interface RentalQuoteItem extends RentalContractItem {
 export interface RentalQuote {
   id: number;
   quoteNumber: string;
-  leadId: number;
+  leadId?: number;
   leadName: string;
   leadDocument?: string;
   leadEmail?: string;

@@ -52,6 +52,8 @@ type RentalContractItemRow = typeof rentalContractItems.$inferSelect;
 type RentalQuoteRow = typeof rentalQuotes.$inferSelect;
 type RentalQuoteItemRow = typeof rentalQuoteItems.$inferSelect;
 
+let quotesWithoutLeadMigrationReady = false;
+
 export const handler: Handler = async (event) => {
   try {
     if (event.httpMethod === 'OPTIONS') {
@@ -764,7 +766,7 @@ async function listRentalQuotes() {
 
 async function saveRentalQuote(input: Record<string, unknown>) {
   const id = optionalNumber(input.id);
-  const lead = await requiredLeadInput(input.lead);
+  const lead = await optionalLeadInput(input.lead);
   const seller = optionalRecordInput(input.seller);
   const billingPeriod = normalizeBillingPeriod(input.billingPeriod);
   const rentalPeriodCount = periodCountInput(input.rentalPeriodCount);
@@ -775,26 +777,42 @@ async function saveRentalQuote(input: Record<string, unknown>) {
   const shippingCents = centsInput(input.shippingCents, 0);
   const discountCents = centsInput(input.discountCents);
   const surchargeCents = centsInput(input.surchargeCents);
+  const leadName = textInput(input.leadName) || lead?.nome || '';
+  const leadDocument = textInput(input.leadDocument) || lead?.document || '';
+  const leadEmail = textInput(input.leadEmail) || lead?.email || '';
+  const leadPhone = textInput(input.leadPhone) || lead?.whatsapp || lead?.phone || '';
+  const leadAddress = textInput(input.leadAddress) || lead?.address || '';
+  const leadCity = textInput(input.leadCity) || lead?.city || '';
+  const leadState = textInput(input.leadState) || lead?.state || '';
+
+  if (!leadName) {
+    throw httpError(400, 'Informe o nome do interessado ou selecione um lead.');
+  }
+
+  if (!lead) {
+    await ensureQuotesAllowNoLead();
+  }
+
   const payload = {
-    leadId: lead.id,
-    leadName: lead.nome,
-    leadDocument: lead.document,
-    leadEmail: lead.email,
-    leadPhone: lead.whatsapp || lead.phone,
-    leadAddress: lead.address,
-    leadCity: lead.city,
-    leadState: lead.state,
-    leadOrigin: normalizeLeadOrigin(lead.origin),
-    leadInterestCategoryId: lead.interestCategoryId ?? null,
-    leadInterestCategoryName: lead.interestCategoryName,
-    customerId: lead.customerId ?? null,
-    customerName: lead.nome,
-    customerDocument: lead.document,
-    customerEmail: lead.email,
-    customerPhone: lead.whatsapp || lead.phone,
-    customerAddress: lead.address,
-    customerCity: lead.city,
-    customerState: lead.state,
+    leadId: lead?.id ?? null,
+    leadName,
+    leadDocument,
+    leadEmail,
+    leadPhone,
+    leadAddress,
+    leadCity,
+    leadState,
+    leadOrigin: normalizeLeadOrigin(lead?.origin),
+    leadInterestCategoryId: lead?.interestCategoryId ?? null,
+    leadInterestCategoryName: lead?.interestCategoryName ?? '',
+    customerId: lead?.customerId ?? null,
+    customerName: leadName,
+    customerDocument: leadDocument,
+    customerEmail: leadEmail,
+    customerPhone: leadPhone,
+    customerAddress: leadAddress,
+    customerCity: leadCity,
+    customerState: leadState,
     sellerId: optionalNumber(seller?.id) ?? null,
     sellerName: textInput(seller?.nome),
     sellerEmail: textInput(seller?.email),
@@ -840,32 +858,46 @@ async function saveRentalQuote(input: Record<string, unknown>) {
   return mapQuoteRow(saved.quote, saved.items.map(mapQuoteItemRow));
 }
 
-async function requiredLeadInput(value: unknown): Promise<LeadRow> {
+async function ensureQuotesAllowNoLead() {
+  if (quotesWithoutLeadMigrationReady) {
+    return;
+  }
+
+  await getDb().execute(sql`alter table public.rental_quotes alter column lead_id drop not null`);
+  quotesWithoutLeadMigrationReady = true;
+}
+
+async function optionalLeadInput(value: unknown): Promise<LeadRow | null> {
   const input = optionalRecordInput(value);
 
   if (!input) {
-    throw httpError(400, 'Selecione um lead/interessado para o orçamento.');
+    return null;
   }
 
-  const leadId = numberInput(input.id);
+  const leadId = optionalNumber(input.id);
+
+  if (!leadId) {
+    return null;
+  }
+
   const [lead] = await getDb().select().from(leads).where(eq(leads.id, leadId));
 
-  if (!lead || lead.status === 'archived') {
+  if (!lead) {
     throw httpError(400, 'Lead/interessado inválido.');
   }
 
   return lead;
 }
 
-function quoteCustomerSnapshotFromLead(quote: RentalQuoteRow, lead: LeadRow) {
+function quoteCustomerSnapshot(quote: RentalQuoteRow, lead: LeadRow | null) {
   return {
-    name: quote.leadName || lead.nome,
-    document: quote.leadDocument || lead.document,
-    email: quote.leadEmail || lead.email,
-    phone: quote.leadPhone || lead.whatsapp || lead.phone,
-    address: quote.leadAddress || lead.address,
-    city: quote.leadCity || lead.city,
-    state: quote.leadState || lead.state,
+    name: quote.leadName || quote.customerName || lead?.nome || '',
+    document: quote.leadDocument || quote.customerDocument || lead?.document || '',
+    email: quote.leadEmail || quote.customerEmail || lead?.email || '',
+    phone: quote.leadPhone || quote.customerPhone || lead?.whatsapp || lead?.phone || '',
+    address: quote.leadAddress || quote.customerAddress || lead?.address || '',
+    city: quote.leadCity || quote.customerCity || lead?.city || '',
+    state: quote.leadState || quote.customerState || lead?.state || '',
   };
 }
 
@@ -880,14 +912,16 @@ async function convertRentalQuoteToContract(id: number) {
     throw httpError(404, 'Orçamento não encontrado.');
   }
 
-  if (!quote.leadId) {
-    throw httpError(400, 'Selecione um lead/interessado antes de transformar o orçamento em contrato.');
-  }
+  let lead: LeadRow | null = null;
 
-  const [lead] = await getDb().select().from(leads).where(eq(leads.id, quote.leadId));
+  if (quote.leadId) {
+    const [leadRow] = await getDb().select().from(leads).where(eq(leads.id, quote.leadId));
 
-  if (!lead) {
-    throw httpError(400, 'Lead/interessado não encontrado.');
+    if (!leadRow) {
+      throw httpError(400, 'Lead/interessado não encontrado.');
+    }
+
+    lead = leadRow;
   }
 
   if (!quote.sellerId) {
@@ -916,10 +950,14 @@ async function convertRentalQuoteToContract(id: number) {
   const contractNotes = [`Convertido do orçamento ${quote.quoteNumber}.`, quote.notes]
     .filter(Boolean)
     .join('\n');
-  const customerSnapshot = quoteCustomerSnapshotFromLead(quote, lead);
+  const customerSnapshot = quoteCustomerSnapshot(quote, lead);
+
+  if (!customerSnapshot.name) {
+    throw httpError(400, 'Informe o interessado antes de transformar o orçamento em contrato.');
+  }
 
   const saved = await getDb().transaction(async (tx) => {
-    let customerId = lead.customerId ?? quote.customerId ?? null;
+    let customerId = lead?.customerId ?? quote.customerId ?? null;
 
     if (!customerId) {
       const [customer] = await tx
@@ -934,7 +972,13 @@ async function convertRentalQuoteToContract(id: number) {
           address: customerSnapshot.address,
           city: customerSnapshot.city,
           state: customerSnapshot.state,
-          notes: [`Criado automaticamente a partir do lead #${lead.id}.`, lead.notes]
+          notes: [
+            lead
+              ? `Criado automaticamente a partir do lead #${lead.id}.`
+              : `Criado automaticamente a partir do orçamento ${quote.quoteNumber}.`,
+            lead?.notes,
+            quote.notes,
+          ]
             .filter(Boolean)
             .join('\n'),
           status: 'active',
@@ -942,11 +986,14 @@ async function convertRentalQuoteToContract(id: number) {
         .returning();
 
       if (!customer) {
-        throw httpError(500, 'Não foi possível criar o cliente a partir do lead.');
+        throw httpError(500, 'Não foi possível criar o cliente a partir do orçamento.');
       }
 
       customerId = customer.id;
-      await tx.update(leads).set({ customerId }).where(eq(leads.id, lead.id));
+
+      if (lead) {
+        await tx.update(leads).set({ customerId }).where(eq(leads.id, lead.id));
+      }
     }
 
     if (!customerId) {
@@ -1432,7 +1479,7 @@ function mapQuoteRow(row: RentalQuoteRow, items: ReturnType<typeof mapQuoteItemR
   return {
     id: row.id,
     quoteNumber: row.quoteNumber,
-    leadId: row.leadId,
+    leadId: row.leadId ?? undefined,
     leadName: row.leadName || row.customerName,
     leadDocument: row.leadDocument || row.customerDocument || undefined,
     leadEmail: row.leadEmail || row.customerEmail || undefined,

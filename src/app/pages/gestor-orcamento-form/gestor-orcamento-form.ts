@@ -128,7 +128,14 @@ export class GestorOrcamentoFormPage implements OnInit {
   protected successMessage = '';
 
   protected readonly form = this.formBuilder.nonNullable.group({
-    leadId: [0, [Validators.required, Validators.min(1)]],
+    leadId: [0],
+    leadName: ['', Validators.required],
+    leadDocument: [''],
+    leadEmail: ['', Validators.email],
+    leadPhone: [''],
+    leadAddress: [''],
+    leadCity: [''],
+    leadState: [''],
     sellerId: [0],
     billingPeriod: ['daily' as RentalBillingPeriod, Validators.required],
     rentalPeriodCount: [1, [Validators.required, Validators.min(1)]],
@@ -175,6 +182,14 @@ export class GestorOrcamentoFormPage implements OnInit {
 
   protected changeQuoteRentalPeriodCount() {
     this.repriceQuoteItemsForBillingPeriod(this.form.controls.billingPeriod.value);
+  }
+
+  protected changeQuoteLead() {
+    const lead = this.leads.find((item) => item.id === Number(this.form.controls.leadId.value)) ?? null;
+
+    if (lead) {
+      this.patchLeadSnapshot(lead);
+    }
   }
 
   protected addItem() {
@@ -328,8 +343,8 @@ export class GestorOrcamentoFormPage implements OnInit {
     const lead = this.leads.find((item) => item.id === Number(value.leadId)) ?? null;
     const seller = this.sellers.find((item) => item.id === Number(value.sellerId)) ?? null;
 
-    if (!lead) {
-      this.errorMessage = 'Selecione um lead/interessado para o orçamento.';
+    if (!value.leadName.trim()) {
+      this.errorMessage = 'Informe o nome do interessado ou selecione um lead.';
       return;
     }
 
@@ -341,6 +356,13 @@ export class GestorOrcamentoFormPage implements OnInit {
       const payload: RentalQuoteEditorInput = {
         id: this.editingQuote?.id,
         lead,
+        leadName: value.leadName,
+        leadDocument: value.leadDocument,
+        leadEmail: value.leadEmail,
+        leadPhone: value.leadPhone,
+        leadAddress: value.leadAddress,
+        leadCity: value.leadCity,
+        leadState: value.leadState,
         seller,
         billingPeriod: value.billingPeriod,
         rentalPeriodCount: normalizeRentalPeriodCount(value.rentalPeriodCount),
@@ -382,7 +404,7 @@ export class GestorOrcamentoFormPage implements OnInit {
       const editingId = this.editingQuoteId();
       const [leads, sellers, equipments, quotes] = await withTimeout(
         Promise.all([
-          this.leadService.listLeads(),
+          this.leadService.listLeads(true),
           this.staffUserService.listSellers(),
           this.catalogService.listEquipments(),
           editingId ? this.quoteService.listQuotes() : Promise.resolve([]),
@@ -405,7 +427,7 @@ export class GestorOrcamentoFormPage implements OnInit {
 
         this.populateEditForm(quote);
       } else {
-        this.populateCreateForm();
+        this.populateCreateForm(this.requestedLead());
       }
     } catch (error) {
       console.error('quote form load failed', error);
@@ -422,11 +444,28 @@ export class GestorOrcamentoFormPage implements OnInit {
     return Number.isFinite(id) && id > 0 ? id : null;
   }
 
-  private populateCreateForm() {
+  private requestedLead(): Lead | null {
+    const leadId = Number(this.route.snapshot.queryParamMap.get('leadId'));
+
+    if (!Number.isFinite(leadId) || leadId <= 0) {
+      return null;
+    }
+
+    return this.leads.find((lead) => lead.id === leadId) ?? null;
+  }
+
+  private populateCreateForm(lead: Lead | null = null) {
     this.editingQuote = null;
     this.quoteItems = [];
     this.form.reset({
-      leadId: 0,
+      leadId: lead?.id ?? 0,
+      leadName: lead?.nome ?? '',
+      leadDocument: lead?.document ?? '',
+      leadEmail: lead?.email ?? '',
+      leadPhone: lead ? lead.whatsapp || lead.phone || '' : '',
+      leadAddress: lead?.address ?? '',
+      leadCity: lead?.city ?? '',
+      leadState: lead?.state ?? '',
       sellerId: this.sellers[0]?.id ?? 0,
       billingPeriod: 'daily',
       rentalPeriodCount: 1,
@@ -452,6 +491,13 @@ export class GestorOrcamentoFormPage implements OnInit {
     this.quoteItems = quote.items;
     this.form.reset({
       leadId: quote.leadId ?? 0,
+      leadName: quote.leadName ?? quote.customerName ?? '',
+      leadDocument: quote.leadDocument ?? quote.customerDocument ?? '',
+      leadEmail: quote.leadEmail ?? quote.customerEmail ?? '',
+      leadPhone: quote.leadPhone ?? quote.customerPhone ?? '',
+      leadAddress: quote.leadAddress ?? quote.customerAddress ?? '',
+      leadCity: quote.leadCity ?? quote.customerCity ?? '',
+      leadState: quote.leadState ?? quote.customerState ?? '',
       sellerId: quote.sellerId ?? 0,
       billingPeriod: quote.billingPeriod,
       rentalPeriodCount: normalizeRentalPeriodCount(quote.rentalPeriodCount),
@@ -497,6 +543,18 @@ export class GestorOrcamentoFormPage implements OnInit {
 
   private currentRentalPeriodCount(): number {
     return normalizeRentalPeriodCount(this.form.controls.rentalPeriodCount.value);
+  }
+
+  private patchLeadSnapshot(lead: Lead) {
+    this.form.patchValue({
+      leadName: lead.nome,
+      leadDocument: lead.document ?? '',
+      leadEmail: lead.email ?? '',
+      leadPhone: lead.whatsapp || lead.phone || '',
+      leadAddress: lead.address ?? '',
+      leadCity: lead.city ?? '',
+      leadState: lead.state ?? '',
+    });
   }
 }
 

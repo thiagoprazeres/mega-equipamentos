@@ -118,7 +118,7 @@ export class GestorOrcamentoDetalhePage implements OnInit {
   }
 
   protected canConvertQuote(quote: RentalQuote): boolean {
-    return Boolean(quote.leadId && quote.sellerId && quote.items.length);
+    return Boolean(quote.leadName && quote.sellerId && quote.items.length);
   }
 
   protected formatDate(value?: string): string {

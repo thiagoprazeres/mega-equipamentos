@@ -40,13 +40,16 @@
 
           <div class="mt-4 grid gap-4 md:grid-cols-2">
             <label class="flex flex-col gap-1.5">
-              <span class="text-sm font-semibold text-base-content/80">Lead/interessado</span>
-              <select class="select select-bordered w-full" formControlName="leadId">
-                <option [value]="0">Selecione um lead</option>
+              <span class="text-sm font-semibold text-base-content/80">Lead cadastrado</span>
+              <select class="select select-bordered w-full" formControlName="leadId" (change)="changeQuoteLead()">
+                <option [value]="0">Sem lead cadastrado</option>
                 @for (lead of leads; track lead.id) {
                   <option [value]="lead.id">{{ lead.nome }}</option>
                 }
               </select>
+              <span class="text-xs text-base-content/60">
+                Opcional. Se selecionar um lead, os dados do interessado são preenchidos abaixo.
+              </span>
             </label>
 
             <label class="flex flex-col gap-1.5">
@@ -105,6 +108,50 @@
               <span class="text-sm font-semibold text-base-content/80">Validade do orçamento</span>
               <input class="input input-bordered w-full" type="date" formControlName="validUntil" />
             </label>
+          </div>
+
+          <div class="mt-5 rounded-box border border-base-300 bg-base-200/50 p-4">
+            <h3 class="font-bold text-primary">Dados do interessado</h3>
+            <p class="mt-1 text-sm text-base-content/60">
+              Preencha manualmente quando o orçamento não tiver lead cadastrado.
+            </p>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-2">
+              <label class="flex flex-col gap-1.5">
+                <span class="text-sm font-semibold text-base-content/80">Nome</span>
+                <input class="input input-bordered w-full" formControlName="leadName" />
+              </label>
+
+              <label class="flex flex-col gap-1.5">
+                <span class="text-sm font-semibold text-base-content/80">CPF/CNPJ</span>
+                <input class="input input-bordered w-full" inputmode="numeric" formControlName="leadDocument" />
+              </label>
+
+              <label class="flex flex-col gap-1.5">
+                <span class="text-sm font-semibold text-base-content/80">E-mail</span>
+                <input class="input input-bordered w-full" type="email" formControlName="leadEmail" />
+              </label>
+
+              <label class="flex flex-col gap-1.5">
+                <span class="text-sm font-semibold text-base-content/80">Telefone/WhatsApp</span>
+                <input class="input input-bordered w-full" inputmode="tel" formControlName="leadPhone" />
+              </label>
+
+              <label class="flex flex-col gap-1.5 md:col-span-2">
+                <span class="text-sm font-semibold text-base-content/80">Endereço</span>
+                <input class="input input-bordered w-full" formControlName="leadAddress" />
+              </label>
+
+              <label class="flex flex-col gap-1.5">
+                <span class="text-sm font-semibold text-base-content/80">Cidade</span>
+                <input class="input input-bordered w-full" formControlName="leadCity" />
+              </label>
+
+              <label class="flex flex-col gap-1.5">
+                <span class="text-sm font-semibold text-base-content/80">UF</span>
+                <input class="input input-bordered w-full" maxlength="2" formControlName="leadState" />
+              </label>
+            </div>
           </div>
         </section>
 

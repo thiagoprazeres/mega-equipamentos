@@ -71,6 +71,18 @@ export const routes: Routes = [
     title: 'Leads | Área Gestora Mega Equipamentos',
   },
   {
+    path: 'gestor/leads/novo',
+    canActivate: [gestorAuthGuard],
+    loadComponent: () => import('./pages/gestor-lead-form/gestor-lead-form').then(m => m.GestorLeadFormPage),
+    title: 'Novo Lead | Área Gestora Mega Equipamentos',
+  },
+  {
+    path: 'gestor/leads/:id/editar',
+    canActivate: [gestorAuthGuard],
+    loadComponent: () => import('./pages/gestor-lead-form/gestor-lead-form').then(m => m.GestorLeadFormPage),
+    title: 'Editar Lead | Área Gestora Mega Equipamentos',
+  },
+  {
     path: 'gestor/leads/:id',
     canActivate: [gestorAuthGuard],
     loadComponent: () => import('./pages/gestor-lead-detalhe/gestor-lead-detalhe').then(m => m.GestorLeadDetalhePage),

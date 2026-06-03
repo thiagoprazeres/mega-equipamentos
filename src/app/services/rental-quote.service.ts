@@ -8,7 +8,14 @@ import { GestorApiService } from './gestor-api.service';
 
 export interface RentalQuoteEditorInput {
   id?: number;
-  lead: Lead;
+  lead?: Lead | null;
+  leadName: string;
+  leadDocument?: string;
+  leadEmail?: string;
+  leadPhone?: string;
+  leadAddress?: string;
+  leadCity?: string;
+  leadState?: string;
   seller?: StaffUser | null;
   billingPeriod: RentalBillingPeriod;
   rentalPeriodCount: number;
