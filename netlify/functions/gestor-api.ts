@@ -75,9 +75,13 @@ export const handler: Handler = async (event) => {
       return json({ ok: true });
     }
 
-    await requireAuthenticatedSession(event);
-
     const [resource, id, action] = routeSegments(event);
+
+    if (resource === 'rental-contracts') {
+      await cleanupHardcodedContracts();
+    }
+
+    await requireAuthenticatedSession(event);
 
     switch (resource) {
       case 'categories':
@@ -239,8 +243,6 @@ async function handleCompanyProfile(event: HandlerEvent) {
 }
 
 async function handleRentalContracts(event: HandlerEvent, id?: string, action?: string) {
-  await cleanupHardcodedContracts();
-
   if (id && action === 'status' && event.httpMethod === 'PATCH') {
     const body = await readJson(event);
     await updateRentalContractStatus(Number(id), normalizeContractStatus(body.status));
