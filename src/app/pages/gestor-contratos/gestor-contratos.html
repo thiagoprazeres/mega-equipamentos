@@ -254,7 +254,11 @@
                       </div>
                       <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Status</p>
-                        <span class="badge mt-1" [class.badge-success]="contract.status === 'active'">
+                        <span
+                          class="badge mt-1"
+                          [class.badge-success]="contract.status === 'active'"
+                          [class.badge-error]="contract.status === 'cancelled'"
+                        >
                           {{ statusLabel(contract.status) }}
                         </span>
                       </div>
@@ -280,6 +284,24 @@
                                 Editar
                               </a>
                             </li>
+                            @if (contract.status !== 'cancelled') {
+                              <li class="menu-title">Status</li>
+                              <li>
+                                <button
+                                  class="text-error"
+                                  type="button"
+                                  [disabled]="updatingContractStatusId === contract.id"
+                                  (click)="cancelContract(contract)"
+                                >
+                                  @if (updatingContractStatusId === contract.id) {
+                                    <span class="loading loading-spinner loading-xs"></span>
+                                  } @else {
+                                    <lucide-angular [img]="X" class="h-4 w-4"></lucide-angular>
+                                  }
+                                  Cancelar contrato
+                                </button>
+                              </li>
+                            }
                             <li class="menu-title">PDFs</li>
                             <li>
                               <button type="button" (click)="exportQuote(contract)">

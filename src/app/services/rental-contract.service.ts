@@ -67,4 +67,11 @@ export class RentalContractService {
       body: input,
     });
   }
+
+  async updateStatus(id: number, status: RentalContractStatus): Promise<void> {
+    await this.api.request<{ ok: true }>(`/rental-contracts/${id}/status`, {
+      method: 'PATCH',
+      body: { status },
+    });
+  }
 }

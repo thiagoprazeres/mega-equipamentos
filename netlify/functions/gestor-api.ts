@@ -67,6 +67,7 @@ type RentalQuoteItemRow = typeof rentalQuoteItems.$inferSelect;
 let quotesWithoutLeadMigrationReady = false;
 let invoicePixChargesMigrationReady = false;
 let financialTransactionsMigrationReady = false;
+let hardcodedContractsCleanupReady = false;
 
 export const handler: Handler = async (event) => {
   try {
@@ -92,7 +93,7 @@ export const handler: Handler = async (event) => {
       case 'company-profile':
         return handleCompanyProfile(event);
       case 'rental-contracts':
-        return handleRentalContracts(event);
+        return handleRentalContracts(event, id, action);
       case 'rental-quotes':
         return handleRentalQuotes(event);
       case 'invoice-charges':
@@ -237,7 +238,15 @@ async function handleCompanyProfile(event: HandlerEvent) {
   return json({ error: 'Operação de empresa não suportada.' }, 405);
 }
 
-async function handleRentalContracts(event: HandlerEvent) {
+async function handleRentalContracts(event: HandlerEvent, id?: string, action?: string) {
+  await cleanupHardcodedContracts();
+
+  if (id && action === 'status' && event.httpMethod === 'PATCH') {
+    const body = await readJson(event);
+    await updateRentalContractStatus(Number(id), normalizeContractStatus(body.status));
+    return json({ ok: true });
+  }
+
   if (event.httpMethod === 'GET') {
     return json(await listRentalContracts(event));
   }
@@ -812,6 +821,48 @@ async function saveRentalContract(input: Record<string, unknown>) {
   });
 
   return mapContractRow(saved.contract, saved.items.map(mapContractItemRow));
+}
+
+async function updateRentalContractStatus(id: number, status: RentalContractStatus) {
+  if (!Number.isFinite(id) || id <= 0) {
+    throw httpError(400, 'Contrato inválido.');
+  }
+
+  const [row] = await getDb()
+    .update(rentalContracts)
+    .set({ status, updatedAt: new Date().toISOString() })
+    .where(eq(rentalContracts.id, id))
+    .returning({ id: rentalContracts.id });
+
+  if (!row) {
+    throw httpError(404, 'Contrato não encontrado.');
+  }
+}
+
+async function cleanupHardcodedContracts() {
+  if (hardcodedContractsCleanupReady) {
+    return;
+  }
+
+  await ensureInvoicePixChargesTable();
+
+  await getDb().transaction(async (tx) => {
+    const rows = await tx
+      .select({ id: rentalContracts.id })
+      .from(rentalContracts)
+      .where(inArray(rentalContracts.contractNumber, ['2.048', '2.049']));
+    const ids = rows.map((row) => row.id);
+
+    if (!ids.length) {
+      return;
+    }
+
+    await tx.delete(invoicePixCharges).where(inArray(invoicePixCharges.contractId, ids));
+    await tx.delete(rentalContractItems).where(inArray(rentalContractItems.contractId, ids));
+    await tx.delete(rentalContracts).where(inArray(rentalContracts.id, ids));
+  });
+
+  hardcodedContractsCleanupReady = true;
 }
 
 async function listInvoiceCharges(event: HandlerEvent) {

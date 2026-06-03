@@ -105,6 +105,7 @@ export class GestorContratosPage implements OnInit {
   protected exportingReturnReceiptId: number | null = null;
   protected exportingInvoiceId: number | null = null;
   protected exportingQuoteId: number | null = null;
+  protected updatingContractStatusId: number | null = null;
   protected invoiceDialogOpen = false;
   protected invoiceContract: RentalContract | null = null;
   protected invoicePixCharge: InvoicePixCharge | null = null;
@@ -407,6 +408,38 @@ export class GestorContratosPage implements OnInit {
         error instanceof Error && error.message ? error.message : 'Não foi possível exportar o orçamento.';
     } finally {
       this.exportingQuoteId = null;
+      this.changeDetector.detectChanges();
+    }
+  }
+
+  protected async cancelContract(contract: RentalContract) {
+    if (contract.status === 'cancelled') {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Cancelar o contrato ${contract.contractNumber}? Esta ação muda o status para Cancelado.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.updatingContractStatusId = contract.id;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    try {
+      await this.rentalContractService.updateStatus(contract.id, 'cancelled');
+      this.contracts = this.contracts.map((item) =>
+        item.id === contract.id ? { ...item, status: 'cancelled' } : item
+      );
+      this.successMessage = `Contrato ${contract.contractNumber} cancelado.`;
+    } catch (error) {
+      this.errorMessage =
+        error instanceof Error && error.message ? error.message : 'Não foi possível cancelar o contrato.';
+    } finally {
+      this.updatingContractStatusId = null;
       this.changeDetector.detectChanges();
     }
   }
