@@ -1,0 +1,352 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-7xl space-y-6">
+    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+        <h1 class="text-3xl font-extrabold text-primary md:text-4xl">Financeiro</h1>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button class="btn btn-primary" type="button" (click)="openCreateModal('expense')">
+          <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
+          Novo lançamento
+        </button>
+        <button class="btn btn-ghost" type="button" (click)="signOut()">
+          <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+          Sair
+        </button>
+      </div>
+    </header>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
+    <section class="grid gap-3 md:grid-cols-4">
+      <div class="rounded-box border border-base-300 bg-base-100 p-5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Entradas confirmadas</p>
+        <p class="mt-2 text-2xl font-extrabold text-success">{{ formatMoney(totalIncomeCents()) }}</p>
+      </div>
+      <div class="rounded-box border border-base-300 bg-base-100 p-5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Saídas confirmadas</p>
+        <p class="mt-2 text-2xl font-extrabold text-error">{{ formatMoney(totalExpenseCents()) }}</p>
+      </div>
+      <div class="rounded-box border border-base-300 bg-base-100 p-5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Saldo operacional</p>
+        <p
+          class="mt-2 text-2xl font-extrabold"
+          [class.text-success]="balanceCents() >= 0"
+          [class.text-error]="balanceCents() < 0"
+        >
+          {{ formatMoney(balanceCents()) }}
+        </p>
+      </div>
+      <div class="rounded-box border border-base-300 bg-base-100 p-5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Pendências</p>
+        <p class="mt-2 text-2xl font-extrabold text-warning">{{ formatMoney(pendingCents()) }}</p>
+      </div>
+    </section>
+
+    <section class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <label class="input input-bordered flex items-center gap-2">
+        <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
+        <input
+          class="grow"
+          type="search"
+          placeholder="Buscar por descrição, categoria, contrato, cliente, CPF/CNPJ ou valor"
+          [value]="query"
+          (input)="query = $any($event.target).value"
+        />
+      </label>
+
+      <div class="grid gap-3 md:grid-cols-[auto_auto_auto_auto] md:items-end">
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-semibold uppercase tracking-wide text-base-content/50">De</span>
+          <input
+            class="input input-bordered w-full md:w-40"
+            type="date"
+            [value]="draftDateFrom"
+            (input)="draftDateFrom = $any($event.target).value"
+          />
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Até</span>
+          <input
+            class="input input-bordered w-full md:w-40"
+            type="date"
+            [value]="draftDateTo"
+            (input)="draftDateTo = $any($event.target).value"
+          />
+        </label>
+        <button class="btn btn-primary" type="button" (click)="applyDateRange()">
+          <lucide-angular [img]="CalendarRange" class="h-4 w-4"></lucide-angular>
+          Consultar
+        </button>
+        <button class="btn btn-ghost" type="button" (click)="clearDateRange()">Limpar</button>
+      </div>
+    </section>
+
+    <section class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div role="tablist" class="tabs tabs-box w-fit">
+        @for (option of typeOptions; track option.value) {
+          <button
+            role="tab"
+            type="button"
+            class="tab"
+            [class.tab-active]="selectedType === option.value"
+            (click)="setType(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+
+      <div role="tablist" class="tabs tabs-box w-fit">
+        @for (option of statusOptions; track option.value) {
+          <button
+            role="tab"
+            type="button"
+            class="tab"
+            [class.tab-active]="selectedStatus === option.value"
+            (click)="setStatus(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <p class="text-sm text-base-content/60">
+      {{ filteredEntriesCount() }} de {{ entries.length }} lançamento(s)
+    </p>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else {
+      <section class="rounded-box border border-base-300 bg-base-100">
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>Lançamento</th>
+                <th>Origem</th>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th class="text-right">Valor</th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of filteredEntries(); track entry.entryId) {
+                <tr>
+                  <td>
+                    <div class="min-w-72">
+                      <p class="font-bold text-primary">{{ entry.description }}</p>
+                      <p class="text-xs text-base-content/60">
+                        {{ entry.category || 'Sem categoria' }}
+                        @if (entry.customerName) {
+                          <span> | {{ entry.customerName }}</span>
+                        }
+                      </p>
+                      @if (entry.notes) {
+                        <p class="mt-1 max-w-xl truncate text-xs text-base-content/50">{{ entry.notes }}</p>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    @if (entry.source === 'invoice_pix') {
+                      <a
+                        class="link-hover font-semibold text-primary"
+                        [routerLink]="['/gestor/contratos', entry.contractId]"
+                      >
+                        Fatura PIX
+                      </a>
+                      <p class="text-xs text-base-content/60">Locação {{ entry.contractNumber || '-' }}</p>
+                    } @else {
+                      <span class="font-semibold">Manual</span>
+                      <p class="text-xs text-base-content/60">Lançamento interno</p>
+                    }
+                  </td>
+                  <td>{{ formatDate(entry.movementDate) }}</td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.badge-success]="entry.type === 'income'"
+                      [class.badge-error]="entry.type === 'expense'"
+                    >
+                      {{ typeLabel(entry.type) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="statusBadgeClass(entry.status)">
+                      {{ statusLabel(entry.status) }}
+                    </span>
+                  </td>
+                  <td
+                    class="text-right font-bold"
+                    [class.text-success]="entry.type === 'income'"
+                    [class.text-error]="entry.type === 'expense'"
+                  >
+                    {{ entry.type === 'expense' ? '-' : '+' }} {{ formatMoney(entry.amountCents) }}
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      @if (entry.source === 'manual') {
+                        <button
+                          class="btn btn-square btn-ghost"
+                          type="button"
+                          title="Editar lançamento"
+                          aria-label="Editar lançamento"
+                          (click)="openEditModal(entry)"
+                        >
+                          <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
+                        </button>
+                        @if (entry.status !== 'confirmed') {
+                          <button
+                            class="btn btn-square btn-ghost"
+                            type="button"
+                            title="Confirmar lançamento"
+                            aria-label="Confirmar lançamento"
+                            (click)="confirmManualEntry(entry)"
+                          >
+                            <lucide-angular [img]="CheckCircle2" class="h-4 w-4"></lucide-angular>
+                          </button>
+                        }
+                        @if (entry.status !== 'cancelled') {
+                          <button
+                            class="btn btn-square btn-ghost"
+                            type="button"
+                            title="Cancelar lançamento"
+                            aria-label="Cancelar lançamento"
+                            (click)="cancelManualEntry(entry)"
+                          >
+                            <lucide-angular [img]="X" class="h-4 w-4"></lucide-angular>
+                          </button>
+                        }
+                      } @else {
+                        <a class="btn btn-sm btn-outline" routerLink="/gestor/recebimentos">
+                          <lucide-angular [img]="HandCoins" class="h-4 w-4"></lucide-angular>
+                          Recebimento
+                        </a>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="py-10 text-center text-base-content/60">
+                    Nenhum lançamento encontrado.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  </div>
+</section>
+
+<dialog class="modal" [open]="modalOpen">
+  <div class="modal-box max-w-3xl">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Financeiro</p>
+        <h2 class="text-2xl font-extrabold text-primary">
+          {{ editingEntry ? 'Editar lançamento' : 'Novo lançamento' }}
+        </h2>
+      </div>
+      <button class="btn btn-square btn-ghost" type="button" [disabled]="saving" (click)="closeModal()">
+        <lucide-angular [img]="X" class="h-5 w-5"></lucide-angular>
+      </button>
+    </div>
+
+    <div class="mt-6 grid gap-4 md:grid-cols-2">
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">Tipo</span>
+        <select class="select select-bordered w-full" [value]="formType" (change)="formType = $any($event.target).value">
+          <option value="income">Entrada</option>
+          <option value="expense">Saída</option>
+        </select>
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">Status</span>
+        <select class="select select-bordered w-full" [value]="formStatus" (change)="formStatus = $any($event.target).value">
+          <option value="confirmed">Confirmado</option>
+          <option value="pending">Pendente</option>
+          <option value="cancelled">Cancelado</option>
+        </select>
+      </label>
+
+      <label class="flex flex-col gap-1.5 md:col-span-2">
+        <span class="text-sm font-semibold text-base-content/80">Descrição</span>
+        <input
+          class="input input-bordered w-full"
+          [value]="formDescription"
+          (input)="formDescription = $any($event.target).value"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">Categoria</span>
+        <input
+          class="input input-bordered w-full"
+          placeholder="Ex.: combustível, manutenção, aluguel, venda avulsa"
+          [value]="formCategory"
+          (input)="formCategory = $any($event.target).value"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">Data</span>
+        <input
+          class="input input-bordered w-full"
+          type="date"
+          [value]="formMovementDate"
+          (input)="formMovementDate = $any($event.target).value"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5 md:col-span-2">
+        <span class="text-sm font-semibold text-base-content/80">Valor</span>
+        <input
+          class="input input-bordered w-full"
+          inputmode="decimal"
+          [value]="formAmount"
+          (input)="formAmount = $any($event.target).value"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5 md:col-span-2">
+        <span class="text-sm font-semibold text-base-content/80">Observações</span>
+        <textarea
+          class="textarea textarea-bordered h-28 w-full"
+          [value]="formNotes"
+          (input)="formNotes = $any($event.target).value"
+        ></textarea>
+      </label>
+    </div>
+
+    <div class="modal-action">
+      <button class="btn btn-ghost" type="button" [disabled]="saving" (click)="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" type="button" [disabled]="saving" (click)="saveEntry()">
+        @if (saving) {
+          <span class="loading loading-spinner loading-sm"></span>
+        } @else {
+          <lucide-angular [img]="Banknote" class="h-4 w-4"></lucide-angular>
+        }
+        Salvar lançamento
+      </button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button type="button" [disabled]="saving" (click)="closeModal()">Fechar</button>
+  </form>
+</dialog>

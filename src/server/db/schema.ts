@@ -18,6 +18,8 @@ export type StaffUserRole = 'admin' | 'vendedor' | 'operador' | 'financeiro';
 export type RentalBillingPeriod = 'daily' | 'weekly' | 'fortnightly' | 'monthly';
 export type RentalContractStatus = 'draft' | 'active' | 'closed' | 'returned' | 'cancelled';
 export type InvoicePixChargeStatus = 'pending' | 'paid' | 'review' | 'rejected' | 'cancelled';
+export type FinancialEntryType = 'income' | 'expense';
+export type FinancialEntryStatus = 'pending' | 'confirmed' | 'cancelled';
 export type RentalQuoteStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired';
 export type LeadOrigin =
   | 'indicacao'
@@ -332,6 +334,27 @@ export const invoicePixCharges = pgTable('invoice_pix_charges', {
   check('invoice_pix_charges_paid_amount_cents_check', sql`${table.paidAmountCents} >= 0`),
   check('invoice_pix_charges_risk_score_check', sql`${table.riskScore} >= 0`),
   check('invoice_pix_charges_status_check', sql`${table.status} in ('pending', 'paid', 'review', 'rejected', 'cancelled')`),
+]);
+
+export const financialTransactions = pgTable('financial_transactions', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  type: text('type').notNull().$type<FinancialEntryType>(),
+  source: text('source').notNull().default('manual'),
+  description: text('description').notNull(),
+  category: text('category').notNull().default(''),
+  amountCents: integer('amount_cents').notNull().default(0),
+  movementDate: date('movement_date', { mode: 'string' }).notNull(),
+  status: text('status').notNull().default('confirmed').$type<FinancialEntryStatus>(),
+  notes: text('notes').notNull().default(''),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (table) => [
+  index('financial_transactions_type_idx').on(table.type),
+  index('financial_transactions_status_idx').on(table.status),
+  index('financial_transactions_movement_date_idx').on(table.movementDate),
+  check('financial_transactions_type_check', sql`${table.type} in ('income', 'expense')`),
+  check('financial_transactions_status_check', sql`${table.status} in ('pending', 'confirmed', 'cancelled')`),
+  check('financial_transactions_amount_cents_check', sql`${table.amountCents} >= 0`),
 ]);
 
 export const rentalQuotes = pgTable('rental_quotes', {

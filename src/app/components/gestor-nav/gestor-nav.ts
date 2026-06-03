@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
+  Banknote,
   Building2,
   ClipboardList,
   FileText,
@@ -65,6 +66,7 @@ export class GestorNavComponent {
     { label: 'Orçamentos', route: '/gestor/orcamentos', icon: ClipboardList },
     { label: 'Contratos', route: '/gestor/contratos', icon: FileText },
     { label: 'Recebimentos', route: '/gestor/recebimentos', icon: HandCoins },
+    { label: 'Financeiro', route: '/gestor/financeiro', icon: Banknote },
     { label: 'Empresa', route: '/gestor/empresa', icon: Building2 },
     { label: 'Usuários', route: '/gestor/usuarios', icon: UserRound },
   ];

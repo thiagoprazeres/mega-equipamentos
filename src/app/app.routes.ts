@@ -173,6 +173,12 @@ export const routes: Routes = [
     title: 'Recebimentos | Área Gestora Mega Equipamentos',
   },
   {
+    path: 'gestor/financeiro',
+    canActivate: [gestorAuthGuard],
+    loadComponent: () => import('./pages/gestor-financeiro/gestor-financeiro').then(m => m.GestorFinanceiroPage),
+    title: 'Financeiro | Área Gestora Mega Equipamentos',
+  },
+  {
     path: 'gestor/empresa',
     canActivate: [gestorAuthGuard],
     loadComponent: () => import('./pages/gestor-empresa/gestor-empresa').then(m => m.GestorEmpresaPage),

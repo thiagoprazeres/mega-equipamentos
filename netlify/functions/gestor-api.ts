@@ -20,6 +20,7 @@ import {
   customers,
   equipmentPrices,
   equipments,
+  financialTransactions,
   leads,
   invoicePixCharges,
   rentalContractItems,
@@ -28,6 +29,8 @@ import {
   rentalQuotes,
   staffUsers,
   type CatalogStatus,
+  type FinancialEntryStatus,
+  type FinancialEntryType,
   type InvoicePixChargeStatus,
   type LeadOrigin,
   type RentalBillingPeriod,
@@ -51,6 +54,7 @@ type CategoryRow = typeof categories.$inferSelect;
 type EquipmentRow = typeof equipments.$inferSelect;
 type EquipmentPriceRow = typeof equipmentPrices.$inferSelect;
 type CustomerRow = typeof customers.$inferSelect;
+type FinancialTransactionRow = typeof financialTransactions.$inferSelect;
 type LeadRow = typeof leads.$inferSelect;
 type InvoicePixChargeRow = typeof invoicePixCharges.$inferSelect;
 type StaffUserRow = typeof staffUsers.$inferSelect;
@@ -62,6 +66,7 @@ type RentalQuoteItemRow = typeof rentalQuoteItems.$inferSelect;
 
 let quotesWithoutLeadMigrationReady = false;
 let invoicePixChargesMigrationReady = false;
+let financialTransactionsMigrationReady = false;
 
 export const handler: Handler = async (event) => {
   try {
@@ -92,6 +97,8 @@ export const handler: Handler = async (event) => {
         return handleRentalQuotes(event);
       case 'invoice-charges':
         return handleInvoiceCharges(event, id, action);
+      case 'financial-transactions':
+        return handleFinancialTransactions(event, id, action);
       default:
         return json({ error: 'Recurso não encontrado.' }, 404);
     }
@@ -278,6 +285,28 @@ async function handleInvoiceCharges(event: HandlerEvent, id?: string, action?: s
   }
 
   return json({ error: 'Operação de recebimento não suportada.' }, 405);
+}
+
+async function handleFinancialTransactions(event: HandlerEvent, id?: string, action?: string) {
+  await ensureFinancialTransactionsTable();
+
+  if (!id) {
+    if (event.httpMethod === 'GET') {
+      return json(await listFinancialEntries(event));
+    }
+
+    if (event.httpMethod === 'POST') {
+      return json(await saveFinancialTransaction(await readJson(event)));
+    }
+  }
+
+  if (id && action === 'status' && event.httpMethod === 'PATCH') {
+    const body = await readJson(event);
+    await updateFinancialTransactionStatus(Number(id), normalizeFinancialStatus(body.status));
+    return json({ ok: true });
+  }
+
+  return json({ error: 'Operação financeira não suportada.' }, 405);
 }
 
 async function listCategories(event: HandlerEvent) {
@@ -917,6 +946,98 @@ async function confirmInvoiceCharge(id: number, input: Record<string, unknown>) 
 
   const contractsById = await loadContractsById([row.contractId]);
   return mapInvoiceChargeRow(row, contractsById.get(row.contractId));
+}
+
+async function listFinancialEntries(event: HandlerEvent) {
+  const type = optionalFinancialType(queryValue(event, 'type'));
+  const status = optionalFinancialStatus(queryValue(event, 'status'));
+  const dateFrom = dateQueryValue(event, 'dateFrom');
+  const dateTo = dateQueryValue(event, 'dateTo');
+  const manualFilters: SQL[] = [];
+  const invoiceFilters: SQL[] = [];
+
+  if (type) {
+    manualFilters.push(eq(financialTransactions.type, type));
+  }
+
+  if (status) {
+    manualFilters.push(eq(financialTransactions.status, status));
+  }
+
+  if (dateFrom) {
+    manualFilters.push(sql`${financialTransactions.movementDate} >= ${dateFrom}`);
+    invoiceFilters.push(sql`coalesce(${invoicePixCharges.paidAt}::date, ${invoicePixCharges.dueDate}) >= ${dateFrom}`);
+  }
+
+  if (dateTo) {
+    manualFilters.push(sql`${financialTransactions.movementDate} <= ${dateTo}`);
+    invoiceFilters.push(sql`coalesce(${invoicePixCharges.paidAt}::date, ${invoicePixCharges.dueDate}) <= ${dateTo}`);
+  }
+
+  const includeInvoices = !type || type === 'income';
+  const [manualRows, invoiceRows] = await Promise.all([
+    getDb()
+      .select()
+      .from(financialTransactions)
+      .where(manualFilters.length ? and(...manualFilters) : undefined)
+      .orderBy(desc(financialTransactions.movementDate), desc(financialTransactions.createdAt), desc(financialTransactions.id)),
+    includeInvoices
+      ? getDb()
+          .select()
+          .from(invoicePixCharges)
+          .where(invoiceFilters.length ? and(...invoiceFilters) : undefined)
+          .orderBy(desc(invoicePixCharges.createdAt), desc(invoicePixCharges.id))
+      : Promise.resolve([] as InvoicePixChargeRow[]),
+  ]);
+  const contractsById = await loadContractsById(invoiceRows.map((charge) => charge.contractId));
+  const entries = [
+    ...manualRows.map(mapFinancialTransactionRow),
+    ...invoiceRows
+      .map((row) => mapInvoiceChargeFinancialEntry(row, contractsById.get(row.contractId)))
+      .filter((entry) => !status || entry.status === status),
+  ];
+
+  return entries.sort(compareFinancialEntriesDesc);
+}
+
+async function saveFinancialTransaction(input: Record<string, unknown>) {
+  const id = optionalNumber(input.id);
+  const payload = {
+    type: normalizeFinancialType(input.type),
+    source: 'manual',
+    description: textInput(input.description),
+    category: textInput(input.category),
+    amountCents: centsInput(input.amountCents),
+    movementDate: requiredDateInput(input.movementDate, 'Informe a data do lançamento.'),
+    status: normalizeFinancialStatus(input.status),
+    notes: textInput(input.notes),
+  };
+
+  if (!payload.description) {
+    throw httpError(400, 'Informe a descrição do lançamento.');
+  }
+
+  if (payload.amountCents <= 0) {
+    throw httpError(400, 'Informe um valor maior que zero.');
+  }
+
+  const [row] = id
+    ? await getDb()
+        .update(financialTransactions)
+        .set(payload)
+        .where(eq(financialTransactions.id, id))
+        .returning()
+    : await getDb().insert(financialTransactions).values(payload).returning();
+
+  if (!row) {
+    throw httpError(500, 'Não foi possível salvar o lançamento financeiro.');
+  }
+
+  return mapFinancialTransactionRow(row);
+}
+
+async function updateFinancialTransactionStatus(id: number, status: FinancialEntryStatus) {
+  await getDb().update(financialTransactions).set({ status }).where(eq(financialTransactions.id, id));
 }
 
 async function listRentalQuotes() {
@@ -1712,6 +1833,51 @@ function mapInvoiceChargeRow(
   };
 }
 
+function mapFinancialTransactionRow(row: FinancialTransactionRow) {
+  return {
+    id: row.id,
+    entryId: `manual-${row.id}`,
+    type: normalizeFinancialType(row.type),
+    source: 'manual' as const,
+    description: row.description,
+    category: row.category || undefined,
+    amountCents: row.amountCents,
+    movementDate: row.movementDate,
+    status: normalizeFinancialStatus(row.status),
+    notes: row.notes || undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function mapInvoiceChargeFinancialEntry(
+  row: InvoicePixChargeRow,
+  contract?: ReturnType<typeof mapContractRow>
+) {
+  const status = invoiceChargeFinancialStatus(row.status);
+  const paidDate = row.paidAt ? row.paidAt.slice(0, 10) : '';
+
+  return {
+    id: row.id,
+    entryId: `invoice-${row.id}`,
+    type: 'income' as const,
+    source: 'invoice_pix' as const,
+    sourceId: row.id,
+    description: `${row.invoiceNumber} | Locação ${contract?.contractNumber ?? `#${row.contractId}`}`,
+    category: 'Fatura PIX',
+    amountCents: row.paidAmountCents > 0 ? row.paidAmountCents : row.amountCents,
+    movementDate: paidDate || row.dueDate,
+    status,
+    notes: row.additionalInfo || undefined,
+    contractId: row.contractId,
+    contractNumber: contract?.contractNumber,
+    customerName: contract?.customerName,
+    customerDocument: contract?.customerDocument,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
 function mapQuoteRow(row: RentalQuoteRow, items: ReturnType<typeof mapQuoteItemRow>[]) {
   return {
     id: row.id,
@@ -2013,6 +2179,63 @@ function normalizeInvoiceChargeStatus(value: unknown): InvoicePixChargeStatus {
   return 'pending';
 }
 
+function normalizeFinancialType(value: unknown): FinancialEntryType {
+  return value === 'expense' ? 'expense' : 'income';
+}
+
+function optionalFinancialType(value: unknown): FinancialEntryType | null {
+  const normalized = textInput(value);
+
+  if (!normalized || normalized === 'all') {
+    return null;
+  }
+
+  return normalizeFinancialType(normalized);
+}
+
+function normalizeFinancialStatus(value: unknown): FinancialEntryStatus {
+  if (value === 'pending' || value === 'cancelled') {
+    return value;
+  }
+
+  return 'confirmed';
+}
+
+function optionalFinancialStatus(value: unknown): FinancialEntryStatus | null {
+  const normalized = textInput(value);
+
+  if (!normalized || normalized === 'all') {
+    return null;
+  }
+
+  return normalizeFinancialStatus(normalized);
+}
+
+function invoiceChargeFinancialStatus(value: InvoicePixChargeStatus): FinancialEntryStatus {
+  if (value === 'paid') {
+    return 'confirmed';
+  }
+
+  if (value === 'cancelled' || value === 'rejected') {
+    return 'cancelled';
+  }
+
+  return 'pending';
+}
+
+function compareFinancialEntriesDesc(
+  left: ReturnType<typeof mapFinancialTransactionRow> | ReturnType<typeof mapInvoiceChargeFinancialEntry>,
+  right: ReturnType<typeof mapFinancialTransactionRow> | ReturnType<typeof mapInvoiceChargeFinancialEntry>
+): number {
+  const dateComparison = String(right.movementDate).localeCompare(String(left.movementDate));
+
+  if (dateComparison !== 0) {
+    return dateComparison;
+  }
+
+  return String(right.createdAt ?? '').localeCompare(String(left.createdAt ?? ''));
+}
+
 function optionalInvoiceChargeStatus(value: unknown): InvoicePixChargeStatus | null {
   const normalized = textInput(value);
 
@@ -2105,6 +2328,42 @@ async function ensureInvoicePixChargesTable() {
   `);
 
   invoicePixChargesMigrationReady = true;
+}
+
+async function ensureFinancialTransactionsTable() {
+  if (financialTransactionsMigrationReady) {
+    return;
+  }
+
+  await getDb().execute(sql`
+    create table if not exists public.financial_transactions (
+      id integer generated by default as identity primary key,
+      type text not null check (type in ('income', 'expense')),
+      source text not null default 'manual',
+      description text not null,
+      category text not null default '',
+      amount_cents integer not null default 0 check (amount_cents >= 0),
+      movement_date date not null,
+      status text not null default 'confirmed' check (status in ('pending', 'confirmed', 'cancelled')),
+      notes text not null default '',
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `);
+  await getDb().execute(sql`
+    create index if not exists financial_transactions_type_idx
+      on public.financial_transactions(type)
+  `);
+  await getDb().execute(sql`
+    create index if not exists financial_transactions_status_idx
+      on public.financial_transactions(status)
+  `);
+  await getDb().execute(sql`
+    create index if not exists financial_transactions_movement_date_idx
+      on public.financial_transactions(movement_date)
+  `);
+
+  financialTransactionsMigrationReady = true;
 }
 
 function emptyEquipmentPrices() {
