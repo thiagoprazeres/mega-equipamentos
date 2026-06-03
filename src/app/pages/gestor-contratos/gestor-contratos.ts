@@ -99,6 +99,10 @@ export class GestorContratosPage implements OnInit {
   protected exportingReturnReceiptId: number | null = null;
   protected exportingInvoiceId: number | null = null;
   protected exportingQuoteId: number | null = null;
+  protected invoiceDialogOpen = false;
+  protected invoiceContract: RentalContract | null = null;
+  protected invoiceDueDate = '';
+  protected invoiceAdditionalInfo = '';
   protected errorMessage = '';
   protected successMessage = '';
   protected sortKey: ContractSortKey = 'createdAt';
@@ -278,11 +282,42 @@ export class GestorContratosPage implements OnInit {
     }
   }
 
-  protected async exportInvoice(contract: RentalContract) {
+  protected openInvoiceDialog(contract: RentalContract) {
+    this.invoiceContract = contract;
+    this.invoiceDueDate = todayInputValue();
+    this.invoiceAdditionalInfo = contract.notes ?? '';
+    this.invoiceDialogOpen = true;
+    this.errorMessage = '';
+  }
+
+  protected closeInvoiceDialog() {
+    if (this.exportingInvoiceId) {
+      return;
+    }
+
+    this.invoiceDialogOpen = false;
+    this.invoiceContract = null;
+    this.invoiceDueDate = '';
+    this.invoiceAdditionalInfo = '';
+  }
+
+  protected async exportInvoice() {
+    const contract = this.invoiceContract;
+
+    if (!contract || !this.invoiceDueDate) {
+      this.errorMessage = 'Informe a data de vencimento da fatura.';
+      return;
+    }
+
     this.exportingInvoiceId = contract.id;
 
     try {
-      await exportInvoicePdf(contract, await this.getCompanyProfile());
+      await exportInvoicePdf(contract, await this.getCompanyProfile(), {
+        dueDate: dateInputToLocalDate(this.invoiceDueDate),
+        additionalInfo: this.invoiceAdditionalInfo,
+      });
+      this.exportingInvoiceId = null;
+      this.closeInvoiceDialog();
     } catch (error) {
       this.errorMessage =
         error instanceof Error && error.message ? error.message : 'Não foi possível exportar a fatura.';
@@ -447,6 +482,28 @@ function withTimeout<Result>(promise: Promise<Result>, timeoutMs: number): Promi
 function formatDate(value: string): string {
   const [year, month, day] = value.split('-');
   return year && month && day ? `${day}/${month}/${year}` : value;
+}
+
+function todayInputValue(): string {
+  const now = new Date();
+  return dateToInputValue(now);
+}
+
+function dateToInputValue(value: Date): string {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function dateInputToLocalDate(value: string): Date {
+  const [year, month, day] = value.split('-').map((part) => Number(part));
+
+  if (!year || !month || !day) {
+    return new Date();
+  }
+
+  return new Date(year, month - 1, day);
 }
 
 function contractMatchesDateRange(

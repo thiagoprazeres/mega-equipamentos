@@ -26,6 +26,11 @@ const PERIOD_LABELS: Record<RentalBillingPeriod, string> = {
   monthly: 'Mensal',
 };
 
+export interface InvoicePdfOptions {
+  dueDate?: Date;
+  additionalInfo?: string;
+}
+
 function rentalDurationLabel(value: Pick<RentalContract, 'billingPeriod' | 'rentalPeriodCount'>): string {
   return formatRentalDuration(value.billingPeriod, value.rentalPeriodCount);
 }
@@ -219,13 +224,16 @@ export async function exportReturnReceiptPdf(
 
 export async function exportInvoicePdf(
   contract: RentalContract,
-  companyProfile?: CompanyProfile
+  companyProfile?: CompanyProfile,
+  options: InvoicePdfOptions = {}
 ): Promise<void> {
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const company = companyProfile ?? DEFAULT_COMPANY_PROFILE;
   const marginX = 48;
   const issuedAt = new Date();
+  const dueDate = options.dueDate ?? issuedAt;
+  const additionalInfo = options.additionalInfo?.trim();
   const logoDataUrl = await loadImageDataUrl('/logo-mega-equipamentos-preto.png');
   let y = drawOperationalHeader(doc, 'FATURA', `FAT-${contract.contractNumber}`, company, logoDataUrl);
 
@@ -235,7 +243,7 @@ export async function exportInvoicePdf(
     [
       `Locação nº: ${contract.contractNumber}`,
       `Emissão: ${formatDateTime(issuedAt)}`,
-      `Vencimento: ${formatDateTime(issuedAt)}`,
+      `Vencimento: ${formatDateOnly(dueDate)}`,
       `Período da locação: ${rentalDurationLabel(contract)}`,
       `Vigência: ${formatContractPeriod(contract)}`,
       `Endereço da obra: ${formatWorksiteAddress(contract)}`,
@@ -276,9 +284,9 @@ export async function exportInvoicePdf(
     y
   );
 
-  if (contract.notes) {
-    y = sectionTitle(doc, 'Observações', marginX, y + 10);
-    y = paragraph(doc, splitText(contract.notes), marginX, y);
+  if (additionalInfo) {
+    y = sectionTitle(doc, 'INFORMAÇÕES ADICIONAIS', marginX, y + 10);
+    y = paragraph(doc, splitText(additionalInfo), marginX, y);
   }
 
   y = Math.max(y + 40, 690);
