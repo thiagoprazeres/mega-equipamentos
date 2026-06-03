@@ -29,6 +29,12 @@ const PERIOD_LABELS: Record<RentalBillingPeriod, string> = {
 export interface InvoicePdfOptions {
   dueDate?: Date;
   additionalInfo?: string;
+  pixCharge?: {
+    txid: string;
+    brcode: string;
+    qrCodeDataUrl?: string;
+    amountCents?: number;
+  };
 }
 
 function rentalDurationLabel(value: Pick<RentalContract, 'billingPeriod' | 'rentalPeriodCount'>): string {
@@ -272,6 +278,11 @@ export async function exportInvoicePdf(
 
   y = drawFinancialSummary(doc, contract, marginX, y + 12);
 
+  if (y > 570) {
+    doc.addPage();
+    y = 60;
+  }
+
   y = sectionTitle(doc, 'Pagamento', marginX, y);
   y = paragraph(
     doc,
@@ -280,10 +291,18 @@ export async function exportInvoicePdf(
       `Chave PIX: ${company.pixKey || company.document || 'Não informada'}`,
       `Favorecido: ${company.legalName}`,
       `CNPJ: ${company.document || 'Não informado'}`,
+      ...(options.pixCharge ? [
+        `TXID: ${options.pixCharge.txid}`,
+        `Valor da cobrança PIX: ${formatCurrencyCents(options.pixCharge.amountCents ?? contract.totalCents)}`,
+      ] : []),
     ],
     marginX,
     y
   );
+
+  if (options.pixCharge) {
+    y = drawInvoicePixChargeBox(doc, options.pixCharge, marginX, y + 4);
+  }
 
   if (additionalInfo) {
     y = sectionTitle(doc, 'INFORMAÇÕES ADICIONAIS', marginX, y + 10);
@@ -910,6 +929,51 @@ function drawFinancialSummary(doc: unknown, values: FinancialDocument, x: number
   return y + 36;
 }
 
+function drawInvoicePixChargeBox(
+  doc: unknown,
+  pixCharge: NonNullable<InvoicePdfOptions['pixCharge']>,
+  x: number,
+  y: number
+): number {
+  const pdf = doc as {
+    setFont: (font: string, style: string) => void;
+    setFontSize: (size: number) => void;
+    text: (text: string, x: number, y: number) => void;
+    rect: (x: number, y: number, width: number, height: number) => void;
+    addImage?: (imageData: string, format: string, x: number, y: number, width: number, height: number) => void;
+  };
+  const boxHeight = 122;
+
+  pdf.rect(x, y, 499, boxHeight);
+
+  if (pixCharge.qrCodeDataUrl && pdf.addImage) {
+    try {
+      pdf.addImage(pixCharge.qrCodeDataUrl, 'PNG', x + 12, y + 12, 88, 88);
+    } catch {
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(9);
+      pdf.text('QR Code', x + 30, y + 58);
+    }
+  }
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  pdf.text('PIX copia e cola', x + 116, y + 22);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  pdf.text(`TXID: ${pixCharge.txid}`, x + 116, y + 38);
+
+  const brcodeLines = chunkText(pixCharge.brcode, 74).slice(0, 5);
+  let textY = y + 56;
+
+  for (const line of brcodeLines) {
+    pdf.text(line, x + 116, textY);
+    textY += 12;
+  }
+
+  return y + boxHeight + 16;
+}
+
 function sectionTitle(doc: unknown, title: string, x: number, y: number): number {
   const pdf = doc as {
     setFont: (font: string, style: string) => void;
@@ -1290,6 +1354,16 @@ function splitText(value: string): string[] {
   }
 
   return lines;
+}
+
+function chunkText(value: string, size: number): string[] {
+  const chunks: string[] = [];
+
+  for (let index = 0; index < value.length; index += size) {
+    chunks.push(value.slice(index, index + size));
+  }
+
+  return chunks;
 }
 
 function sanitizeFileName(value: string): string {

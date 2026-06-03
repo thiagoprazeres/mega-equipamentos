@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
   CalendarRange,
+  Clipboard,
   ClipboardList,
   Download,
   Eye,
@@ -12,6 +13,7 @@ import {
   Pencil,
   Plus,
   ReceiptText,
+  QrCode,
   RotateCcw,
   Search,
   X,
@@ -24,8 +26,10 @@ import type {
   RentalContract,
   RentalContractStatus,
 } from '../../interfaces/rental-contract';
+import type { InvoicePixCharge } from '../../interfaces/invoice-pix-charge';
 import { AuthService } from '../../services/auth.service';
 import { CompanyProfileService } from '../../services/company-profile.service';
+import { InvoicePixChargeService } from '../../services/invoice-pix-charge.service';
 import {
   type RentalContractDateMode,
   RentalContractService,
@@ -52,6 +56,7 @@ type ContractSortKey = 'createdAt' | 'number' | 'customer' | 'seller' | 'period'
 })
 export class GestorContratosPage implements OnInit {
   protected readonly CalendarRange = CalendarRange;
+  protected readonly Clipboard = Clipboard;
   protected readonly ClipboardList = ClipboardList;
   protected readonly Download = Download;
   protected readonly Eye = Eye;
@@ -61,6 +66,7 @@ export class GestorContratosPage implements OnInit {
   protected readonly Pencil = Pencil;
   protected readonly Plus = Plus;
   protected readonly ReceiptText = ReceiptText;
+  protected readonly QrCode = QrCode;
   protected readonly RotateCcw = RotateCcw;
   protected readonly Search = Search;
   protected readonly X = X;
@@ -101,6 +107,7 @@ export class GestorContratosPage implements OnInit {
   protected exportingQuoteId: number | null = null;
   protected invoiceDialogOpen = false;
   protected invoiceContract: RentalContract | null = null;
+  protected invoicePixCharge: InvoicePixCharge | null = null;
   protected invoiceDueDate = '';
   protected invoiceAdditionalInfo = '';
   protected errorMessage = '';
@@ -112,6 +119,7 @@ export class GestorContratosPage implements OnInit {
     private readonly authService: AuthService,
     private readonly changeDetector: ChangeDetectorRef,
     private readonly companyProfileService: CompanyProfileService,
+    private readonly invoicePixChargeService: InvoicePixChargeService,
     private readonly rentalContractService: RentalContractService,
     private readonly router: Router
   ) {}
@@ -284,6 +292,7 @@ export class GestorContratosPage implements OnInit {
 
   protected openInvoiceDialog(contract: RentalContract) {
     this.invoiceContract = contract;
+    this.invoicePixCharge = null;
     this.invoiceDueDate = todayInputValue();
     this.invoiceAdditionalInfo = contract.notes ?? '';
     this.invoiceDialogOpen = true;
@@ -297,8 +306,47 @@ export class GestorContratosPage implements OnInit {
 
     this.invoiceDialogOpen = false;
     this.invoiceContract = null;
+    this.invoicePixCharge = null;
     this.invoiceDueDate = '';
     this.invoiceAdditionalInfo = '';
+  }
+
+  protected updateInvoiceDueDate(value: string) {
+    this.invoiceDueDate = value;
+    this.invoicePixCharge = null;
+  }
+
+  protected updateInvoiceAdditionalInfo(value: string) {
+    this.invoiceAdditionalInfo = value;
+    this.invoicePixCharge = null;
+  }
+
+  protected async generateInvoicePixCharge() {
+    const contract = this.invoiceContract;
+
+    if (!contract || !this.invoiceDueDate) {
+      this.errorMessage = 'Informe a data de vencimento da cobrança.';
+      return;
+    }
+
+    this.exportingInvoiceId = contract.id;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    try {
+      this.invoicePixCharge = await this.invoicePixChargeService.createCharge({
+        contractId: contract.id,
+        dueDate: this.invoiceDueDate,
+        additionalInfo: this.invoiceAdditionalInfo,
+      });
+      this.successMessage = 'Cobrança PIX gerada para a fatura.';
+    } catch (error) {
+      this.errorMessage =
+        error instanceof Error && error.message ? error.message : 'Não foi possível gerar a cobrança PIX.';
+    } finally {
+      this.exportingInvoiceId = null;
+      this.changeDetector.detectChanges();
+    }
   }
 
   protected async exportInvoice() {
@@ -310,11 +358,20 @@ export class GestorContratosPage implements OnInit {
     }
 
     this.exportingInvoiceId = contract.id;
+    this.errorMessage = '';
+    this.successMessage = '';
 
     try {
+      const pixCharge = this.invoicePixCharge ?? await this.invoicePixChargeService.createCharge({
+        contractId: contract.id,
+        dueDate: this.invoiceDueDate,
+        additionalInfo: this.invoiceAdditionalInfo,
+      });
+      this.invoicePixCharge = pixCharge;
       await exportInvoicePdf(contract, await this.getCompanyProfile(), {
         dueDate: dateInputToLocalDate(this.invoiceDueDate),
         additionalInfo: this.invoiceAdditionalInfo,
+        pixCharge,
       });
       this.exportingInvoiceId = null;
       this.closeInvoiceDialog();
@@ -324,6 +381,19 @@ export class GestorContratosPage implements OnInit {
     } finally {
       this.exportingInvoiceId = null;
       this.changeDetector.detectChanges();
+    }
+  }
+
+  protected async copyInvoicePix() {
+    if (!this.invoicePixCharge) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(this.invoicePixCharge.brcode);
+      this.successMessage = 'PIX copia e cola enviado para a área de transferência.';
+    } catch {
+      this.errorMessage = 'Não foi possível copiar o PIX copia e cola.';
     }
   }
 

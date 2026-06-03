@@ -1,0 +1,256 @@
+<section class="min-h-[80vh] bg-base-200 px-3 py-8">
+  <div class="mx-auto max-w-7xl space-y-6">
+    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
+        <h1 class="text-3xl font-extrabold text-primary md:text-4xl">Recebimentos</h1>
+      </div>
+      <button class="btn btn-ghost" type="button" (click)="signOut()">
+        <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
+        Sair
+      </button>
+    </header>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+
+    <section class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+      <label class="input input-bordered flex items-center gap-2">
+        <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
+        <input
+          class="grow"
+          type="search"
+          placeholder="Buscar por fatura, contrato, CPF/CNPJ, EndToEndId ou banco"
+          [value]="query"
+          (input)="query = $any($event.target).value"
+        />
+      </label>
+
+      <div role="tablist" class="tabs tabs-box w-fit">
+        @for (option of statusOptions; track option.value) {
+          <button
+            role="tab"
+            type="button"
+            class="tab"
+            [class.tab-active]="selectedStatus === option.value"
+            (click)="setStatus(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <p class="text-sm text-base-content/60">
+      {{ filteredChargesCount() }} de {{ charges.length }} recebimento(s)
+    </p>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    } @else {
+      <section class="rounded-box border border-base-300 bg-base-100">
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>Fatura</th>
+                <th>Cliente</th>
+                <th>Cobrança PIX</th>
+                <th>Recebimento</th>
+                <th>Status</th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (charge of filteredCharges(); track charge.id) {
+                <tr>
+                  <td>
+                    <div class="flex min-w-56 items-center gap-3">
+                      <div class="grid h-11 w-11 place-items-center rounded-box bg-primary/10 text-primary">
+                        <lucide-angular [img]="QrCode" class="h-5 w-5"></lucide-angular>
+                      </div>
+                      <div>
+                        <p class="font-bold text-primary">{{ charge.invoiceNumber }}</p>
+                        <a
+                          class="text-xs text-base-content/60 hover:text-primary"
+                          [routerLink]="['/gestor/contratos', charge.contractId]"
+                        >
+                          Locação {{ charge.contractNumber || '#' + charge.contractId }}
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <p class="font-semibold">{{ charge.customerName || 'Cliente não informado' }}</p>
+                    <p class="text-xs text-base-content/60">
+                      {{ charge.customerDocument || charge.customerPhone || 'Sem documento' }}
+                    </p>
+                  </td>
+                  <td>
+                    <p class="font-bold">{{ formatMoney(charge.amountCents) }}</p>
+                    <p class="text-xs text-base-content/60">Vence em {{ formatDate(charge.dueDate) }}</p>
+                    <p class="mt-1 max-w-72 truncate font-mono text-xs text-base-content/50">{{ charge.txid }}</p>
+                  </td>
+                  <td>
+                    @if (charge.endToEndId) {
+                      <p class="font-mono text-xs">{{ charge.endToEndId }}</p>
+                      <p class="text-xs text-base-content/60">{{ charge.payerBankName || charge.payerIspb }}</p>
+                      <p class="text-xs text-base-content/60">{{ formatDateTime(charge.paidAt) }}</p>
+                    } @else {
+                      <span class="text-sm text-base-content/50">Aguardando confirmação</span>
+                    }
+                  </td>
+                  <td>
+                    <div class="flex flex-col gap-1">
+                      <span class="badge" [ngClass]="statusBadgeClass(charge.status)">
+                        {{ statusLabel(charge.status) }}
+                      </span>
+                      <span class="text-xs text-base-content/50">{{ riskLabel(charge) }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <button
+                        class="btn btn-square btn-ghost"
+                        type="button"
+                        title="Copiar PIX copia e cola"
+                        aria-label="Copiar PIX copia e cola"
+                        (click)="copyPix(charge)"
+                      >
+                        <lucide-angular [img]="Clipboard" class="h-4 w-4"></lucide-angular>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-outline"
+                        type="button"
+                        (click)="openReceiptDialog(charge)"
+                      >
+                        <lucide-angular [img]="CheckCircle2" class="h-4 w-4"></lucide-angular>
+                        Confirmar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="py-10 text-center text-base-content/60">
+                    Nenhuma cobrança PIX encontrada.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  </div>
+</section>
+
+<dialog class="modal" [open]="receiptDialogOpen">
+  <div class="modal-box max-w-3xl">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Confirmação de recebimento</p>
+        <h2 class="text-2xl font-extrabold text-primary">
+          {{ selectedCharge?.invoiceNumber || 'Recebimento PIX' }}
+        </h2>
+        @if (selectedCharge) {
+          <p class="mt-1 text-sm text-base-content/60">
+            {{ selectedCharge.customerName || 'Cliente não informado' }} |
+            {{ formatMoney(selectedCharge.amountCents) }}
+          </p>
+        }
+      </div>
+      <button class="btn btn-square btn-ghost" type="button" [disabled]="confirming" (click)="closeReceiptDialog()">
+        <lucide-angular [img]="X" class="h-5 w-5"></lucide-angular>
+      </button>
+    </div>
+
+    <div class="mt-6 grid gap-4 md:grid-cols-2">
+      <label class="flex flex-col gap-1.5 md:col-span-2">
+        <span class="text-sm font-semibold text-base-content/80">EndToEndId</span>
+        <input
+          class="input input-bordered w-full font-mono"
+          placeholder="E0036030520260603123456789012345"
+          [value]="receiptEndToEndId"
+          (input)="receiptEndToEndId = $any($event.target).value"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">Valor recebido</span>
+        <input
+          class="input input-bordered w-full"
+          inputmode="decimal"
+          [value]="receiptPaidAmount"
+          (input)="receiptPaidAmount = $any($event.target).value"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">Data/hora do pagamento</span>
+        <input
+          class="input input-bordered w-full"
+          type="datetime-local"
+          [value]="receiptPaidAt"
+          (input)="receiptPaidAt = $any($event.target).value"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">Nome do pagador</span>
+        <input
+          class="input input-bordered w-full"
+          [value]="receiptPayerName"
+          (input)="receiptPayerName = $any($event.target).value"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">CPF/CNPJ do pagador</span>
+        <input
+          class="input input-bordered w-full"
+          [value]="receiptPayerDocument"
+          (input)="receiptPayerDocument = $any($event.target).value"
+        />
+      </label>
+
+      <div class="rounded-box border border-warning/30 bg-warning/10 p-4 text-sm md:col-span-2">
+        <div class="flex gap-2">
+          <lucide-angular [img]="ShieldAlert" class="mt-0.5 h-4 w-4 shrink-0 text-warning"></lucide-angular>
+          <p>
+            A confirmação cruza EndToEndId, valor, horário, reuso e banco emissor. Divergências ficam como revisão.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-action">
+      <button class="btn btn-ghost" type="button" [disabled]="confirming" (click)="closeReceiptDialog()">
+        Cancelar
+      </button>
+      <button
+        class="btn btn-primary"
+        type="button"
+        [disabled]="confirming || !receiptEndToEndId.trim()"
+        (click)="confirmReceipt()"
+      >
+        @if (confirming) {
+          <span class="loading loading-spinner loading-sm"></span>
+        } @else {
+          <lucide-angular [img]="Banknote" class="h-4 w-4"></lucide-angular>
+        }
+        Confirmar recebimento
+      </button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button type="button" [disabled]="confirming" (click)="closeReceiptDialog()">Fechar</button>
+  </form>
+</dialog>

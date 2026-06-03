@@ -4,6 +4,7 @@ import {
   Building2,
   ClipboardList,
   FileText,
+  HandCoins,
   Package,
   UserRound,
   UsersRound,
@@ -63,6 +64,7 @@ export class GestorNavComponent {
     { label: 'Leads', route: '/gestor/leads', icon: UserRound },
     { label: 'Orçamentos', route: '/gestor/orcamentos', icon: ClipboardList },
     { label: 'Contratos', route: '/gestor/contratos', icon: FileText },
+    { label: 'Recebimentos', route: '/gestor/recebimentos', icon: HandCoins },
     { label: 'Empresa', route: '/gestor/empresa', icon: Building2 },
     { label: 'Usuários', route: '/gestor/usuarios', icon: UserRound },
   ];

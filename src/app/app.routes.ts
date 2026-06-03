@@ -167,6 +167,12 @@ export const routes: Routes = [
     title: 'Detalhes do Contrato | Área Gestora Mega Equipamentos',
   },
   {
+    path: 'gestor/recebimentos',
+    canActivate: [gestorAuthGuard],
+    loadComponent: () => import('./pages/gestor-recebimentos/gestor-recebimentos').then(m => m.GestorRecebimentosPage),
+    title: 'Recebimentos | Área Gestora Mega Equipamentos',
+  },
+  {
     path: 'gestor/empresa',
     canActivate: [gestorAuthGuard],
     loadComponent: () => import('./pages/gestor-empresa/gestor-empresa').then(m => m.GestorEmpresaPage),

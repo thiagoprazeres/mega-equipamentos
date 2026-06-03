@@ -21,18 +21,25 @@ import {
   equipmentPrices,
   equipments,
   leads,
+  invoicePixCharges,
   rentalContractItems,
   rentalContracts,
   rentalQuoteItems,
   rentalQuotes,
   staffUsers,
   type CatalogStatus,
+  type InvoicePixChargeStatus,
   type LeadOrigin,
   type RentalBillingPeriod,
   type RentalContractStatus,
   type RentalQuoteStatus,
   type StaffUserRole,
 } from '../../src/server/db/schema';
+import {
+  analyzePixReceiptRisk,
+  buildInvoicePixCharge,
+  parsePixReceiptEndToEndId,
+} from '../../src/server/pix/invoice-pix';
 import { getSupabaseAnonKey, getSupabaseUrl } from '../../src/server/runtime-config';
 
 const JSON_HEADERS = {
@@ -45,6 +52,7 @@ type EquipmentRow = typeof equipments.$inferSelect;
 type EquipmentPriceRow = typeof equipmentPrices.$inferSelect;
 type CustomerRow = typeof customers.$inferSelect;
 type LeadRow = typeof leads.$inferSelect;
+type InvoicePixChargeRow = typeof invoicePixCharges.$inferSelect;
 type StaffUserRow = typeof staffUsers.$inferSelect;
 type CompanyProfileRow = typeof companyProfile.$inferSelect;
 type RentalContractRow = typeof rentalContracts.$inferSelect;
@@ -53,6 +61,7 @@ type RentalQuoteRow = typeof rentalQuotes.$inferSelect;
 type RentalQuoteItemRow = typeof rentalQuoteItems.$inferSelect;
 
 let quotesWithoutLeadMigrationReady = false;
+let invoicePixChargesMigrationReady = false;
 
 export const handler: Handler = async (event) => {
   try {
@@ -81,6 +90,8 @@ export const handler: Handler = async (event) => {
         return handleRentalContracts(event);
       case 'rental-quotes':
         return handleRentalQuotes(event);
+      case 'invoice-charges':
+        return handleInvoiceCharges(event, id, action);
       default:
         return json({ error: 'Recurso não encontrado.' }, 404);
     }
@@ -247,6 +258,26 @@ async function handleRentalQuotes(event: HandlerEvent) {
   }
 
   return json({ error: 'Operação de orçamento não suportada.' }, 405);
+}
+
+async function handleInvoiceCharges(event: HandlerEvent, id?: string, action?: string) {
+  await ensureInvoicePixChargesTable();
+
+  if (!id) {
+    if (event.httpMethod === 'GET') {
+      return json(await listInvoiceCharges(event));
+    }
+
+    if (event.httpMethod === 'POST') {
+      return json(await createInvoiceCharge(await readJson(event)));
+    }
+  }
+
+  if (id && action === 'confirm' && event.httpMethod === 'PATCH') {
+    return json(await confirmInvoiceCharge(Number(id), await readJson(event)));
+  }
+
+  return json({ error: 'Operação de recebimento não suportada.' }, 405);
 }
 
 async function listCategories(event: HandlerEvent) {
@@ -754,6 +785,140 @@ async function saveRentalContract(input: Record<string, unknown>) {
   return mapContractRow(saved.contract, saved.items.map(mapContractItemRow));
 }
 
+async function listInvoiceCharges(event: HandlerEvent) {
+  const status = optionalInvoiceChargeStatus(queryValue(event, 'status'));
+  const contractId = optionalNumber(queryValue(event, 'contractId'));
+  const filters: SQL[] = [];
+
+  if (status) {
+    filters.push(eq(invoicePixCharges.status, status));
+  }
+
+  if (contractId) {
+    filters.push(eq(invoicePixCharges.contractId, contractId));
+  }
+
+  const chargeRows = await getDb()
+    .select()
+    .from(invoicePixCharges)
+    .where(filters.length ? and(...filters) : undefined)
+    .orderBy(desc(invoicePixCharges.createdAt), desc(invoicePixCharges.id));
+  const contractsById = await loadContractsById(chargeRows.map((charge) => charge.contractId));
+
+  return chargeRows.map((row) => mapInvoiceChargeRow(row, contractsById.get(row.contractId)));
+}
+
+async function createInvoiceCharge(input: Record<string, unknown>) {
+  const contract = await loadRentalContractById(numberInput(input.contractId));
+  const company = await getCompanyProfile();
+  const dueDate = requiredDateInput(input.dueDate, 'Informe a data de vencimento.');
+  const additionalInfo = textInput(input.additionalInfo);
+  const pixKey = company.pixKey || company.document || '';
+
+  if (!pixKey) {
+    throw httpError(400, 'Cadastre a chave PIX em Dados da Empresa antes de gerar fatura PIX.');
+  }
+
+  const pix = await buildInvoicePixCharge({
+    contractNumber: contract.contractNumber,
+    amountCents: contract.totalCents,
+    pixKey,
+    receiverName: company.legalName,
+    receiverCity: company.city || 'Caruaru',
+    description: `FAT ${contract.contractNumber}`,
+  });
+
+  const [row] = await getDb()
+    .insert(invoicePixCharges)
+    .values({
+      contractId: contract.id,
+      invoiceNumber: `FAT-${contract.contractNumber}`,
+      txid: pix.txid,
+      brcode: pix.brcode,
+      pixKey,
+      receiverName: pix.receiverName,
+      receiverCity: pix.receiverCity,
+      amountCents: contract.totalCents,
+      dueDate,
+      additionalInfo,
+      status: 'pending',
+    })
+    .returning();
+
+  if (!row) {
+    throw httpError(500, 'Não foi possível criar a cobrança PIX.');
+  }
+
+  return mapInvoiceChargeRow(row, contract, pix.qrCodeDataUrl);
+}
+
+async function confirmInvoiceCharge(id: number, input: Record<string, unknown>) {
+  if (!Number.isFinite(id) || id <= 0) {
+    throw httpError(400, 'Recebimento inválido.');
+  }
+
+  const [charge] = await getDb().select().from(invoicePixCharges).where(eq(invoicePixCharges.id, id));
+
+  if (!charge) {
+    throw httpError(404, 'Cobrança PIX não encontrada.');
+  }
+
+  let parsedEndToEndId: ReturnType<typeof parsePixReceiptEndToEndId>;
+
+  try {
+    parsedEndToEndId = parsePixReceiptEndToEndId(textInput(input.endToEndId));
+  } catch (error) {
+    throw httpError(400, error instanceof Error ? error.message : 'EndToEndId inválido.');
+  }
+
+  const paidAmountCents = centsInput(input.paidAmountCents, charge.amountCents);
+  const paidAt = datetimeInput(input.paidAt);
+  const knownRows = await getDb()
+    .select({ endToEndId: invoicePixCharges.endToEndId })
+    .from(invoicePixCharges)
+    .where(sql`${invoicePixCharges.endToEndId} <> '' and ${invoicePixCharges.id} <> ${charge.id}`);
+  const risk = analyzePixReceiptRisk({
+    txid: charge.txid,
+    endToEndId: parsedEndToEndId.endToEndId,
+    expectedAmountCents: charge.amountCents,
+    paidAmountCents,
+    paidAt,
+    chargeCreatedAt: charge.createdAt,
+    payerIspb: parsedEndToEndId.ispb,
+    pixKey: charge.pixKey,
+    knownEndToEndIds: knownRows.map((row) => row.endToEndId),
+    channel: 'manual',
+  });
+  const nextStatus = invoiceChargeStatusAfterRisk(risk.verdict, charge.amountCents, paidAmountCents);
+  const [row] = await getDb()
+    .update(invoicePixCharges)
+    .set({
+      status: nextStatus,
+      endToEndId: parsedEndToEndId.endToEndId,
+      paidAmountCents,
+      paidAt,
+      payerIspb: parsedEndToEndId.ispb,
+      payerBankName: parsedEndToEndId.bankName,
+      payerName: textInput(input.payerName),
+      payerDocument: textInput(input.payerDocument),
+      riskScore: risk.score,
+      riskBand: risk.band,
+      riskVerdict: risk.verdict,
+      riskSignals: risk.signals,
+      riskEvidences: risk.evidences,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(invoicePixCharges.id, id))
+    .returning();
+
+  if (!row) {
+    throw httpError(500, 'Não foi possível confirmar o recebimento.');
+  }
+
+  const contractsById = await loadContractsById([row.contractId]);
+  return mapInvoiceChargeRow(row, contractsById.get(row.contractId));
+}
+
 async function listRentalQuotes() {
   const quoteRows = await getDb()
     .select()
@@ -1067,6 +1232,38 @@ async function loadCategories(includeArchived: boolean): Promise<CategoryRow[]> 
     .from(categories)
     .where(includeArchived ? undefined : eq(categories.status, 'active'))
     .orderBy(categoryCodeOrderSql(), asc(categories.categoryCode), asc(categories.sortOrder), asc(categories.nome));
+}
+
+async function loadRentalContractById(id: number) {
+  const [row] = await getDb().select().from(rentalContracts).where(eq(rentalContracts.id, id));
+
+  if (!row) {
+    throw httpError(404, 'Contrato não encontrado.');
+  }
+
+  const itemsByContractId = await loadContractItemsByContractId([row.id]);
+  return mapContractRow(row, itemsByContractId.get(row.id) ?? []);
+}
+
+async function loadContractsById(contractIds: number[]): Promise<Map<number, ReturnType<typeof mapContractRow>>> {
+  const uniqueIds = [...new Set(contractIds.filter((id) => Number.isFinite(id) && id > 0))];
+  const contractsById = new Map<number, ReturnType<typeof mapContractRow>>();
+
+  if (!uniqueIds.length) {
+    return contractsById;
+  }
+
+  const rows = await getDb()
+    .select()
+    .from(rentalContracts)
+    .where(inArray(rentalContracts.id, uniqueIds));
+  const itemsByContractId = await loadContractItemsByContractId(uniqueIds);
+
+  for (const row of rows) {
+    contractsById.set(row.id, mapContractRow(row, itemsByContractId.get(row.id) ?? []));
+  }
+
+  return contractsById;
 }
 
 async function loadCategoryById(id: number): Promise<CategoryRow | null> {
@@ -1475,6 +1672,46 @@ function mapContractItemRow(row: RentalContractItemRow) {
   };
 }
 
+function mapInvoiceChargeRow(
+  row: InvoicePixChargeRow,
+  contract?: ReturnType<typeof mapContractRow>,
+  qrCodeDataUrl?: string
+) {
+  return {
+    id: row.id,
+    contractId: row.contractId,
+    contractNumber: contract?.contractNumber,
+    invoiceNumber: row.invoiceNumber,
+    txid: row.txid,
+    brcode: row.brcode,
+    qrCodeDataUrl,
+    pixKey: row.pixKey,
+    receiverName: row.receiverName,
+    receiverCity: row.receiverCity,
+    amountCents: row.amountCents,
+    dueDate: row.dueDate,
+    additionalInfo: row.additionalInfo || undefined,
+    status: normalizeInvoiceChargeStatus(row.status),
+    endToEndId: row.endToEndId || undefined,
+    paidAmountCents: row.paidAmountCents,
+    paidAt: row.paidAt ?? undefined,
+    payerIspb: row.payerIspb || undefined,
+    payerBankName: row.payerBankName || undefined,
+    payerName: row.payerName || undefined,
+    payerDocument: row.payerDocument || undefined,
+    riskScore: row.riskScore,
+    riskBand: row.riskBand || undefined,
+    riskVerdict: row.riskVerdict || undefined,
+    riskSignals: row.riskSignals,
+    riskEvidences: row.riskEvidences,
+    customerName: contract?.customerName,
+    customerDocument: contract?.customerDocument,
+    customerPhone: contract?.customerPhone,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
 function mapQuoteRow(row: RentalQuoteRow, items: ReturnType<typeof mapQuoteItemRow>[]) {
   return {
     id: row.id,
@@ -1601,6 +1838,31 @@ function dateQueryValue(event: HandlerEvent, key: string): string {
   }
 
   return value;
+}
+
+function requiredDateInput(value: unknown, message: string): string {
+  const normalized = textInput(value);
+
+  if (!normalized) {
+    throw httpError(400, message);
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+    throw httpError(400, 'Data inválida.');
+  }
+
+  return normalized;
+}
+
+function datetimeInput(value: unknown): string {
+  const normalized = textInput(value);
+  const date = normalized ? new Date(normalized) : new Date();
+
+  if (Number.isNaN(date.getTime())) {
+    throw httpError(400, 'Data/hora de pagamento inválida.');
+  }
+
+  return date.toISOString();
 }
 
 function contractDateModeQuery(event: HandlerEvent): 'overlap' | 'start' | 'end' {
@@ -1738,12 +2000,111 @@ function normalizeContractStatus(value: unknown): RentalContractStatus {
   return 'draft';
 }
 
+function normalizeInvoiceChargeStatus(value: unknown): InvoicePixChargeStatus {
+  if (
+    value === 'paid' ||
+    value === 'review' ||
+    value === 'rejected' ||
+    value === 'cancelled'
+  ) {
+    return value;
+  }
+
+  return 'pending';
+}
+
+function optionalInvoiceChargeStatus(value: unknown): InvoicePixChargeStatus | null {
+  const normalized = textInput(value);
+
+  if (!normalized || normalized === 'all') {
+    return null;
+  }
+
+  return normalizeInvoiceChargeStatus(normalized);
+}
+
+function invoiceChargeStatusAfterRisk(
+  verdict: 'approved' | 'review' | 'rejected',
+  expectedAmountCents: number,
+  paidAmountCents: number
+): InvoicePixChargeStatus {
+  if (verdict === 'rejected') {
+    return 'rejected';
+  }
+
+  if (verdict === 'review' || expectedAmountCents !== paidAmountCents) {
+    return 'review';
+  }
+
+  return 'paid';
+}
+
 function normalizeQuoteStatus(value: unknown): RentalQuoteStatus {
   if (value === 'sent' || value === 'approved' || value === 'rejected' || value === 'expired') {
     return value;
   }
 
   return 'draft';
+}
+
+async function ensureInvoicePixChargesTable() {
+  if (invoicePixChargesMigrationReady) {
+    return;
+  }
+
+  await getDb().execute(sql`
+    create table if not exists public.invoice_pix_charges (
+      id integer generated by default as identity primary key,
+      contract_id integer not null references public.rental_contracts(id) on delete cascade on update cascade,
+      invoice_number text not null,
+      txid text not null,
+      brcode text not null,
+      pix_key text not null,
+      receiver_name text not null default '',
+      receiver_city text not null default '',
+      amount_cents integer not null default 0 check (amount_cents >= 0),
+      due_date date not null,
+      additional_info text not null default '',
+      status text not null default 'pending' check (status in ('pending', 'paid', 'review', 'rejected', 'cancelled')),
+      end_to_end_id text not null default '',
+      paid_amount_cents integer not null default 0 check (paid_amount_cents >= 0),
+      paid_at timestamptz,
+      payer_ispb text not null default '',
+      payer_bank_name text not null default '',
+      payer_name text not null default '',
+      payer_document text not null default '',
+      risk_score integer not null default 0 check (risk_score >= 0),
+      risk_band text not null default 'low',
+      risk_verdict text not null default 'approved',
+      risk_signals jsonb not null default '[]'::jsonb,
+      risk_evidences jsonb not null default '[]'::jsonb,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `);
+  await getDb().execute(sql`
+    create unique index if not exists invoice_pix_charges_txid_key
+      on public.invoice_pix_charges(txid)
+  `);
+  await getDb().execute(sql`
+    create unique index if not exists invoice_pix_charges_end_to_end_id_key
+      on public.invoice_pix_charges(end_to_end_id)
+      where end_to_end_id <> ''
+  `);
+  await getDb().execute(sql`
+    create index if not exists invoice_pix_charges_contract_id_idx
+      on public.invoice_pix_charges(contract_id)
+  `);
+  await getDb().execute(sql`
+    create index if not exists invoice_pix_charges_status_idx
+      on public.invoice_pix_charges(status)
+  `);
+  await getDb().execute(sql`
+    create index if not exists invoice_pix_charges_due_date_idx
+      on public.invoice_pix_charges(due_date)
+  `);
+
+  invoicePixChargesMigrationReady = true;
 }
 
 function emptyEquipmentPrices() {

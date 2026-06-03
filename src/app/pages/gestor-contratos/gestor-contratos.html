@@ -383,7 +383,7 @@
           class="input input-bordered w-full"
           type="date"
           [value]="invoiceDueDate"
-          (input)="invoiceDueDate = $any($event.target).value"
+          (input)="updateInvoiceDueDate($any($event.target).value)"
         />
       </label>
 
@@ -393,14 +393,61 @@
           class="textarea textarea-bordered h-36 w-full"
           placeholder="Ex.: pagamento via PIX, condições combinadas, observações da cobrança..."
           [value]="invoiceAdditionalInfo"
-          (input)="invoiceAdditionalInfo = $any($event.target).value"
+          (input)="updateInvoiceAdditionalInfo($any($event.target).value)"
         ></textarea>
       </label>
+
+      @if (invoicePixCharge) {
+        <div class="rounded-box border border-primary/20 bg-primary/5 p-4">
+          <div class="grid gap-4 md:grid-cols-[auto_minmax(0,1fr)] md:items-center">
+            @if (invoicePixCharge.qrCodeDataUrl) {
+              <img
+                class="h-36 w-36 rounded-box border border-base-300 bg-white p-2"
+                [src]="invoicePixCharge.qrCodeDataUrl"
+                alt="QR Code PIX"
+              />
+            } @else {
+              <div class="grid h-36 w-36 place-items-center rounded-box border border-base-300 bg-base-100 text-primary">
+                <lucide-angular [img]="QrCode" class="h-10 w-10"></lucide-angular>
+              </div>
+            }
+            <div class="min-w-0 space-y-2">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">TXID</p>
+                <p class="truncate font-mono text-sm">{{ invoicePixCharge.txid }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">PIX copia e cola</p>
+                <p class="line-clamp-3 break-all font-mono text-xs text-base-content/70">
+                  {{ invoicePixCharge.brcode }}
+                </p>
+              </div>
+              <button class="btn btn-sm btn-outline" type="button" (click)="copyInvoicePix()">
+                <lucide-angular [img]="Clipboard" class="h-4 w-4"></lucide-angular>
+                Copiar PIX
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
 
     <div class="modal-action">
       <button class="btn btn-ghost" type="button" [disabled]="!!exportingInvoiceId" (click)="closeInvoiceDialog()">
         Cancelar
+      </button>
+      <button
+        class="btn btn-outline"
+        type="button"
+        [disabled]="!invoiceDueDate || !!exportingInvoiceId || !!invoicePixCharge"
+        (click)="generateInvoicePixCharge()"
+      >
+        @if (exportingInvoiceId && !invoicePixCharge) {
+          <span class="loading loading-spinner loading-sm"></span>
+        } @else {
+          <lucide-angular [img]="QrCode" class="h-4 w-4"></lucide-angular>
+        }
+        Gerar cobrança PIX
       </button>
       <button class="btn btn-primary" type="button" [disabled]="!invoiceDueDate || !!exportingInvoiceId" (click)="exportInvoice()">
         @if (exportingInvoiceId) {
@@ -408,7 +455,7 @@
         } @else {
           <lucide-angular [img]="ReceiptText" class="h-4 w-4"></lucide-angular>
         }
-        Gerar fatura
+        Gerar fatura PDF
       </button>
     </div>
   </div>

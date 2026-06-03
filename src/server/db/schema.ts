@@ -4,6 +4,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -16,6 +17,7 @@ export type CatalogStatus = 'active' | 'archived';
 export type StaffUserRole = 'admin' | 'vendedor' | 'operador' | 'financeiro';
 export type RentalBillingPeriod = 'daily' | 'weekly' | 'fortnightly' | 'monthly';
 export type RentalContractStatus = 'draft' | 'active' | 'closed' | 'returned' | 'cancelled';
+export type InvoicePixChargeStatus = 'pending' | 'paid' | 'review' | 'rejected' | 'cancelled';
 export type RentalQuoteStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired';
 export type LeadOrigin =
   | 'indicacao'
@@ -287,6 +289,49 @@ export const rentalContractItems = pgTable('rental_contract_items', {
   check('rental_contract_items_unit_price_cents_check', sql`${table.unitPriceCents} >= 0`),
   check('rental_contract_items_total_price_cents_check', sql`${table.totalPriceCents} >= 0`),
   check('rental_contract_items_asset_value_cents_check', sql`${table.assetValueCents} >= 0`),
+]);
+
+export const invoicePixCharges = pgTable('invoice_pix_charges', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  contractId: integer('contract_id')
+    .notNull()
+    .references(() => rentalContracts.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  invoiceNumber: text('invoice_number').notNull(),
+  txid: text('txid').notNull(),
+  brcode: text('brcode').notNull(),
+  pixKey: text('pix_key').notNull(),
+  receiverName: text('receiver_name').notNull().default(''),
+  receiverCity: text('receiver_city').notNull().default(''),
+  amountCents: integer('amount_cents').notNull().default(0),
+  dueDate: date('due_date', { mode: 'string' }).notNull(),
+  additionalInfo: text('additional_info').notNull().default(''),
+  status: text('status').notNull().default('pending').$type<InvoicePixChargeStatus>(),
+  endToEndId: text('end_to_end_id').notNull().default(''),
+  paidAmountCents: integer('paid_amount_cents').notNull().default(0),
+  paidAt: timestamp('paid_at', { withTimezone: true, mode: 'string' }),
+  payerIspb: text('payer_ispb').notNull().default(''),
+  payerBankName: text('payer_bank_name').notNull().default(''),
+  payerName: text('payer_name').notNull().default(''),
+  payerDocument: text('payer_document').notNull().default(''),
+  riskScore: integer('risk_score').notNull().default(0),
+  riskBand: text('risk_band').notNull().default('low'),
+  riskVerdict: text('risk_verdict').notNull().default('approved'),
+  riskSignals: jsonb('risk_signals').notNull().default(sql`'[]'::jsonb`).$type<unknown[]>(),
+  riskEvidences: jsonb('risk_evidences').notNull().default(sql`'[]'::jsonb`).$type<unknown[]>(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (table) => [
+  uniqueIndex('invoice_pix_charges_txid_key').on(table.txid),
+  uniqueIndex('invoice_pix_charges_end_to_end_id_key')
+    .on(table.endToEndId)
+    .where(sql`${table.endToEndId} <> ''`),
+  index('invoice_pix_charges_contract_id_idx').on(table.contractId),
+  index('invoice_pix_charges_status_idx').on(table.status),
+  index('invoice_pix_charges_due_date_idx').on(table.dueDate),
+  check('invoice_pix_charges_amount_cents_check', sql`${table.amountCents} >= 0`),
+  check('invoice_pix_charges_paid_amount_cents_check', sql`${table.paidAmountCents} >= 0`),
+  check('invoice_pix_charges_risk_score_check', sql`${table.riskScore} >= 0`),
+  check('invoice_pix_charges_status_check', sql`${table.status} in ('pending', 'paid', 'review', 'rejected', 'cancelled')`),
 ]);
 
 export const rentalQuotes = pgTable('rental_quotes', {
