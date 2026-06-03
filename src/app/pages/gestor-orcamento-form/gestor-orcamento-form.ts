@@ -15,7 +15,7 @@ import {
 } from 'lucide-angular';
 
 import type { Equipamento } from '../../interfaces/equipamento';
-import type { Lead } from '../../interfaces/lead';
+import { leadOriginLabel, type Lead } from '../../interfaces/lead';
 import type { RentalBillingPeriod } from '../../interfaces/rental-contract';
 import type { RentalQuote, RentalQuoteItem, RentalQuoteStatus } from '../../interfaces/rental-quote';
 import type { StaffUser } from '../../interfaces/staff-user';
@@ -128,6 +128,7 @@ export class GestorOrcamentoFormPage implements OnInit {
   protected successMessage = '';
 
   protected readonly form = this.formBuilder.nonNullable.group({
+    leadQuery: [''],
     leadId: [0],
     leadName: ['', Validators.required],
     leadDocument: [''],
@@ -190,6 +191,38 @@ export class GestorOrcamentoFormPage implements OnInit {
     if (lead) {
       this.patchLeadSnapshot(lead);
     }
+  }
+
+  protected filteredLeadOptions(): Lead[] {
+    const query = this.form.controls.leadQuery.value;
+    const selectedLeadId = Number(this.form.controls.leadId.value);
+    const selectedLead = this.leads.find((lead) => lead.id === selectedLeadId) ?? null;
+    const filtered = this.leads.filter((lead) =>
+      matchesSearchQuery(query, [
+        lead.id,
+        lead.nome,
+        lead.document,
+        lead.email,
+        lead.phone,
+        lead.whatsapp,
+        lead.address,
+        lead.city,
+        lead.state,
+        lead.interestCategoryName,
+        leadOriginLabel(lead.origin),
+      ])
+    );
+
+    if (selectedLead && !filtered.some((lead) => lead.id === selectedLead.id)) {
+      return [selectedLead, ...filtered];
+    }
+
+    return filtered;
+  }
+
+  protected leadOptionLabel(lead: Lead): string {
+    const contact = lead.whatsapp || lead.phone || lead.email || 'sem contato';
+    return `#${lead.id} - ${lead.nome} | ${contact}`;
   }
 
   protected addItem() {
@@ -458,6 +491,7 @@ export class GestorOrcamentoFormPage implements OnInit {
     this.editingQuote = null;
     this.quoteItems = [];
     this.form.reset({
+      leadQuery: '',
       leadId: lead?.id ?? 0,
       leadName: lead?.nome ?? '',
       leadDocument: lead?.document ?? '',
@@ -490,6 +524,7 @@ export class GestorOrcamentoFormPage implements OnInit {
     this.editingQuote = quote;
     this.quoteItems = quote.items;
     this.form.reset({
+      leadQuery: '',
       leadId: quote.leadId ?? 0,
       leadName: quote.leadName ?? quote.customerName ?? '',
       leadDocument: quote.leadDocument ?? quote.customerDocument ?? '',

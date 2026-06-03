@@ -62,7 +62,8 @@ export async function exportRentalContractPdf(
   const company = companyProfile ?? DEFAULT_COMPANY_PROFILE;
   const logoDataUrl = await loadImageDataUrl('/logo-mega-equipamentos-preto.png');
 
-  drawLegacyContractFirstPage(doc, contract, company, logoDataUrl);
+  const renderedItems = drawLegacyContractFirstPage(doc, contract, company, logoDataUrl);
+  drawLegacyContractItemsContinuationPages(doc, contract, company, logoDataUrl, renderedItems);
   doc.addPage();
   drawLegacyContractTermsPage(doc, contract);
 
@@ -454,7 +455,7 @@ function drawLegacyContractFirstPage(
   contract: RentalContract,
   company: CompanyProfile,
   logoDataUrl: string | null
-): void {
+): number {
   const pdf = doc as {
     addImage: (imageData: string, format: string, x: number, y: number, width: number, height: number) => void;
     line: (x1: number, y1: number, x2: number, y2: number) => void;
@@ -498,9 +499,81 @@ function drawLegacyContractFirstPage(
   drawLegacyCustomerBox(pdf, contract, x, 116, width);
   drawLegacyPeriodBox(pdf, contract, x, 222, width);
   drawLegacyNotesBox(pdf, contract, x, 278, width);
-  drawLegacyItemsTable(pdf, contract, x, 330, width);
+  const renderedItems = drawLegacyItemsTable(pdf, contract, x, 330, width);
   drawLegacyDeclarationBox(pdf, contract, x, 502, width);
   drawLegacyPromissoryBox(pdf, contract, company, x, 710, width);
+
+  return renderedItems;
+}
+
+function drawLegacyContractItemsContinuationPages(
+  doc: unknown,
+  contract: RentalContract,
+  company: CompanyProfile,
+  logoDataUrl: string | null,
+  renderedItems: number
+): void {
+  if (renderedItems >= contract.items.length) {
+    return;
+  }
+
+  const pdf = doc as LegacyPdfDoc & {
+    addImage?: (imageData: string, format: string, x: number, y: number, width: number, height: number) => void;
+    addPage: () => void;
+  };
+  const x = 26;
+  const width = 543;
+  let nextIndex = renderedItems;
+
+  while (nextIndex < contract.items.length) {
+    pdf.addPage();
+    drawLegacyContinuationHeader(pdf, contract, company, logoDataUrl, x, width);
+    const count = drawLegacyItemsTable(pdf, contract, x, 118, width, {
+      startIndex: nextIndex,
+      height: 650,
+      rowHeight: 13,
+    });
+
+    if (!count) {
+      break;
+    }
+
+    nextIndex += count;
+  }
+}
+
+function drawLegacyContinuationHeader(
+  doc: LegacyPdfDoc & {
+    addImage?: (imageData: string, format: string, x: number, y: number, width: number, height: number) => void;
+  },
+  contract: RentalContract,
+  company: CompanyProfile,
+  logoDataUrl: string | null,
+  x: number,
+  width: number
+): void {
+  doc.rect(x, 22, width, 64);
+
+  if (logoDataUrl && doc.addImage) {
+    try {
+      const logoWidth = 112;
+      const logoHeight = logoWidth / 4.993;
+      doc.addImage(logoDataUrl, 'PNG', x + 30, 44, logoWidth, logoHeight);
+    } catch {
+      // The logo is decorative in the PDF; keep the document exportable if it cannot be embedded.
+    }
+  }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9.6);
+  drawFittedText(doc, company.legalName, x + 150, 40, 375);
+  doc.setFont('helvetica', 'normal');
+  drawFittedText(doc, formatCompanyContact(company), x + 150, 54, 375);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text(`ITENS DO CONTRATO - CONTINUAÇÃO - Nº: ${contract.contractNumber}`, x + width / 2, 104, {
+    align: 'center',
+  });
 }
 
 function drawLegacyCustomerBox(doc: LegacyPdfDoc, contract: RentalContract, x: number, y: number, width: number): void {
@@ -550,29 +623,23 @@ function drawLegacyPeriodBox(doc: LegacyPdfDoc, contract: RentalContract, x: num
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   centerCellText(doc, `Início: ${formatDate(contract.startDate)}`, x, y + 13, colWidth);
-  centerCellText(doc, `Nº contrato: ${contract.contractNumber}`, x + colWidth, y + 13, colWidth);
   centerCellText(
     doc,
     `Término: ${contract.endDate ? formatDate(contract.endDate) : '-'}`,
-    x + colWidth * 2,
+    x + colWidth,
     y + 13,
     colWidth
   );
   centerCellText(
     doc,
     `Período: ${rentalDurationLabel(contract)}`,
-    x,
-    y + rowHeight + 13,
+    x + colWidth * 2,
+    y + 13,
     colWidth
   );
-  centerCellText(
-    doc,
-    `Locação (${rentalDurationLabel(contract)}): ${formatCurrencyCents(contract.subtotalCents || contract.totalCents)}`,
-    x + colWidth,
-    y + rowHeight + 13,
-    colWidth
-  );
-  centerCellText(doc, `Frete: ${formatCurrencyCents(contract.shippingCents ?? 0)}`, x + colWidth * 2, y + rowHeight + 13, colWidth);
+  centerCellText(doc, `Locação: ${formatCurrencyCents(contract.subtotalCents || contract.totalCents)}`, x, y + rowHeight + 13, colWidth);
+  centerCellText(doc, `Frete: ${formatCurrencyCents(contract.shippingCents ?? 0)}`, x + colWidth, y + rowHeight + 13, colWidth);
+  centerCellText(doc, `Total: ${formatCurrencyCents(contract.totalCents)}`, x + colWidth * 2, y + rowHeight + 13, colWidth);
 }
 
 function drawLegacyNotesBox(doc: LegacyPdfDoc, contract: RentalContract, x: number, y: number, width: number): void {
@@ -582,8 +649,18 @@ function drawLegacyNotesBox(doc: LegacyPdfDoc, contract: RentalContract, x: numb
   drawWrappedText(doc, `Observações: ${legacyObservationText(contract.notes) || '-'}`, x + 3, y + 12, width - 6, 9, 3);
 }
 
-function drawLegacyItemsTable(doc: LegacyPdfDoc, contract: RentalContract, x: number, y: number, width: number): void {
-  const height = 148;
+function drawLegacyItemsTable(
+  doc: LegacyPdfDoc,
+  contract: RentalContract,
+  x: number,
+  y: number,
+  width: number,
+  options: LegacyItemsTableOptions = {}
+): number {
+  const height = options.height ?? 148;
+  const rowHeight = options.rowHeight ?? 13;
+  const startIndex = options.startIndex ?? 0;
+  const maxRows = options.maxRows ?? Math.max(1, Math.floor((height - 45) / rowHeight));
   const columns = [0, 32, 94, 332, 356, 450, 496, 543];
   doc.rect(x, y, width, height);
   doc.line(x, y + 22, x + width, y + 22);
@@ -607,7 +684,7 @@ function drawLegacyItemsTable(doc: LegacyPdfDoc, contract: RentalContract, x: nu
   centerCellText(doc, 'Total', x + 496, y + 29, 47);
 
   const items = contract.items.length
-    ? contract.items.slice(0, 7)
+    ? contract.items.slice(startIndex, startIndex + maxRows)
     : [
         {
           equipmentId: 0,
@@ -633,12 +710,10 @@ function drawLegacyItemsTable(doc: LegacyPdfDoc, contract: RentalContract, x: nu
     doc.text(formatCurrencyCents(assetTotalCents).replace('R$ ', ''), x + 445, rowY, { align: 'right' });
     doc.text(formatCurrencyCents(item.unitPriceCents).replace('R$ ', ''), x + 491, rowY, { align: 'right' });
     doc.text(formatCurrencyCents(item.totalPriceCents).replace('R$ ', ''), x + 538, rowY, { align: 'right' });
-    rowY += 13;
+    rowY += rowHeight;
   }
 
-  if (contract.items.length > items.length) {
-    drawWrappedText(doc, `+ ${contract.items.length - items.length} item(ns) no contrato`, x + 98, rowY, 228, 8, 1);
-  }
+  return contract.items.length ? items.length : 0;
 }
 
 function drawLegacyDeclarationBox(doc: LegacyPdfDoc, contract: RentalContract, x: number, y: number, width: number): void {
@@ -744,6 +819,13 @@ type LegacyPdfDoc = {
   setFontSize: (size: number) => void;
   splitTextToSize?: (text: string, maxWidth: number) => string[];
   text: (text: string | string[], x: number, y: number, options?: Record<string, unknown>) => void;
+};
+
+type LegacyItemsTableOptions = {
+  startIndex?: number;
+  maxRows?: number;
+  height?: number;
+  rowHeight?: number;
 };
 
 type FinancialDocument = {
