@@ -1,71 +1,33 @@
-<section class="bg-neutral px-4 py-10 text-neutral-content md:py-14">
-  <div class="mx-auto max-w-6xl">
-    <div class="grid min-h-[calc(100vh-18rem)] items-center gap-8 lg:grid-cols-[minmax(0,1fr)_25rem]">
-      <div class="max-w-2xl">
-        <span class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-neutral-content/75">
-          <lucide-angular [img]="ShieldCheck" class="h-4 w-4 text-primary"></lucide-angular>
-          Acesso restrito
-        </span>
-
-        <h1 class="mt-6 text-4xl font-extrabold leading-tight md:text-5xl">
-          Painel comercial e operacional
-        </h1>
-
-        <p class="mt-5 max-w-xl text-base leading-7 text-neutral-content/70 md:text-lg">
-          Ambiente interno para gerir leads, orçamentos, contratos, clientes, equipamentos e preços.
-        </p>
-
-        <div class="mt-8 grid gap-3 sm:grid-cols-3">
-          <div class="rounded-lg border border-white/10 bg-white/5 p-4">
-            <p class="text-2xl font-black text-primary">01</p>
-            <p class="mt-1 text-sm text-neutral-content/70">Leads</p>
-          </div>
-          <div class="rounded-lg border border-white/10 bg-white/5 p-4">
-            <p class="text-2xl font-black text-primary">02</p>
-            <p class="mt-1 text-sm text-neutral-content/70">Orçamentos</p>
-          </div>
-          <div class="rounded-lg border border-white/10 bg-white/5 p-4">
-            <p class="text-2xl font-black text-primary">03</p>
-            <p class="mt-1 text-sm text-neutral-content/70">Contratos</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="rounded-lg border border-base-300 bg-base-100 p-6 text-base-content shadow-2xl">
-        <div class="flex items-center gap-3">
-          <div class="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
-            <lucide-angular [img]="KeyRound" class="h-5 w-5"></lucide-angular>
-          </div>
-          <div>
-            <h2 class="text-2xl font-extrabold text-primary">Entrar</h2>
-            <p class="text-sm text-base-content/60">Use sua conta autorizada.</p>
-          </div>
-        </div>
-
-        @if (errorMessage) {
-          <div class="alert alert-error mt-5 text-sm">{{ errorMessage }}</div>
-        }
-
-        <button
-          class="btn mt-6 w-full border-base-300 bg-base-100 text-base-content hover:bg-base-200"
-          type="button"
-          (click)="signInWithGoogle()"
-          [disabled]="loading"
-        >
-          @if (loading) {
-            <span class="loading loading-spinner loading-sm"></span>
-          } @else {
-            <span class="grid h-5 w-5 place-items-center rounded-full border border-base-300 text-xs font-bold">
-              G
-            </span>
-          }
-          Entrar com Google
-        </button>
-
-        <p class="mt-4 text-center text-sm text-base-content/60">
-          O acesso é liberado apenas para e-mails cadastrados.
-        </p>
-      </div>
+<section class="grid min-h-screen place-items-center bg-base-200 px-4 py-10">
+  <div class="w-full max-w-sm rounded-lg border border-base-300 bg-base-100 p-6 shadow-lg">
+    <div class="text-center">
+      <img
+        class="mx-auto h-14 w-auto"
+        src="logo-mega-equipamentos-preto.png"
+        alt="Mega Equipamentos"
+      />
+      <h1 class="mt-6 text-2xl font-extrabold text-primary">Área restrita</h1>
+      <p class="mt-2 text-sm text-base-content/60">Entre com uma conta Google autorizada.</p>
     </div>
+
+    @if (errorMessage) {
+      <div class="alert alert-error mt-5 text-sm">{{ errorMessage }}</div>
+    }
+
+    <button
+      class="btn mt-6 w-full border-base-300 bg-base-100 text-base-content hover:bg-base-200"
+      type="button"
+      (click)="signInWithGoogle()"
+      [disabled]="loading"
+    >
+      @if (loading) {
+        <span class="loading loading-spinner loading-sm"></span>
+      } @else {
+        <span class="grid h-5 w-5 place-items-center rounded-full border border-base-300 text-xs font-bold">
+          G
+        </span>
+      }
+      Entrar com Google
+    </button>
   </div>
 </section>

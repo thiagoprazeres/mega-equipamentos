@@ -1,4 +1,6 @@
-@if (isRestrictedArea()) {
+@if (isAuthPage()) {
+  <router-outlet></router-outlet>
+} @else if (isRestrictedArea()) {
   <div class="drawer drawer-open" data-testid="restricted-drawer">
     <input id="gestor-drawer" type="checkbox" class="drawer-toggle" aria-label="Alternar menu da área gestora" />
 

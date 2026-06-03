@@ -16,6 +16,7 @@ import { GestorNavComponent } from './components/gestor-nav/gestor-nav';
 })
 export class App {
   protected readonly title = signal('mega-equipamentos');
+  protected readonly isAuthPage = signal(false);
   protected readonly isRestrictedArea = signal(false);
   protected readonly ExternalLink = ExternalLink;
   protected readonly PanelLeftOpen = PanelLeftOpen;
@@ -34,9 +35,9 @@ export class App {
 
   private updateLayoutForUrl(url: string): void {
     const path = url.split(/[?#]/)[0];
+    const isLoginRoute = path === '/area-restrita' || path === '/gestor/login';
 
-    this.isRestrictedArea.set(
-      path === '/area-restrita' || path === '/gestor' || path.startsWith('/gestor/')
-    );
+    this.isAuthPage.set(isLoginRoute);
+    this.isRestrictedArea.set(!isLoginRoute && (path === '/gestor' || path.startsWith('/gestor/')));
   }
 }

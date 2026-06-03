@@ -1,21 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { KeyRound, LucideAngularModule, ShieldCheck } from 'lucide-angular';
 
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-gestor-login',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule],
   templateUrl: './gestor-login.html',
 })
 export class GestorLoginPage implements OnInit {
   protected loading = false;
   protected errorMessage = '';
-  protected readonly KeyRound = KeyRound;
-  protected readonly ShieldCheck = ShieldCheck;
 
   constructor(
     private readonly authService: AuthService,
