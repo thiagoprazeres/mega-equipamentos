@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Mega Gestor Rental</title>
+  <desc id="desc">Marca compacta MG do Mega Gestor Rental.</desc>
+  <defs>
+    <linearGradient id="mg-teal" x1="20" x2="72" y1="26" y2="68" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00A7A9" />
+      <stop offset="1" stop-color="#007D93" />
+    </linearGradient>
+  </defs>
+  <path
+    d="M18 12h60c9.4 0 17 7.6 17 17v31c0 9.4-7.6 17-17 17H58.9L48 88 37.1 77H18C8.6 77 1 69.4 1 60V29c0-9.4 7.6-17 17-17Z"
+    fill="#fff"
+    stroke="#003063"
+    stroke-linejoin="round"
+    stroke-width="7"
+  />
+  <path
+    d="M22 29h10.6l15.2 18.7L63 29h11v38H62.4V46.1L50.3 60.8h-5.1L33.1 46.1V67H22V29Z"
+    fill="url(#mg-teal)"
+  />
+  <path
+    d="M77 29h-8.7L56.9 40.4v8.4H66V67h11V44.4h-9.1L77 35.3V29Z"
+    fill="url(#mg-teal)"
+  />
+</svg>
