@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { ArrowLeft, Printer, LucideAngularModule } from 'lucide-angular';
+import { ArrowLeft, Plus, Printer, LucideAngularModule } from 'lucide-angular';
 
 import type { Customer } from '../../interfaces/customer';
 import { CustomerService } from '../../services/customer.service';
@@ -195,6 +195,7 @@ import { CustomerService } from '../../services/customer.service';
 })
 export class GestorClienteDetalhePage implements OnInit {
   protected readonly ArrowLeft = ArrowLeft;
+  protected readonly Plus = Plus;
   protected readonly Printer = Printer;
 
   protected customer: Customer | null = null;

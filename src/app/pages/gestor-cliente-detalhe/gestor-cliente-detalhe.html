@@ -7,10 +7,20 @@
       </a>
 
       @if (customer) {
-        <button class="btn btn-primary w-fit" type="button" (click)="printPage()">
-          <lucide-angular [img]="Printer" class="h-4 w-4"></lucide-angular>
-          Imprimir ficha
-        </button>
+        <div class="flex flex-wrap gap-2">
+          <a
+            class="btn btn-primary w-fit"
+            routerLink="/gestor/contratos/novo"
+            [queryParams]="{ cliente: customer.id }"
+          >
+            <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
+            Novo contrato
+          </a>
+          <button class="btn btn-outline w-fit" type="button" (click)="printPage()">
+            <lucide-angular [img]="Printer" class="h-4 w-4"></lucide-angular>
+            Imprimir ficha
+          </button>
+        </div>
       }
     </div>
 

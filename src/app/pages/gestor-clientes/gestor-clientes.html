@@ -139,6 +139,14 @@
                   </td>
                   <td>
                     <div class="flex justify-end gap-2">
+                      <a
+                        class="btn btn-square btn-ghost"
+                        title="Novo contrato"
+                        [routerLink]="['/gestor/contratos/novo']"
+                        [queryParams]="{ cliente: customer.id }"
+                      >
+                        <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
+                      </a>
                       <a class="btn btn-square btn-ghost" [routerLink]="['/gestor/clientes', customer.id]">
                         <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
                       </a>

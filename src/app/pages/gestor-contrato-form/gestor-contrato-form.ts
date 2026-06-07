@@ -123,6 +123,7 @@ export class GestorContratoFormPage implements OnInit {
   ];
 
   protected customers: Customer[] = [];
+  protected customerQuery = '';
   protected sellers: StaffUser[] = [];
   protected equipments: Equipamento[] = [];
   protected contractItems: RentalContractItem[] = [];
@@ -315,6 +316,57 @@ export class GestorContratoFormPage implements OnInit {
       .sort(compareEquipmentByInternalCode);
   }
 
+  protected filteredCustomerOptions(): Customer[] {
+    const selectedCustomer = this.selectedCustomer();
+    const filtered = [...this.customers]
+      .filter((customer) =>
+        matchesSearchQuery(this.customerQuery, [
+          customer.id,
+          this.customerCode(customer),
+          customer.nome,
+          customer.document,
+          customer.email,
+          customer.phone,
+          customer.whatsapp,
+          customer.zipCode,
+          customer.address,
+          customer.city,
+          customer.state,
+          customerContractAddress(customer),
+        ])
+      )
+      .sort(compareCustomersByName);
+
+    if (selectedCustomer && !filtered.some((customer) => customer.id === selectedCustomer.id)) {
+      return [selectedCustomer, ...filtered];
+    }
+
+    return filtered;
+  }
+
+  protected customerOptionLabel(customer: Customer): string {
+    const contact = customer.whatsapp || customer.phone || customer.email || 'Sem contato';
+    const document = customer.document ? ` | ${customer.document}` : '';
+
+    return `${this.customerCode(customer)} - ${customer.nome}${document} | ${contact}`;
+  }
+
+  protected selectedCustomerSummary(): string {
+    const customer = this.selectedCustomer();
+
+    if (!customer) {
+      return 'Busque por código, nome, CPF/CNPJ, e-mail, telefone ou cidade.';
+    }
+
+    const details = [
+      customer.document,
+      customer.whatsapp || customer.phone || customer.email,
+      customerContractAddress(customer),
+    ].filter(Boolean);
+
+    return details.length ? details.join(' | ') : 'Cliente selecionado.';
+  }
+
   protected equipmentOptionLabel(equipment: Equipamento): string {
     const code = equipment.codigoInterno || equipment.codigo || String(equipment.id);
     const category = equipment.equipamentoCategoria.codigo
@@ -473,7 +525,10 @@ export class GestorContratoFormPage implements OnInit {
 
         this.populateEditForm(contract);
       } else {
-        this.populateCreateForm(normalizeContractTerms(companyProfile?.contractTerms));
+        this.populateCreateForm(
+          normalizeContractTerms(companyProfile?.contractTerms),
+          this.preselectedCustomerId()
+        );
       }
     } catch (error) {
       console.error('contract form load failed', error);
@@ -490,20 +545,31 @@ export class GestorContratoFormPage implements OnInit {
     return Number.isFinite(id) && id > 0 ? id : null;
   }
 
-  private populateCreateForm(contractTerms = DEFAULT_CONTRACT_TERMS) {
+  private populateCreateForm(contractTerms = DEFAULT_CONTRACT_TERMS, customerId: number | null = null) {
+    const preselectedCustomer = customerId
+      ? this.customers.find((customer) => customer.id === customerId) ?? null
+      : null;
+    const customerAddress = preselectedCustomer ? customerContractAddress(preselectedCustomer) : '';
+
     this.editingContract = null;
     this.contractItems = [];
     this.worksiteAddressTouched = false;
     this.endDateTouched = false;
+    this.customerQuery = preselectedCustomer ? this.customerOptionLabel(preselectedCustomer) : '';
+
+    if (customerId && !preselectedCustomer) {
+      this.errorMessage = 'Cliente informado na URL não está disponível para novo contrato.';
+    }
+
     this.form.reset({
-      customerId: 0,
+      customerId: preselectedCustomer?.id ?? 0,
       sellerId: 0,
       billingPeriod: 'daily',
       rentalPeriodCount: 1,
       startDate: todayInputValue(),
       endDate: '',
-      deliveryAddress: '',
-      worksiteAddress: '',
+      deliveryAddress: customerAddress,
+      worksiteAddress: customerAddress,
       shipping: centsToDecimalInput(6000),
       discount: centsToDecimalInput(0),
       surcharge: centsToDecimalInput(0),
@@ -521,6 +587,8 @@ export class GestorContratoFormPage implements OnInit {
 
   private populateEditForm(contract: RentalContract) {
     this.editingContract = contract;
+    const customer = this.customers.find((item) => item.id === contract.customerId);
+    this.customerQuery = customer ? this.customerOptionLabel(customer) : contract.customerName;
     this.contractItems = contract.items.map((item) => ({
       ...item,
       billingPeriod: contract.billingPeriod,
@@ -587,6 +655,25 @@ export class GestorContratoFormPage implements OnInit {
 
   private currentRentalPeriodCount(): number {
     return normalizeRentalPeriodCount(this.form.controls.rentalPeriodCount.value);
+  }
+
+  private selectedCustomer(): Customer | undefined {
+    const selectedId = Number(this.form.controls.customerId.value);
+    return this.customers.find((customer) => customer.id === selectedId);
+  }
+
+  private customerCode(customer: Customer): string {
+    return `#${String(customer.id).padStart(6, '0')}`;
+  }
+
+  private preselectedCustomerId(): number | null {
+    const value =
+      this.route.snapshot.queryParamMap.get('cliente') ??
+      this.route.snapshot.queryParamMap.get('clienteId') ??
+      this.route.snapshot.queryParamMap.get('customerId');
+    const id = Number(value);
+
+    return Number.isFinite(id) && id > 0 ? id : null;
   }
 
   private itemAssetValue(item: RentalContractItem): number {
@@ -690,6 +777,19 @@ function compareEquipmentByInternalCode(left: Equipamento, right: Equipamento): 
     numeric: true,
     sensitivity: 'base',
   });
+}
+
+function compareCustomersByName(left: Customer, right: Customer): number {
+  return left.nome.localeCompare(right.nome, 'pt-BR', {
+    numeric: true,
+    sensitivity: 'base',
+  });
+}
+
+function customerContractAddress(customer: Customer): string {
+  const cityState = [customer.city, customer.state].filter(Boolean).join(' / ');
+
+  return [customer.address, cityState].filter(Boolean).join(' - ');
 }
 
 function equipmentCodeSortValue(equipment: Equipamento): string {
