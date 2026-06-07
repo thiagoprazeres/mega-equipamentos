@@ -1,48 +1,153 @@
-<section class="grid min-h-screen place-items-center bg-base-200 px-4 py-10">
-  <div class="w-full max-w-sm rounded-lg border border-base-300 bg-base-100 p-6 shadow-lg">
-    <div class="text-center">
-      <img
-        class="mx-auto h-14 w-auto"
-        src="logo-mega-equipamentos-preto.png"
-        alt="Mega Equipamentos"
-      />
-      <h1 class="mt-6 text-2xl font-extrabold text-primary">Área restrita</h1>
-      <p class="mt-2 text-sm text-base-content/60">Entre com uma conta Google autorizada.</p>
-    </div>
+<section class="relative min-h-screen overflow-hidden bg-[#04101f] px-5 py-8 text-white sm:px-8 lg:px-12">
+  <div
+    class="pointer-events-none absolute -left-40 bottom-[-22rem] h-[48rem] w-[48rem] rounded-full border border-cyan-400/20"
+  ></div>
+  <div
+    class="pointer-events-none absolute left-20 top-[-26rem] h-[58rem] w-[58rem] rounded-full border border-cyan-400/10"
+  ></div>
+  <div
+    class="pointer-events-none absolute right-[-10rem] top-20 h-[32rem] w-[32rem] rounded-full bg-cyan-400/10 blur-3xl"
+  ></div>
+  <div
+    class="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-[radial-gradient(circle_at_0%_100%,rgba(15,213,226,0.22),transparent_34%)]"
+  ></div>
 
-    @if (errorMessage) {
-      <div class="alert alert-error mt-5 text-sm">{{ errorMessage }}</div>
-    }
+  <div class="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl flex-col">
+    <header class="flex items-start justify-between gap-6">
+      <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+        <img
+          class="h-12 w-12 shrink-0 rounded-xl bg-white/5 object-contain p-1.5 ring-1 ring-cyan-300/30 sm:h-16 sm:w-16"
+          src="logo-mega-gestor-rental-mark.svg"
+          alt="Mega Gestor Rental"
+        />
+        <div class="min-w-0">
+          <p class="text-xl font-black leading-none tracking-tight sm:text-3xl">
+            <span class="text-cyan-300">Mega</span>
+            <span class="text-white"> Gestor Rental</span>
+          </p>
+          <p class="mt-2 text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-white/62 sm:text-sm sm:tracking-[0.48em]">
+            Gestão inteligente
+          </p>
+        </div>
+      </div>
 
-    <button
-      class="btn mt-6 w-full border-base-300 bg-base-100 text-base-content hover:bg-base-200"
-      type="button"
-      (click)="signInWithGoogle()"
-      [disabled]="loading"
-    >
-      @if (loading) {
-        <span class="loading loading-spinner loading-sm"></span>
-      } @else {
-        <svg class="h-5 w-5" viewBox="0 0 48 48" aria-hidden="true">
-          <path
-            fill="#FFC107"
-            d="M43.61 20.08H42V20H24v8h11.3c-1.65 4.66-6.08 8-11.3 8-6.63 0-12-5.37-12-12s5.37-12 12-12c3.06 0 5.84 1.15 7.95 3.05l5.66-5.66C34.05 6.05 29.27 4 24 4 12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20c0-1.34-.14-2.65-.39-3.92Z"
-          />
-          <path
-            fill="#FF3D00"
-            d="m6.31 14.69 6.57 4.82C14.66 15.1 18.96 12 24 12c3.06 0 5.84 1.15 7.95 3.05l5.66-5.66C34.05 6.05 29.27 4 24 4 16.32 4 9.66 8.34 6.31 14.69Z"
-          />
-          <path
-            fill="#4CAF50"
-            d="M24 44c5.17 0 9.86-1.98 13.4-5.19l-6.19-5.24C29.14 35.14 26.54 36 24 36c-5.2 0-9.61-3.32-11.28-7.95l-6.53 5.03C9.5 39.55 16.22 44 24 44Z"
-          />
-          <path
-            fill="#1976D2"
-            d="M43.61 20.08H42V20H24v8h11.3c-.79 2.22-2.21 4.14-4.1 5.57l.01-.01 6.19 5.24C37.96 38.3 44 33.5 44 24c0-1.34-.14-2.65-.39-3.92Z"
-          />
-        </svg>
-      }
-      Entrar com Google
-    </button>
+      <a
+        class="btn btn-ghost btn-sm gap-2 border border-transparent text-white/85 hover:border-cyan-300/30 hover:bg-white/10 hover:text-white"
+        routerLink="/"
+      >
+        Site público
+        <lucide-angular [img]="ExternalLink" class="h-4 w-4 text-cyan-300"></lucide-angular>
+      </a>
+    </header>
+
+    <main class="grid flex-1 items-center gap-10 py-12 lg:grid-cols-[minmax(0,1.08fr)_minmax(28rem,0.82fr)] lg:gap-14">
+      <section class="max-w-3xl">
+        <div
+          class="inline-flex items-center gap-2 rounded-full border border-cyan-300/35 bg-cyan-300/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-cyan-300"
+        >
+          <lucide-angular [img]="LockKeyhole" class="h-4 w-4"></lucide-angular>
+          Uso interno
+        </div>
+
+        <h1 class="mt-8 max-w-2xl text-5xl font-black leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">
+          Acesso à
+          <span class="block text-cyan-300">área gestora</span>
+        </h1>
+        <div class="mt-6 h-1.5 w-20 rounded-full bg-cyan-300"></div>
+        <p class="mt-7 max-w-2xl text-lg leading-8 text-white/78 sm:text-xl">
+          Ambiente interno para gestão comercial e operacional. Gerencie leads, orçamentos, contratos,
+          clientes e equipamentos com segurança e eficiência.
+        </p>
+
+        <div class="mt-10 grid gap-5 text-white/78 sm:grid-cols-2 xl:grid-cols-4">
+          <div class="border-white/25 xl:border-r xl:pr-6">
+            <lucide-angular [img]="UserRound" class="h-10 w-10 text-cyan-300"></lucide-angular>
+            <h2 class="mt-4 text-base font-extrabold text-white">Leads</h2>
+            <p class="mt-1 text-sm leading-5">Acompanhe e converta oportunidades.</p>
+          </div>
+          <div class="border-white/25 xl:border-r xl:px-6">
+            <lucide-angular [img]="FilePenLine" class="h-10 w-10 text-cyan-300"></lucide-angular>
+            <h2 class="mt-4 text-base font-extrabold text-white">Orçamentos</h2>
+            <p class="mt-1 text-sm leading-5">Crie e gerencie propostas com agilidade.</p>
+          </div>
+          <div class="border-white/25 xl:border-r xl:px-6">
+            <lucide-angular [img]="FileText" class="h-10 w-10 text-cyan-300"></lucide-angular>
+            <h2 class="mt-4 text-base font-extrabold text-white">Contratos</h2>
+            <p class="mt-1 text-sm leading-5">Formalize acordos e acompanhe vigências.</p>
+          </div>
+          <div class="xl:pl-6">
+            <lucide-angular [img]="Box" class="h-10 w-10 text-cyan-300"></lucide-angular>
+            <h2 class="mt-4 text-base font-extrabold text-white">Equipamentos</h2>
+            <p class="mt-1 text-sm leading-5">Controle inventário e disponibilidade.</p>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="mx-auto w-full max-w-xl rounded-[1.6rem] border border-cyan-200/40 bg-white px-6 py-10 text-slate-950 shadow-[0_0_70px_rgba(20,214,229,0.28)] sm:px-10 lg:py-12"
+      >
+        <div class="mx-auto grid h-20 w-20 place-items-center rounded-full bg-cyan-50 ring-1 ring-cyan-200">
+          <lucide-angular [img]="ShieldCheck" class="h-10 w-10 text-cyan-600"></lucide-angular>
+        </div>
+
+        <div class="mt-7 text-center">
+          <h2 class="text-4xl font-black tracking-tight text-slate-950">Entrar</h2>
+          <p class="mt-4 text-base text-slate-600">Use sua conta autorizada para acessar o sistema.</p>
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert alert-error mt-6 text-sm">{{ errorMessage }}</div>
+        }
+
+        <button
+          class="btn mt-8 h-14 w-full border-slate-200 bg-white text-base font-extrabold text-slate-950 shadow-md hover:border-cyan-300 hover:bg-slate-50"
+          type="button"
+          (click)="signInWithGoogle()"
+          [disabled]="loading"
+        >
+          @if (loading) {
+            <span class="loading loading-spinner loading-sm"></span>
+          } @else {
+            <svg class="h-7 w-7" viewBox="0 0 48 48" aria-hidden="true">
+              <path
+                fill="#FFC107"
+                d="M43.61 20.08H42V20H24v8h11.3c-1.65 4.66-6.08 8-11.3 8-6.63 0-12-5.37-12-12s5.37-12 12-12c3.06 0 5.84 1.15 7.95 3.05l5.66-5.66C34.05 6.05 29.27 4 24 4 12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20c0-1.34-.14-2.65-.39-3.92Z"
+              />
+              <path
+                fill="#FF3D00"
+                d="m6.31 14.69 6.57 4.82C14.66 15.1 18.96 12 24 12c3.06 0 5.84 1.15 7.95 3.05l5.66-5.66C34.05 6.05 29.27 4 24 4 16.32 4 9.66 8.34 6.31 14.69Z"
+              />
+              <path
+                fill="#4CAF50"
+                d="M24 44c5.17 0 9.86-1.98 13.4-5.19l-6.19-5.24C29.14 35.14 26.54 36 24 36c-5.2 0-9.61-3.32-11.28-7.95l-6.53 5.03C9.5 39.55 16.22 44 24 44Z"
+              />
+              <path
+                fill="#1976D2"
+                d="M43.61 20.08H42V20H24v8h11.3c-.79 2.22-2.21 4.14-4.1 5.57l.01-.01 6.19 5.24C37.96 38.3 44 33.5 44 24c0-1.34-.14-2.65-.39-3.92Z"
+              />
+            </svg>
+          }
+          Entrar com Google
+        </button>
+
+        <div class="my-8 flex items-center gap-4 text-sm font-semibold text-slate-400">
+          <div class="h-px flex-1 bg-slate-200"></div>
+          <span>ou</span>
+          <div class="h-px flex-1 bg-slate-200"></div>
+        </div>
+
+        <div class="flex items-center gap-4 rounded-xl border border-cyan-200 bg-cyan-50 px-5 py-4 text-slate-700">
+          <lucide-angular [img]="LockKeyhole" class="h-8 w-8 shrink-0 text-cyan-600"></lucide-angular>
+          <p class="text-sm leading-6">
+            Acesso restrito a usuários autorizados pela Mega Equipamentos.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="flex items-center justify-center gap-2 pb-2 text-sm font-medium text-white/55">
+      <lucide-angular [img]="LockKeyhole" class="h-4 w-4"></lucide-angular>
+      Uso interno
+    </footer>
   </div>
 </section>

@@ -1,16 +1,34 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import {
+  Box,
+  ExternalLink,
+  FilePenLine,
+  FileText,
+  LockKeyhole,
+  ShieldCheck,
+  UserRound,
+  LucideAngularModule,
+} from 'lucide-angular';
 
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-gestor-login',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, LucideAngularModule],
   templateUrl: './gestor-login.html',
 })
 export class GestorLoginPage implements OnInit {
+  protected readonly Box = Box;
+  protected readonly ExternalLink = ExternalLink;
+  protected readonly FilePenLine = FilePenLine;
+  protected readonly FileText = FileText;
+  protected readonly LockKeyhole = LockKeyhole;
+  protected readonly ShieldCheck = ShieldCheck;
+  protected readonly UserRound = UserRound;
+
   protected loading = false;
   protected errorMessage = '';
 
