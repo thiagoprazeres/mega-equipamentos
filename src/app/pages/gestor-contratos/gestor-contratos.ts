@@ -65,7 +65,6 @@ type ContractSortKey =
   | 'total'
   | 'startDate'
   | 'endDate'
-  | 'dueDate'
   | 'paymentDate'
   | 'financialStatus'
   | 'rentalStatus'
@@ -86,7 +85,6 @@ type ColumnFilters = Record<
   | 'value'
   | 'startDate'
   | 'endDate'
-  | 'dueDate'
   | 'paymentDate'
   | 'financialStatus'
   | 'rentalStatus'
@@ -258,7 +256,6 @@ export class GestorContratosPage implements OnInit {
         contract.sellerPhone,
         contract.deliveryAddress,
         contract.worksiteAddress,
-        contract.dueDate,
         contract.paymentDate,
         this.financialStatusLabel(this.effectiveFinancialStatus(contract)),
         contract.operationalCode,
@@ -847,7 +844,6 @@ export class GestorContratosPage implements OnInit {
       'Valor',
       'Data início',
       'Data fim',
-      'Data vencimento',
       'Data pagamento',
       'Status financeiro',
       'Status locação',
@@ -861,7 +857,6 @@ export class GestorContratosPage implements OnInit {
       formatCurrencyCents(contract.totalCents),
       this.formatDate(contract.startDate),
       this.formatDate(contract.endDate),
-      this.formatDate(contract.dueDate),
       this.formatDate(contract.paymentDate),
       this.financialStatusLabel(this.effectiveFinancialStatus(contract)),
       this.statusLabel(contract.status),
@@ -898,8 +893,6 @@ export class GestorContratosPage implements OnInit {
         return contract.startDate;
       case 'endDate':
         return contract.endDate ?? '';
-      case 'dueDate':
-        return contract.dueDate ?? '';
       case 'paymentDate':
         return contract.paymentDate ?? '';
       case 'financialStatus':
@@ -924,7 +917,6 @@ export class GestorContratosPage implements OnInit {
       value: [formatCurrencyCents(contract.totalCents), contract.totalCents],
       startDate: [contract.startDate, this.formatDate(contract.startDate)],
       endDate: [contract.endDate, this.formatDate(contract.endDate)],
-      dueDate: [contract.dueDate, this.formatDate(contract.dueDate)],
       paymentDate: [contract.paymentDate, this.formatDate(contract.paymentDate)],
       financialStatus: [
         this.financialStatusLabel(this.effectiveFinancialStatus(contract)),
@@ -1175,7 +1167,6 @@ function emptyColumnFilters(): ColumnFilters {
     value: '',
     startDate: '',
     endDate: '',
-    dueDate: '',
     paymentDate: '',
     financialStatus: '',
     rentalStatus: '',
