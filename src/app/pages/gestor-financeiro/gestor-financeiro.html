@@ -6,9 +6,17 @@
         <h1 class="text-3xl font-extrabold text-primary md:text-4xl">Financeiro</h1>
       </div>
       <div class="flex flex-wrap gap-2">
+        <button class="btn btn-outline" type="button" (click)="openCreateModal('income')">
+          <lucide-angular [img]="HandCoins" class="h-4 w-4"></lucide-angular>
+          Novo recebimento
+        </button>
         <button class="btn btn-primary" type="button" (click)="openCreateModal('expense')">
           <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
-          Novo lançamento
+          Nova despesa
+        </button>
+        <button class="btn btn-ghost" type="button" (click)="setViewMode('categories')">
+          <lucide-angular [img]="Tags" class="h-4 w-4"></lucide-angular>
+          Categorias
         </button>
         <button class="btn btn-ghost" type="button" (click)="signOut()">
           <lucide-angular [img]="LogOut" class="h-4 w-4"></lucide-angular>
@@ -27,11 +35,11 @@
 
     <section class="grid gap-3 md:grid-cols-4">
       <div class="rounded-box border border-base-300 bg-base-100 p-5">
-        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Entradas confirmadas</p>
+        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Recebimentos confirmados</p>
         <p class="mt-2 text-2xl font-extrabold text-success">{{ formatMoney(totalIncomeCents()) }}</p>
       </div>
       <div class="rounded-box border border-base-300 bg-base-100 p-5">
-        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Saídas confirmadas</p>
+        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Despesas confirmadas</p>
         <p class="mt-2 text-2xl font-extrabold text-error">{{ formatMoney(totalExpenseCents()) }}</p>
       </div>
       <div class="rounded-box border border-base-300 bg-base-100 p-5">
@@ -50,6 +58,28 @@
       </div>
     </section>
 
+    <section class="flex flex-wrap items-center gap-2">
+      <button
+        class="btn btn-sm"
+        type="button"
+        [class.btn-primary]="viewMode === 'entries'"
+        [class.btn-outline]="viewMode !== 'entries'"
+        (click)="setViewMode('entries')"
+      >
+        Lançamentos
+      </button>
+      <button
+        class="btn btn-sm"
+        type="button"
+        [class.btn-primary]="viewMode === 'categories'"
+        [class.btn-outline]="viewMode !== 'categories'"
+        (click)="setViewMode('categories')"
+      >
+        Categorias de lançamentos
+      </button>
+    </section>
+
+    @if (viewMode === 'entries') {
     <section class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
       <label class="input input-bordered flex items-center gap-2">
         <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
@@ -150,6 +180,9 @@
                       <p class="font-bold text-primary">{{ entry.description }}</p>
                       <p class="text-xs text-base-content/60">
                         {{ entry.category || 'Sem categoria' }}
+                        @if (entry.type === 'expense') {
+                          <span> | {{ expenseKindLabel(entry.expenseKind) }}</span>
+                        }
                         @if (entry.customerName) {
                           <span> | {{ entry.customerName }}</span>
                         }
@@ -165,7 +198,7 @@
                         class="link-hover font-semibold text-primary"
                         [routerLink]="['/gestor/contratos', entry.contractId]"
                       >
-                        Fatura PIX
+                        Recebimento PIX
                       </a>
                       <p class="text-xs text-base-content/60">Locação {{ entry.contractNumber || '-' }}</p>
                     } @else {
@@ -250,6 +283,133 @@
         </div>
       </section>
     }
+    } @else {
+      <section class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <label class="input input-bordered flex items-center gap-2">
+          <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
+          <input
+            class="grow"
+            type="search"
+            placeholder="Buscar por categoria, tipo ou classificação"
+            [value]="query"
+            (input)="query = $any($event.target).value"
+          />
+        </label>
+
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-outline" type="button" (click)="openCreateCategoryModal('income')">
+            <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
+            Categoria de recebimento
+          </button>
+          <button class="btn btn-primary" type="button" (click)="openCreateCategoryModal('expense')">
+            <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
+            Categoria de despesa
+          </button>
+        </div>
+      </section>
+
+      <p class="text-sm text-base-content/60">
+        {{ filteredCategoriesCount() }} de {{ categories.length }} categoria(s)
+      </p>
+
+      <section class="rounded-box border border-base-300 bg-base-100">
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>Categoria</th>
+                <th>Natureza</th>
+                <th>Tipo da despesa</th>
+                <th>Status</th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (category of filteredCategories(); track category.id) {
+                <tr>
+                  <td>
+                    <div class="min-w-64">
+                      <p class="font-bold text-primary">{{ category.name }}</p>
+                      <p class="text-xs text-base-content/60">Ordem {{ category.sortOrder || 0 }}</p>
+                    </div>
+                  </td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.badge-success]="category.type === 'income'"
+                      [class.badge-error]="category.type === 'expense'"
+                    >
+                      {{ typeLabel(category.type) }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (category.type === 'expense') {
+                      <span class="badge badge-outline">{{ expenseKindLabel(category.expenseKind) }}</span>
+                    } @else {
+                      <span class="text-sm text-base-content/45">Não se aplica</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="categoryStatusBadgeClass(category.status)">
+                      {{ categoryStatusLabel(category.status) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <button
+                        class="btn btn-square btn-ghost"
+                        type="button"
+                        title="Editar categoria"
+                        aria-label="Editar categoria"
+                        (click)="openEditCategoryModal(category)"
+                      >
+                        <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
+                      </button>
+                      @if (category.status === 'active') {
+                        <button
+                          class="btn btn-square btn-ghost"
+                          type="button"
+                          title="Arquivar categoria"
+                          aria-label="Arquivar categoria"
+                          (click)="updateCategoryStatus(category, 'archived')"
+                        >
+                          <lucide-angular [img]="Archive" class="h-4 w-4"></lucide-angular>
+                        </button>
+                      } @else {
+                        <button
+                          class="btn btn-square btn-ghost"
+                          type="button"
+                          title="Restaurar categoria"
+                          aria-label="Restaurar categoria"
+                          (click)="updateCategoryStatus(category, 'active')"
+                        >
+                          <lucide-angular [img]="RotateCcw" class="h-4 w-4"></lucide-angular>
+                        </button>
+                      }
+                      <button
+                        class="btn btn-square btn-ghost text-error"
+                        type="button"
+                        title="Excluir categoria"
+                        aria-label="Excluir categoria"
+                        (click)="deleteCategory(category)"
+                      >
+                        <lucide-angular [img]="Trash2" class="h-4 w-4"></lucide-angular>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="py-10 text-center text-base-content/60">
+                    Nenhuma categoria encontrada.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
   </div>
 </section>
 
@@ -270,9 +430,10 @@
     <div class="mt-6 grid gap-4 md:grid-cols-2">
       <label class="flex flex-col gap-1.5">
         <span class="text-sm font-semibold text-base-content/80">Tipo</span>
-        <select class="select select-bordered w-full" [value]="formType" (change)="formType = $any($event.target).value">
-          <option value="income">Entrada</option>
-          <option value="expense">Saída</option>
+        <select class="select select-bordered w-full" [value]="formType" (change)="setFormType($any($event.target).value)">
+          @for (option of entryTypeOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
         </select>
       </label>
 
@@ -294,15 +455,37 @@
         />
       </label>
 
-      <label class="flex flex-col gap-1.5">
+      <label class="flex flex-col gap-1.5" [class.md:col-span-2]="formType === 'income'">
         <span class="text-sm font-semibold text-base-content/80">Categoria</span>
-        <input
-          class="input input-bordered w-full"
-          placeholder="Ex.: combustível, manutenção, aluguel, venda avulsa"
+        <select
+          class="select select-bordered w-full"
           [value]="formCategory"
-          (input)="formCategory = $any($event.target).value"
-        />
+          (change)="setFormCategory($any($event.target).value)"
+        >
+          <option value="">Selecione uma categoria</option>
+          @for (category of currentCategoryOptions(); track category.name) {
+            <option [value]="category.name">
+              {{ category.name }}{{ category.status === 'archived' ? ' (arquivada)' : '' }}
+            </option>
+          }
+        </select>
+        @if (!activeCategoriesForType(formType).length) {
+          <span class="text-xs text-warning">
+            Cadastre uma categoria ativa para {{ typeLabel(formType).toLowerCase() }} antes de salvar.
+          </span>
+        }
       </label>
+
+      @if (formType === 'expense') {
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-semibold text-base-content/80">Tipo da despesa</span>
+          <select class="select select-bordered w-full" [value]="formExpenseKind" (change)="formExpenseKind = $any($event.target).value">
+            @for (option of expenseKindOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+      }
 
       <label class="flex flex-col gap-1.5">
         <span class="text-sm font-semibold text-base-content/80">Data</span>
@@ -348,5 +531,88 @@
   </div>
   <form method="dialog" class="modal-backdrop">
     <button type="button" [disabled]="saving" (click)="closeModal()">Fechar</button>
+  </form>
+</dialog>
+
+<dialog class="modal" [open]="categoryModalOpen">
+  <div class="modal-box max-w-2xl">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Categorias financeiras</p>
+        <h2 class="text-2xl font-extrabold text-primary">
+          {{ editingCategory ? 'Editar categoria' : 'Nova categoria' }}
+        </h2>
+      </div>
+      <button class="btn btn-square btn-ghost" type="button" [disabled]="categorySaving" (click)="closeCategoryModal()">
+        <lucide-angular [img]="X" class="h-5 w-5"></lucide-angular>
+      </button>
+    </div>
+
+    <div class="mt-6 grid gap-4 md:grid-cols-2">
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">Natureza</span>
+        <select class="select select-bordered w-full" [value]="categoryFormType" (change)="setCategoryFormType($any($event.target).value)">
+          @for (option of entryTypeOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">Status</span>
+        <select class="select select-bordered w-full" [value]="categoryFormStatus" (change)="categoryFormStatus = $any($event.target).value">
+          <option value="active">Ativa</option>
+          <option value="archived">Arquivada</option>
+        </select>
+      </label>
+
+      <label class="flex flex-col gap-1.5 md:col-span-2">
+        <span class="text-sm font-semibold text-base-content/80">Nome</span>
+        <input
+          class="input input-bordered w-full"
+          placeholder="Ex.: Locação, frete, combustível, manutenção"
+          [value]="categoryFormName"
+          (input)="categoryFormName = $any($event.target).value"
+        />
+      </label>
+
+      @if (categoryFormType === 'expense') {
+        <label class="flex flex-col gap-1.5">
+          <span class="text-sm font-semibold text-base-content/80">Tipo da despesa</span>
+          <select class="select select-bordered w-full" [value]="categoryFormExpenseKind" (change)="categoryFormExpenseKind = $any($event.target).value">
+            @for (option of expenseKindOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-sm font-semibold text-base-content/80">Ordem</span>
+        <input
+          class="input input-bordered w-full"
+          type="number"
+          min="0"
+          step="1"
+          [value]="categoryFormSortOrder"
+          (input)="categoryFormSortOrder = +$any($event.target).value"
+        />
+      </label>
+    </div>
+
+    <div class="modal-action">
+      <button class="btn btn-ghost" type="button" [disabled]="categorySaving" (click)="closeCategoryModal()">Cancelar</button>
+      <button class="btn btn-primary" type="button" [disabled]="categorySaving" (click)="saveCategory()">
+        @if (categorySaving) {
+          <span class="loading loading-spinner loading-sm"></span>
+        } @else {
+          <lucide-angular [img]="Tags" class="h-4 w-4"></lucide-angular>
+        }
+        Salvar categoria
+      </button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button type="button" [disabled]="categorySaving" (click)="closeCategoryModal()">Fechar</button>
   </form>
 </dialog>

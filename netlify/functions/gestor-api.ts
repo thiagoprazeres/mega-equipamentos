@@ -20,6 +20,7 @@ import {
   customers,
   equipmentPrices,
   equipments,
+  financialTransactionCategories,
   financialTransactions,
   leads,
   invoicePixCharges,
@@ -31,6 +32,7 @@ import {
   type CatalogStatus,
   type FinancialEntryStatus,
   type FinancialEntryType,
+  type FinancialExpenseKind,
   type InvoicePixChargeStatus,
   type LeadOrigin,
   type RentalBillingPeriod,
@@ -58,6 +60,7 @@ type EquipmentRow = typeof equipments.$inferSelect;
 type EquipmentPriceRow = typeof equipmentPrices.$inferSelect;
 type CustomerRow = typeof customers.$inferSelect;
 type FinancialTransactionRow = typeof financialTransactions.$inferSelect;
+type FinancialTransactionCategoryRow = typeof financialTransactionCategories.$inferSelect;
 type LeadRow = typeof leads.$inferSelect;
 type InvoicePixChargeRow = typeof invoicePixCharges.$inferSelect;
 type StaffUserRow = typeof staffUsers.$inferSelect;
@@ -70,6 +73,7 @@ type RentalQuoteItemRow = typeof rentalQuoteItems.$inferSelect;
 let quotesWithoutLeadMigrationReady = false;
 let invoicePixChargesMigrationReady = false;
 let financialTransactionsMigrationReady = false;
+let financialTransactionCategoriesMigrationReady = false;
 let hardcodedContractsCleanupReady = false;
 let rentalContractManagementFieldsReady = false;
 
@@ -86,7 +90,8 @@ export const handler: Handler = async (event) => {
     if (
       resource === 'rental-contracts' ||
       resource === 'invoice-charges' ||
-      resource === 'financial-transactions'
+      resource === 'financial-transactions' ||
+      resource === 'financial-categories'
     ) {
       await ensureRentalContractManagementFields();
     }
@@ -116,6 +121,8 @@ export const handler: Handler = async (event) => {
         return handleInvoiceCharges(event, id, action);
       case 'financial-transactions':
         return handleFinancialTransactions(event, id, action);
+      case 'financial-categories':
+        return handleFinancialCategories(event, id, action);
       default:
         return json({ error: 'Recurso não encontrado.' }, 404);
     }
@@ -330,6 +337,34 @@ async function handleFinancialTransactions(event: HandlerEvent, id?: string, act
   }
 
   return json({ error: 'Operação financeira não suportada.' }, 405);
+}
+
+async function handleFinancialCategories(event: HandlerEvent, id?: string, action?: string) {
+  await ensureFinancialTransactionsTable();
+  await ensureFinancialTransactionCategoriesTable();
+
+  if (!id) {
+    if (event.httpMethod === 'GET') {
+      return json(await listFinancialCategories(event));
+    }
+
+    if (event.httpMethod === 'POST') {
+      return json(await saveFinancialCategory(await readJson(event)));
+    }
+  }
+
+  if (id && action === 'status' && event.httpMethod === 'PATCH') {
+    const body = await readJson(event);
+    await updateFinancialCategoryStatus(Number(id), normalizeCatalogStatus(body.status));
+    return json({ ok: true });
+  }
+
+  if (id && event.httpMethod === 'DELETE') {
+    await deleteFinancialCategory(Number(id));
+    return json({ ok: true });
+  }
+
+  return json({ error: 'Operação de categoria financeira não suportada.' }, 405);
 }
 
 async function listCategories(event: HandlerEvent) {
@@ -839,7 +874,7 @@ async function saveRentalContract(input: Record<string, unknown>) {
     return { contract, items: savedItems };
   });
 
-  return mapContractRow(saved.contract, saved.items.map(mapContractItemRow));
+  return mapContractRow(saved.contract, saved.items.map((item) => mapContractItemRow(item)));
 }
 
 async function updateRentalContractStatus(id: number, status: RentalContractStatus) {
@@ -1073,6 +1108,81 @@ async function confirmInvoiceCharge(id: number, input: Record<string, unknown>) 
   return mapInvoiceChargeRow(row, contractsById.get(row.contractId));
 }
 
+async function listFinancialCategories(event: HandlerEvent) {
+  const type = optionalFinancialType(queryValue(event, 'type'));
+  const includeArchived = queryValue(event, 'includeArchived') === '1';
+  const filters: SQL[] = [];
+
+  if (type) {
+    filters.push(eq(financialTransactionCategories.type, type));
+  }
+
+  if (!includeArchived) {
+    filters.push(eq(financialTransactionCategories.status, 'active'));
+  }
+
+  const rows = await getDb()
+    .select()
+    .from(financialTransactionCategories)
+    .where(filters.length ? and(...filters) : undefined)
+    .orderBy(
+      asc(financialTransactionCategories.type),
+      asc(financialTransactionCategories.expenseKind),
+      asc(financialTransactionCategories.sortOrder),
+      asc(financialTransactionCategories.name)
+    );
+
+  return rows.map(mapFinancialCategoryRow);
+}
+
+async function saveFinancialCategory(input: Record<string, unknown>) {
+  const id = optionalNumber(input.id);
+  const type = normalizeFinancialType(input.type);
+  const name = textInput(input.name);
+  const payload = {
+    type,
+    name,
+    expenseKind: type === 'expense' ? normalizeFinancialExpenseKind(input.expenseKind) : null,
+    status: normalizeCatalogStatus(input.status),
+    sortOrder: Math.trunc(numberInput(input.sortOrder)),
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (!payload.name) {
+    throw httpError(400, 'Informe o nome da categoria.');
+  }
+
+  const [row] = id
+    ? await getDb()
+        .update(financialTransactionCategories)
+        .set(payload)
+        .where(eq(financialTransactionCategories.id, id))
+        .returning()
+    : await getDb()
+        .insert(financialTransactionCategories)
+        .values({ ...payload, createdAt: new Date().toISOString() })
+        .returning();
+
+  if (!row) {
+    throw httpError(500, 'Não foi possível salvar a categoria financeira.');
+  }
+
+  return mapFinancialCategoryRow(row);
+}
+
+async function updateFinancialCategoryStatus(id: number, status: CatalogStatus) {
+  await getDb()
+    .update(financialTransactionCategories)
+    .set({ status, updatedAt: new Date().toISOString() })
+    .where(eq(financialTransactionCategories.id, id));
+}
+
+async function deleteFinancialCategory(id: number) {
+  await getDb()
+    .delete(financialTransactionCategories)
+    .where(eq(financialTransactionCategories.id, id));
+}
+
 async function listFinancialEntries(event: HandlerEvent) {
   const type = optionalFinancialType(queryValue(event, 'type'));
   const status = optionalFinancialStatus(queryValue(event, 'status'));
@@ -1127,11 +1237,13 @@ async function listFinancialEntries(event: HandlerEvent) {
 
 async function saveFinancialTransaction(input: Record<string, unknown>) {
   const id = optionalNumber(input.id);
+  const type = normalizeFinancialType(input.type);
   const payload = {
-    type: normalizeFinancialType(input.type),
+    type,
     source: 'manual',
     description: textInput(input.description),
     category: textInput(input.category),
+    expenseKind: type === 'expense' ? normalizeFinancialExpenseKind(input.expenseKind) : null,
     amountCents: centsInput(input.amountCents),
     movementDate: requiredDateInput(input.movementDate, 'Informe a data do lançamento.'),
     status: normalizeFinancialStatus(input.status),
@@ -1140,6 +1252,10 @@ async function saveFinancialTransaction(input: Record<string, unknown>) {
 
   if (!payload.description) {
     throw httpError(400, 'Informe a descrição do lançamento.');
+  }
+
+  if (!payload.category) {
+    throw httpError(400, 'Informe a categoria do lançamento.');
   }
 
   if (payload.amountCents <= 0) {
@@ -1474,7 +1590,7 @@ async function convertRentalQuoteToContract(id: number) {
     return { contract, items: savedItems };
   });
 
-  return mapContractRow(saved.contract, saved.items.map(mapContractItemRow));
+  return mapContractRow(saved.contract, saved.items.map((item) => mapContractItemRow(item)));
 }
 
 async function loadCategories(includeArchived: boolean): Promise<CategoryRow[]> {
@@ -1997,10 +2113,24 @@ function mapFinancialTransactionRow(row: FinancialTransactionRow) {
     source: 'manual' as const,
     description: row.description,
     category: row.category || undefined,
+    expenseKind: row.type === 'expense' ? normalizeFinancialExpenseKind(row.expenseKind) : undefined,
     amountCents: row.amountCents,
     movementDate: row.movementDate,
     status: normalizeFinancialStatus(row.status),
     notes: row.notes || undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function mapFinancialCategoryRow(row: FinancialTransactionCategoryRow) {
+  return {
+    id: row.id,
+    type: normalizeFinancialType(row.type),
+    name: row.name,
+    expenseKind: row.type === 'expense' ? normalizeFinancialExpenseKind(row.expenseKind) : undefined,
+    status: normalizeCatalogStatus(row.status),
+    sortOrder: row.sortOrder,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -2379,6 +2509,10 @@ function normalizeFinancialType(value: unknown): FinancialEntryType {
   return value === 'expense' ? 'expense' : 'income';
 }
 
+function normalizeFinancialExpenseKind(value: unknown): FinancialExpenseKind {
+  return value === 'fixed' ? 'fixed' : 'variable';
+}
+
 function optionalFinancialType(value: unknown): FinancialEntryType | null {
   const normalized = textInput(value);
 
@@ -2538,6 +2672,7 @@ async function ensureFinancialTransactionsTable() {
       source text not null default 'manual',
       description text not null,
       category text not null default '',
+      expense_kind text,
       amount_cents integer not null default 0 check (amount_cents >= 0),
       movement_date date not null,
       status text not null default 'confirmed' check (status in ('pending', 'confirmed', 'cancelled')),
@@ -2545,6 +2680,39 @@ async function ensureFinancialTransactionsTable() {
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now()
     )
+  `);
+  await getDb().execute(sql`
+    alter table public.financial_transactions
+      add column if not exists expense_kind text
+  `);
+  await getDb().execute(sql`
+    update public.financial_transactions
+    set expense_kind = 'variable'
+    where type = 'expense'
+      and expense_kind is null
+  `);
+  await getDb().execute(sql`
+    update public.financial_transactions
+    set expense_kind = null
+    where type = 'income'
+  `);
+  await getDb().execute(sql`
+    do $$
+    begin
+      if not exists (
+        select 1 from pg_constraint
+        where conname = 'financial_transactions_expense_kind_check'
+          and conrelid = 'public.financial_transactions'::regclass
+      ) then
+        alter table public.financial_transactions
+          add constraint financial_transactions_expense_kind_check
+          check (
+            (type = 'expense' and expense_kind in ('fixed', 'variable'))
+            or
+            (type = 'income' and expense_kind is null)
+          );
+      end if;
+    end $$
   `);
   await getDb().execute(sql`
     create index if not exists financial_transactions_type_idx
@@ -2560,6 +2728,88 @@ async function ensureFinancialTransactionsTable() {
   `);
 
   financialTransactionsMigrationReady = true;
+}
+
+async function ensureFinancialTransactionCategoriesTable() {
+  if (financialTransactionCategoriesMigrationReady) {
+    return;
+  }
+
+  await getDb().execute(sql`
+    create table if not exists public.financial_transaction_categories (
+      id integer generated by default as identity primary key,
+      type text not null,
+      name text not null,
+      expense_kind text,
+      status text not null default 'active',
+      sort_order integer not null default 0,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `);
+  await getDb().execute(sql`
+    create unique index if not exists financial_transaction_categories_type_name_key
+      on public.financial_transaction_categories(type, name)
+  `);
+  await getDb().execute(sql`
+    create index if not exists financial_transaction_categories_type_idx
+      on public.financial_transaction_categories(type)
+  `);
+  await getDb().execute(sql`
+    create index if not exists financial_transaction_categories_status_idx
+      on public.financial_transaction_categories(status)
+  `);
+  await getDb().execute(sql`
+    do $$
+    begin
+      if not exists (
+        select 1 from pg_constraint
+        where conname = 'financial_transaction_categories_type_check'
+          and conrelid = 'public.financial_transaction_categories'::regclass
+      ) then
+        alter table public.financial_transaction_categories
+          add constraint financial_transaction_categories_type_check
+          check (type in ('income', 'expense'));
+      end if;
+
+      if not exists (
+        select 1 from pg_constraint
+        where conname = 'financial_transaction_categories_status_check'
+          and conrelid = 'public.financial_transaction_categories'::regclass
+      ) then
+        alter table public.financial_transaction_categories
+          add constraint financial_transaction_categories_status_check
+          check (status in ('active', 'archived'));
+      end if;
+
+      if not exists (
+        select 1 from pg_constraint
+        where conname = 'financial_transaction_categories_expense_kind_check'
+          and conrelid = 'public.financial_transaction_categories'::regclass
+      ) then
+        alter table public.financial_transaction_categories
+          add constraint financial_transaction_categories_expense_kind_check
+          check (
+            (type = 'expense' and expense_kind in ('fixed', 'variable'))
+            or
+            (type = 'income' and expense_kind is null)
+          );
+      end if;
+    end $$
+  `);
+  await getDb().execute(sql`
+    insert into public.financial_transaction_categories (type, name, expense_kind, sort_order)
+    select distinct
+      ft.type,
+      ft.category,
+      case when ft.type = 'expense' then coalesce(ft.expense_kind, 'variable') else null end,
+      0
+    from public.financial_transactions ft
+    where nullif(trim(ft.category), '') is not null
+    on conflict (type, name) do nothing
+  `);
+
+  financialTransactionCategoriesMigrationReady = true;
 }
 
 async function ensureRentalContractManagementFields() {

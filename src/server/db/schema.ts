@@ -32,6 +32,7 @@ export type RentalPaymentMethod =
 export type InvoicePixChargeStatus = 'pending' | 'paid' | 'review' | 'rejected' | 'cancelled';
 export type FinancialEntryType = 'income' | 'expense';
 export type FinancialEntryStatus = 'pending' | 'confirmed' | 'cancelled';
+export type FinancialExpenseKind = 'fixed' | 'variable';
 export type RentalQuoteStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired';
 export type LeadOrigin =
   | 'indicacao'
@@ -374,6 +375,7 @@ export const financialTransactions = pgTable('financial_transactions', {
   source: text('source').notNull().default('manual'),
   description: text('description').notNull(),
   category: text('category').notNull().default(''),
+  expenseKind: text('expense_kind').$type<FinancialExpenseKind>(),
   amountCents: integer('amount_cents').notNull().default(0),
   movementDate: date('movement_date', { mode: 'string' }).notNull(),
   status: text('status').notNull().default('confirmed').$type<FinancialEntryStatus>(),
@@ -387,6 +389,25 @@ export const financialTransactions = pgTable('financial_transactions', {
   check('financial_transactions_type_check', sql`${table.type} in ('income', 'expense')`),
   check('financial_transactions_status_check', sql`${table.status} in ('pending', 'confirmed', 'cancelled')`),
   check('financial_transactions_amount_cents_check', sql`${table.amountCents} >= 0`),
+  check('financial_transactions_expense_kind_check', sql`(${table.type} = 'expense' and ${table.expenseKind} in ('fixed', 'variable')) or (${table.type} = 'income' and ${table.expenseKind} is null)`),
+]);
+
+export const financialTransactionCategories = pgTable('financial_transaction_categories', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+  type: text('type').notNull().$type<FinancialEntryType>(),
+  name: text('name').notNull(),
+  expenseKind: text('expense_kind').$type<FinancialExpenseKind>(),
+  status: text('status').notNull().default('active').$type<CatalogStatus>(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (table) => [
+  uniqueIndex('financial_transaction_categories_type_name_key').on(table.type, table.name),
+  index('financial_transaction_categories_type_idx').on(table.type),
+  index('financial_transaction_categories_status_idx').on(table.status),
+  check('financial_transaction_categories_type_check', sql`${table.type} in ('income', 'expense')`),
+  check('financial_transaction_categories_status_check', sql`${table.status} in ('active', 'archived')`),
+  check('financial_transaction_categories_expense_kind_check', sql`(${table.type} = 'expense' and ${table.expenseKind} in ('fixed', 'variable')) or (${table.type} = 'income' and ${table.expenseKind} is null)`),
 ]);
 
 export const rentalQuotes = pgTable('rental_quotes', {
