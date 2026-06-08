@@ -316,7 +316,7 @@
                   <button class="font-bold" type="button" (click)="setSort('operationalCode')">Cód. {{ sortIndicator('operationalCode') }}</button>
                 </th>
                 <th class="w-72">Observações</th>
-                <th class="sticky right-0 z-10 w-32 bg-base-100 text-right">Ações</th>
+                <th class="w-32 text-right">Ações</th>
               </tr>
               <tr>
                 <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.category" (input)="setColumnFilter('category', $any($event.target).value)" /></th>
@@ -333,7 +333,7 @@
                 <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.rentalStatus" (input)="setColumnFilter('rentalStatus', $any($event.target).value)" /></th>
                 <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.operationalCode" (input)="setColumnFilter('operationalCode', $any($event.target).value)" /></th>
                 <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.notes" (input)="setColumnFilter('notes', $any($event.target).value)" /></th>
-                <th class="sticky right-0 z-10 bg-base-100"></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -387,7 +387,7 @@
                   <td>
                     <p class="line-clamp-2 max-w-72 text-xs text-base-content/70">{{ contract.notes || '-' }}</p>
                   </td>
-                  <td class="sticky right-0 z-10 bg-base-100 text-right">
+                  <td class="text-right">
                     <details class="dropdown dropdown-end">
                       <summary class="btn btn-sm btn-outline list-none">
                         <lucide-angular [img]="MoreVertical" class="h-4 w-4"></lucide-angular>
