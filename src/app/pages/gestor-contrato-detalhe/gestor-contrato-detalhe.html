@@ -52,6 +52,30 @@
         </div>
       </section>
 
+      <section class="grid gap-4 md:grid-cols-5">
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Vencimento</p>
+          <p class="mt-1 text-lg font-bold">{{ formatDate(contract.dueDate || contract.startDate) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Pagamento</p>
+          <p class="mt-1 text-lg font-bold">{{ formatDate(contract.paymentDate) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Forma</p>
+          <p class="mt-1 text-lg font-bold">{{ paymentMethodLabel(contract.paymentMethod) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Financeiro</p>
+          <p class="mt-1 text-lg font-bold">{{ financialStatusLabel(contract.financialStatus) }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-4">
+          <p class="text-xs uppercase text-base-content/60">Código operacional</p>
+          <p class="mt-1 text-lg font-bold">{{ contract.operationalCode }}</p>
+          <p class="mt-1 text-xs text-base-content/60">{{ operationalCodeLabel(contract.operationalCode) }}</p>
+        </div>
+      </section>
+
       <section class="grid gap-4 lg:grid-cols-2">
         <div class="rounded-box border border-base-300 bg-base-100 p-5">
           <h2 class="text-xl font-bold text-primary">Cliente</h2>

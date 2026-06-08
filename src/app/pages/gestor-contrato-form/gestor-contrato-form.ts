@@ -22,6 +22,9 @@ import type {
   RentalContract,
   RentalContractItem,
   RentalContractStatus,
+  RentalFinancialStatus,
+  RentalOperationalCode,
+  RentalPaymentMethod,
 } from '../../interfaces/rental-contract';
 import { AuthService } from '../../services/auth.service';
 import { CatalogService } from '../../services/catalog.service';
@@ -121,6 +124,29 @@ export class GestorContratoFormPage implements OnInit {
     { value: 'returned', label: 'Devolvido' },
     { value: 'cancelled', label: 'Cancelado' },
   ];
+  protected readonly financialStatusOptions: Array<{ value: RentalFinancialStatus; label: string }> = [
+    { value: 'pending', label: 'Pendente' },
+    { value: 'paid', label: 'Pago' },
+    { value: 'overdue', label: 'Atrasado' },
+    { value: 'partial', label: 'Parcial' },
+    { value: 'cancelled', label: 'Cancelado' },
+  ];
+  protected readonly paymentMethodOptions: Array<{ value: RentalPaymentMethod; label: string }> = [
+    { value: 'not_defined', label: 'Não definido' },
+    { value: 'pix', label: 'Pix' },
+    { value: 'cash', label: 'Dinheiro' },
+    { value: 'credit_card', label: 'Cartão de crédito' },
+    { value: 'debit_card', label: 'Cartão de débito' },
+    { value: 'bank_transfer', label: 'Transferência' },
+    { value: 'boleto', label: 'Boleto' },
+    { value: 'courtesy', label: 'Cortesia' },
+    { value: 'other', label: 'Outro' },
+  ];
+  protected readonly operationalCodeOptions: Array<{ value: RentalOperationalCode; label: string; description: string }> = [
+    { value: 'SR', label: 'SR', description: 'Sem renovação' },
+    { value: 'CR', label: 'CR', description: 'Contrato renovado' },
+    { value: 'SR/C', label: 'SR/C', description: 'Sem renovação/coletado' },
+  ];
 
   protected customers: Customer[] = [];
   protected customerQuery = '';
@@ -143,6 +169,10 @@ export class GestorContratoFormPage implements OnInit {
     rentalPeriodCount: [1, [Validators.required, Validators.min(1)]],
     startDate: [todayInputValue(), Validators.required],
     endDate: [''],
+    dueDate: [todayInputValue()],
+    paymentDate: [''],
+    paymentMethod: ['not_defined' as RentalPaymentMethod, Validators.required],
+    financialStatus: ['pending' as RentalFinancialStatus, Validators.required],
     deliveryAddress: [''],
     worksiteAddress: [''],
     shipping: [centsToDecimalInput(6000), Validators.required],
@@ -151,6 +181,7 @@ export class GestorContratoFormPage implements OnInit {
     notes: [''],
     terms: [DEFAULT_CONTRACT_TERMS],
     status: ['draft' as RentalContractStatus, Validators.required],
+    operationalCode: ['SR' as RentalOperationalCode, Validators.required],
   });
   protected readonly itemForm = this.formBuilder.nonNullable.group({
     equipmentQuery: [''],
@@ -217,6 +248,12 @@ export class GestorContratoFormPage implements OnInit {
   protected useAutomaticEndDate() {
     this.endDateTouched = false;
     this.syncEndDateFromRentalPeriod(true);
+  }
+
+  protected syncDueDateFromStartIfEmpty() {
+    if (!this.form.controls.dueDate.value) {
+      this.form.controls.dueDate.setValue(this.form.controls.startDate.value);
+    }
   }
 
   protected changeContractBillingPeriod() {
@@ -458,6 +495,10 @@ export class GestorContratoFormPage implements OnInit {
         rentalPeriodCount: normalizeRentalPeriodCount(value.rentalPeriodCount),
         startDate: value.startDate,
         endDate: value.endDate,
+        dueDate: value.dueDate || value.startDate,
+        paymentDate: value.paymentDate,
+        paymentMethod: value.paymentMethod,
+        financialStatus: value.financialStatus,
         deliveryAddress: value.deliveryAddress,
         worksiteAddress: value.worksiteAddress,
         notes: value.notes,
@@ -467,6 +508,7 @@ export class GestorContratoFormPage implements OnInit {
         shippingCents: parseCurrencyToCents(value.shipping),
         discountCents: parseCurrencyToCents(value.discount),
         surchargeCents: parseCurrencyToCents(value.surcharge),
+        operationalCode: value.operationalCode,
       };
 
       await this.rentalContractService.saveContract(payload);
@@ -568,6 +610,10 @@ export class GestorContratoFormPage implements OnInit {
       rentalPeriodCount: 1,
       startDate: todayInputValue(),
       endDate: '',
+      dueDate: todayInputValue(),
+      paymentDate: '',
+      paymentMethod: 'not_defined',
+      financialStatus: 'pending',
       deliveryAddress: customerAddress,
       worksiteAddress: customerAddress,
       shipping: centsToDecimalInput(6000),
@@ -576,6 +622,7 @@ export class GestorContratoFormPage implements OnInit {
       notes: '',
       terms: normalizeContractTerms(contractTerms),
       status: 'draft',
+      operationalCode: 'SR',
     });
     this.itemForm.reset({
       equipmentQuery: '',
@@ -612,6 +659,10 @@ export class GestorContratoFormPage implements OnInit {
       rentalPeriodCount: normalizeRentalPeriodCount(contract.rentalPeriodCount),
       startDate: contract.startDate,
       endDate: contract.endDate ?? '',
+      dueDate: contract.dueDate ?? contract.startDate,
+      paymentDate: contract.paymentDate ?? '',
+      paymentMethod: contract.paymentMethod ?? 'not_defined',
+      financialStatus: contract.financialStatus ?? 'pending',
       deliveryAddress: contract.deliveryAddress ?? '',
       worksiteAddress: contract.worksiteAddress ?? contract.deliveryAddress ?? '',
       shipping: centsToDecimalInput(contract.shippingCents ?? 6000),
@@ -620,6 +671,7 @@ export class GestorContratoFormPage implements OnInit {
       notes: contract.notes ?? '',
       terms: contract.terms || DEFAULT_CONTRACT_TERMS,
       status: contract.status,
+      operationalCode: contract.operationalCode ?? 'SR',
     });
     this.itemForm.reset({
       equipmentQuery: '',

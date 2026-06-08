@@ -7,6 +7,9 @@ import type {
   RentalContract,
   RentalContractItem,
   RentalContractStatus,
+  RentalFinancialStatus,
+  RentalOperationalCode,
+  RentalPaymentMethod,
 } from '../interfaces/rental-contract';
 import { GestorApiService } from './gestor-api.service';
 
@@ -18,6 +21,10 @@ export interface RentalContractEditorInput {
   rentalPeriodCount: number;
   startDate: string;
   endDate?: string;
+  dueDate?: string;
+  paymentDate?: string;
+  paymentMethod?: RentalPaymentMethod;
+  financialStatus?: RentalFinancialStatus;
   deliveryAddress?: string;
   worksiteAddress?: string;
   notes?: string;
@@ -27,6 +34,7 @@ export interface RentalContractEditorInput {
   shippingCents?: number;
   discountCents?: number;
   surchargeCents?: number;
+  operationalCode?: RentalOperationalCode;
 }
 
 export interface RentalContractListOptions {

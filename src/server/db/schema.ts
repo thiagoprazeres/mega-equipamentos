@@ -17,6 +17,18 @@ export type CatalogStatus = 'active' | 'archived';
 export type StaffUserRole = 'admin' | 'vendedor' | 'operador' | 'financeiro';
 export type RentalBillingPeriod = 'daily' | 'weekly' | 'fortnightly' | 'monthly';
 export type RentalContractStatus = 'draft' | 'active' | 'closed' | 'returned' | 'cancelled';
+export type RentalFinancialStatus = 'pending' | 'paid' | 'overdue' | 'partial' | 'cancelled';
+export type RentalOperationalCode = 'CR' | 'SR' | 'SR/C';
+export type RentalPaymentMethod =
+  | 'not_defined'
+  | 'pix'
+  | 'cash'
+  | 'credit_card'
+  | 'debit_card'
+  | 'bank_transfer'
+  | 'boleto'
+  | 'courtesy'
+  | 'other';
 export type InvoicePixChargeStatus = 'pending' | 'paid' | 'review' | 'rejected' | 'cancelled';
 export type FinancialEntryType = 'income' | 'expense';
 export type FinancialEntryStatus = 'pending' | 'confirmed' | 'cancelled';
@@ -235,6 +247,16 @@ export const rentalContracts = pgTable('rental_contracts', {
   rentalPeriodCount: integer('rental_period_count').notNull().default(1),
   startDate: date('start_date', { mode: 'string' }).notNull(),
   endDate: date('end_date', { mode: 'string' }),
+  dueDate: date('due_date', { mode: 'string' }),
+  paymentDate: date('payment_date', { mode: 'string' }),
+  paymentMethod: text('payment_method')
+    .notNull()
+    .default('not_defined')
+    .$type<RentalPaymentMethod>(),
+  financialStatus: text('financial_status')
+    .notNull()
+    .default('pending')
+    .$type<RentalFinancialStatus>(),
   deliveryAddress: text('delivery_address').notNull().default(''),
   worksiteAddress: text('worksite_address').notNull().default(''),
   notes: text('notes').notNull().default(''),
@@ -245,6 +267,10 @@ export const rentalContracts = pgTable('rental_contracts', {
   surchargeCents: integer('surcharge_cents').notNull().default(0),
   totalCents: integer('total_cents').notNull().default(0),
   status: text('status').notNull().default('draft').$type<RentalContractStatus>(),
+  operationalCode: text('operational_code')
+    .notNull()
+    .default('SR')
+    .$type<RentalOperationalCode>(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (table) => [
@@ -253,9 +279,15 @@ export const rentalContracts = pgTable('rental_contracts', {
   index('rental_contracts_seller_id_idx').on(table.sellerId),
   index('rental_contracts_status_idx').on(table.status),
   index('rental_contracts_start_date_idx').on(table.startDate),
+  index('rental_contracts_due_date_idx').on(table.dueDate),
+  index('rental_contracts_financial_status_idx').on(table.financialStatus),
+  index('rental_contracts_operational_code_idx').on(table.operationalCode),
   check('rental_contracts_billing_period_check', sql`${table.billingPeriod} in ('daily', 'weekly', 'fortnightly', 'monthly')`),
   check('rental_contracts_rental_period_count_check', sql`${table.rentalPeriodCount} > 0`),
   check('rental_contracts_status_check', sql`${table.status} in ('draft', 'active', 'closed', 'returned', 'cancelled')`),
+  check('rental_contracts_payment_method_check', sql`${table.paymentMethod} in ('not_defined', 'pix', 'cash', 'credit_card', 'debit_card', 'bank_transfer', 'boleto', 'courtesy', 'other')`),
+  check('rental_contracts_financial_status_check', sql`${table.financialStatus} in ('pending', 'paid', 'overdue', 'partial', 'cancelled')`),
+  check('rental_contracts_operational_code_check', sql`${table.operationalCode} in ('CR', 'SR', 'SR/C')`),
   check('rental_contracts_subtotal_cents_check', sql`${table.subtotalCents} >= 0`),
   check('rental_contracts_shipping_cents_check', sql`${table.shippingCents} >= 0`),
   check('rental_contracts_discount_cents_check', sql`${table.discountCents} >= 0`),

@@ -1,11 +1,18 @@
 <section class="min-h-[80vh] bg-base-200 px-3 py-8">
-  <div class="mx-auto max-w-7xl space-y-6">
-    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+  <div class="mx-auto max-w-[96rem] space-y-6">
+    <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div>
         <p class="text-sm uppercase tracking-[0.2em] text-primary/70">Área gestora</p>
-        <h1 class="text-3xl font-extrabold text-primary md:text-4xl">Contratos de locação</h1>
+        <h1 class="text-3xl font-extrabold text-primary md:text-4xl">Gestão de Contratos</h1>
+        <p class="mt-2 max-w-3xl text-sm text-base-content/65">
+          Controle contratos, cobranças, renovações, vencimentos e coleta com visão operacional e financeira.
+        </p>
       </div>
       <div class="flex flex-wrap gap-2">
+        <button class="btn btn-outline" type="button" [disabled]="loading" (click)="exportCsv()">
+          <lucide-angular [img]="Download" class="h-4 w-4"></lucide-angular>
+          Exportar
+        </button>
         <a class="btn btn-primary" routerLink="/gestor/contratos/novo">
           <lucide-angular [img]="Plus" class="h-4 w-4"></lucide-angular>
           Novo contrato
@@ -16,6 +23,7 @@
         </button>
       </div>
     </header>
+
     @if (errorMessage) {
       <div class="alert alert-error">{{ errorMessage }}</div>
     }
@@ -24,105 +32,223 @@
       <div class="alert alert-success">{{ successMessage }}</div>
     }
 
-    <section class="grid gap-3">
-      <label class="input input-bordered flex items-center gap-2">
-        <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
-        <input
-          class="grow"
-          type="search"
-          placeholder="Buscar por nº do contrato, CPF/CNPJ, cliente, vendedor, contato ou equipamento"
-          [value]="query"
-          (input)="query = $any($event.target).value"
-        />
-      </label>
-
-      <div class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
-        <div class="grid gap-2 sm:grid-cols-[auto_minmax(0,10rem)_minmax(0,10rem)_minmax(0,12rem)_auto_auto] sm:items-end">
-          <div class="flex items-center gap-2 pb-1 text-sm font-semibold text-base-content/70">
-            <lucide-angular [img]="CalendarRange" class="h-4 w-4 text-primary"></lucide-angular>
-            Período
+    <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <button class="rounded-box border border-base-300 bg-base-100 p-4 text-left shadow-sm" type="button" (click)="setSmartFilter('active')">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-sm text-base-content/60">Contratos ativos</p>
+            <p class="mt-1 text-3xl font-extrabold text-success">{{ indicators().active }}</p>
           </div>
-
-          <label class="flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase tracking-wide text-base-content/60">De</span>
-            <input
-              class="input input-bordered w-full"
-              type="date"
-              [value]="draftDateFrom"
-              (input)="draftDateFrom = $any($event.target).value"
-            />
-          </label>
-
-          <label class="flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase tracking-wide text-base-content/60">Até</span>
-            <input
-              class="input input-bordered w-full"
-              type="date"
-              [value]="draftDateTo"
-              (input)="draftDateTo = $any($event.target).value"
-            />
-          </label>
-
-          <label class="flex flex-col gap-1">
-            <span class="text-xs font-semibold uppercase tracking-wide text-base-content/60">Filtrar por</span>
-            <select
-              class="select select-bordered w-full"
-              [value]="draftDateMode"
-              (change)="draftDateMode = $any($event.target).value"
-            >
-              @for (option of dateModeOptions; track option.value) {
-                <option [value]="option.value">{{ option.label }}</option>
-              }
-            </select>
-          </label>
-
-          <button class="btn btn-primary" type="button" [disabled]="loading" (click)="applyDateRange()">
-            Consultar
-          </button>
-
-          @if (hasDateRange()) {
-            <button class="btn btn-ghost" type="button" [disabled]="loading" (click)="clearDateRange()">
-              <lucide-angular [img]="X" class="h-4 w-4"></lucide-angular>
-              Limpar
-            </button>
-          }
+          <div class="grid h-12 w-12 place-items-center rounded-full bg-success/10 text-success">
+            <lucide-angular [img]="FileCheck" class="h-6 w-6"></lucide-angular>
+          </div>
         </div>
+      </button>
 
-        <div class="flex flex-wrap gap-2">
-        <select
-          class="select select-bordered w-full md:w-48"
-          [value]="selectedPeriod"
-          (change)="setPeriod($any($event.target).value)"
-        >
+      <button class="rounded-box border border-base-300 bg-base-100 p-4 text-left shadow-sm" type="button" (click)="setSmartFilter('due-soon')">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-sm text-base-content/60">Contratos a vencer</p>
+            <p class="mt-1 text-3xl font-extrabold text-warning">{{ indicators().dueSoon }}</p>
+          </div>
+          <div class="grid h-12 w-12 place-items-center rounded-full bg-warning/10 text-warning">
+            <lucide-angular [img]="Clock3" class="h-6 w-6"></lucide-angular>
+          </div>
+        </div>
+      </button>
+
+      <button class="rounded-box border border-base-300 bg-base-100 p-4 text-left shadow-sm" type="button" (click)="setSmartFilter('overdue')">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-sm text-base-content/60">Contratos vencidos</p>
+            <p class="mt-1 text-3xl font-extrabold text-error">{{ indicators().overdue }}</p>
+          </div>
+          <div class="grid h-12 w-12 place-items-center rounded-full bg-error/10 text-error">
+            <lucide-angular [img]="AlertTriangle" class="h-6 w-6"></lucide-angular>
+          </div>
+        </div>
+      </button>
+
+      <button class="rounded-box border border-base-300 bg-base-100 p-4 text-left shadow-sm" type="button" (click)="setSmartFilter('awaiting-collection')">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-sm text-base-content/60">Aguardando coleta</p>
+            <p class="mt-1 text-3xl font-extrabold text-info">{{ indicators().awaitingCollection }}</p>
+          </div>
+          <div class="grid h-12 w-12 place-items-center rounded-full bg-info/10 text-info">
+            <lucide-angular [img]="Truck" class="h-6 w-6"></lucide-angular>
+          </div>
+        </div>
+      </button>
+    </section>
+
+    <section class="grid gap-3 xl:grid-cols-[1fr_1fr_1.3fr]">
+      <button class="rounded-box border border-base-300 bg-base-100 p-4 text-left shadow-sm" type="button" (click)="setSmartFilter('renewed')">
+        <div class="flex items-center gap-3">
+          <div class="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
+            <lucide-angular [img]="RotateCcw" class="h-5 w-5"></lucide-angular>
+          </div>
+          <div>
+            <p class="text-sm text-base-content/60">Contratos renovados</p>
+            <p class="text-2xl font-extrabold">{{ indicators().renewed }}</p>
+          </div>
+        </div>
+      </button>
+
+      <button class="rounded-box border border-base-300 bg-base-100 p-4 text-left shadow-sm" type="button" (click)="setSmartFilter('finalized')">
+        <div class="flex items-center gap-3">
+          <div class="grid h-10 w-10 place-items-center rounded-full bg-base-300 text-base-content/70">
+            <lucide-angular [img]="Flag" class="h-5 w-5"></lucide-angular>
+          </div>
+          <div>
+            <p class="text-sm text-base-content/60">Contratos finalizados</p>
+            <p class="text-2xl font-extrabold">{{ indicators().finalized }}</p>
+          </div>
+        </div>
+      </button>
+
+      <div class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">
+        <div class="flex items-start gap-3">
+          <div class="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
+            <lucide-angular [img]="WalletCards" class="h-5 w-5"></lucide-angular>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm text-base-content/60">Recebido no mês / a receber</p>
+            <p class="text-lg font-extrabold">
+              {{ formatMoney(indicators().receivedThisMonthCents) }}
+              <span class="text-base-content/35">/</span>
+              {{ formatMoney(indicators().receivableCents) }}
+            </p>
+            <p class="mt-1 truncate text-xs text-base-content/60">
+              Maiores saldos:
+              @for (customer of indicators().topOpenCustomers; track customer.name) {
+                {{ customer.name }} {{ formatMoney(customer.totalCents) }}@if (!$last) {<span>, </span>}
+              } @empty {
+                nenhum saldo aberto
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    @if (contractAlerts().length) {
+      <section class="grid gap-2 lg:grid-cols-5">
+        @for (alert of contractAlerts(); track alert.label) {
+          <button
+            class="rounded-box border p-3 text-left"
+            type="button"
+            [ngClass]="alertClass(alert.kind)"
+          >
+            <p class="text-sm font-bold">{{ alert.label }}: {{ alert.count }}</p>
+            <p class="mt-1 text-xs opacity-75">{{ alert.description }}</p>
+          </button>
+        }
+      </section>
+    }
+
+    <section class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">
+      <div class="grid gap-3 xl:grid-cols-[minmax(18rem,1fr)_repeat(5,minmax(10rem,12rem))]">
+        <label class="input input-bordered flex items-center gap-2">
+          <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
+          <input
+            class="grow"
+            type="search"
+            placeholder="Buscar por contrato, cliente, CPF/CNPJ, categoria, observação ou equipamento"
+            [value]="query"
+            (input)="query = $any($event.target).value"
+          />
+        </label>
+
+        <select class="select select-bordered w-full" [value]="selectedCategory" (change)="selectedCategory = $any($event.target).value">
+          <option value="all">Todas as categorias</option>
+          @for (category of categoryOptions(); track category) {
+            <option [value]="category">{{ category }}</option>
+          }
+        </select>
+
+        <select class="select select-bordered w-full" [value]="selectedPeriod" (change)="setPeriod($any($event.target).value)">
           <option value="all">Todos os períodos</option>
           @for (option of periodOptions; track option.value) {
             <option [value]="option.value">{{ option.label }}</option>
           }
         </select>
 
-        <div role="tablist" class="tabs tabs-box w-fit">
-          <button
-            role="tab"
-            type="button"
-            class="tab"
-            [class.tab-active]="selectedStatus === 'all'"
-            (click)="setStatus('all')"
-          >
-            Todos
-          </button>
-          @for (option of statusOptions; track option.value) {
-            <button
-              role="tab"
-              type="button"
-              class="tab"
-              [class.tab-active]="selectedStatus === option.value"
-              (click)="setStatus(option.value)"
-            >
-              {{ option.label }}
-            </button>
+        <select class="select select-bordered w-full" [value]="selectedFinancialStatus" (change)="setFinancialStatus($any($event.target).value)">
+          <option value="all">Status financeiro</option>
+          @for (option of financialStatusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
           }
+        </select>
+
+        <select class="select select-bordered w-full" [value]="selectedStatus" (change)="setStatus($any($event.target).value)">
+          <option value="all">Status da locação</option>
+          @for (option of statusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+
+        <select class="select select-bordered w-full" [value]="selectedPaymentMethod" (change)="setPaymentMethod($any($event.target).value)">
+          <option value="all">Forma de pagamento</option>
+          @for (option of paymentMethodOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="mt-4 grid gap-3 xl:grid-cols-[auto_repeat(3,minmax(10rem,12rem))_auto_auto] xl:items-end">
+        <div class="flex items-center gap-2 pb-1 text-sm font-semibold text-base-content/70">
+          <lucide-angular [img]="CalendarRange" class="h-4 w-4 text-primary"></lucide-angular>
+          Período
         </div>
-        </div>
+
+        <label class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase tracking-wide text-base-content/60">De</span>
+          <input class="input input-bordered w-full" type="date" [value]="draftDateFrom" (input)="draftDateFrom = $any($event.target).value" />
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase tracking-wide text-base-content/60">Até</span>
+          <input class="input input-bordered w-full" type="date" [value]="draftDateTo" (input)="draftDateTo = $any($event.target).value" />
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span class="text-xs font-semibold uppercase tracking-wide text-base-content/60">Filtrar por</span>
+          <select class="select select-bordered w-full" [value]="draftDateMode" (change)="draftDateMode = $any($event.target).value">
+            @for (option of dateModeOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+
+        <button class="btn btn-primary" type="button" [disabled]="loading" (click)="applyDateRange()">Consultar</button>
+
+        @if (hasDateRange()) {
+          <button class="btn btn-ghost" type="button" [disabled]="loading" (click)="clearDateRange()">
+            <lucide-angular [img]="X" class="h-4 w-4"></lucide-angular>
+            Limpar
+          </button>
+        }
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        @for (option of smartFilterOptions; track option.value) {
+          <button
+            class="btn btn-sm"
+            type="button"
+            [class.btn-primary]="selectedSmartFilter === option.value"
+            [class.btn-outline]="selectedSmartFilter !== option.value"
+            (click)="setSmartFilter(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+        @if (hasColumnFilters()) {
+          <button class="btn btn-sm btn-ghost" type="button" (click)="clearColumnFilters()">
+            <lucide-angular [img]="Filter" class="h-4 w-4"></lucide-angular>
+            Limpar filtros por coluna
+          </button>
+        }
       </div>
     </section>
 
@@ -136,232 +262,225 @@
         <span class="loading loading-spinner loading-lg text-primary"></span>
       </div>
     } @else {
-      <section class="rounded-box border border-base-300 bg-base-100">
+      <section class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+        <div class="flex items-center justify-between gap-3 border-b border-base-300 px-4 py-3">
+          <div>
+            <p class="font-bold">Planilha operacional de contratos</p>
+            <p class="text-xs text-base-content/60">
+              Legenda: CR = contrato renovado | SR = sem renovação | SR/C = sem renovação/coletado
+            </p>
+          </div>
+          <div class="hidden items-center gap-2 text-xs text-base-content/60 md:flex">
+            <lucide-angular [img]="Table2" class="h-4 w-4"></lucide-angular>
+            Tabela estilo Excel
+          </div>
+        </div>
+
         <div class="overflow-x-auto">
-          <table class="table table-zebra">
+          <table class="table table-zebra table-sm min-w-[92rem]">
             <thead>
               <tr>
-                <th class="min-w-[36rem]">
-                  <div class="flex flex-col gap-2">
-                    <span class="font-bold">Contrato, cliente e vendedor</span>
-                    <div class="flex flex-wrap gap-2">
-                      <button
-                        class="badge badge-outline gap-1 rounded-md font-semibold"
-                        type="button"
-                        (click)="setSort('number')"
-                      >
-                        Contrato <span class="text-xs">{{ sortIndicator('number') }}</span>
-                      </button>
-                      <button
-                        class="badge badge-outline gap-1 rounded-md font-semibold"
-                        type="button"
-                        (click)="setSort('customer')"
-                      >
-                        Cliente <span class="text-xs">{{ sortIndicator('customer') }}</span>
-                      </button>
-                      <button
-                        class="badge badge-outline gap-1 rounded-md font-semibold"
-                        type="button"
-                        (click)="setSort('seller')"
-                      >
-                        Vendedor <span class="text-xs">{{ sortIndicator('seller') }}</span>
-                      </button>
-                    </div>
-                  </div>
+                <th class="w-40">
+                  <button class="font-bold" type="button" (click)="setSort('category')">Categoria {{ sortIndicator('category') }}</button>
                 </th>
-                <th class="min-w-[36rem]">
-                  <div class="flex flex-col gap-2">
-                    <span class="font-bold">Locação e ações</span>
-                    <div class="flex flex-wrap gap-2">
-                      <button
-                        class="badge badge-outline gap-1 rounded-md font-semibold"
-                        type="button"
-                        (click)="setSort('period')"
-                      >
-                        Período <span class="text-xs">{{ sortIndicator('period') }}</span>
-                      </button>
-                      <button
-                        class="badge badge-outline gap-1 rounded-md font-semibold"
-                        type="button"
-                        (click)="setSort('items')"
-                      >
-                        Itens <span class="text-xs">{{ sortIndicator('items') }}</span>
-                      </button>
-                      <button
-                        class="badge badge-outline gap-1 rounded-md font-semibold"
-                        type="button"
-                        (click)="setSort('total')"
-                      >
-                        Total <span class="text-xs">{{ sortIndicator('total') }}</span>
-                      </button>
-                      <button
-                        class="badge badge-outline gap-1 rounded-md font-semibold"
-                        type="button"
-                        (click)="setSort('status')"
-                      >
-                        Status <span class="text-xs">{{ sortIndicator('status') }}</span>
-                      </button>
-                    </div>
-                  </div>
+                <th class="w-32">
+                  <button class="font-bold" type="button" (click)="setSort('number')">Nº contrato {{ sortIndicator('number') }}</button>
                 </th>
+                <th class="w-64">
+                  <button class="font-bold" type="button" (click)="setSort('customer')">Cliente {{ sortIndicator('customer') }}</button>
+                </th>
+                <th class="w-36">
+                  <button class="font-bold" type="button" (click)="setSort('period')">Período {{ sortIndicator('period') }}</button>
+                </th>
+                <th class="w-32">
+                  <button class="font-bold" type="button" (click)="setSort('total')">Valor {{ sortIndicator('total') }}</button>
+                </th>
+                <th class="w-32">
+                  <button class="font-bold" type="button" (click)="setSort('startDate')">Início {{ sortIndicator('startDate') }}</button>
+                </th>
+                <th class="w-32">
+                  <button class="font-bold" type="button" (click)="setSort('endDate')">Fim {{ sortIndicator('endDate') }}</button>
+                </th>
+                <th class="w-32">
+                  <button class="font-bold" type="button" (click)="setSort('dueDate')">Vencimento {{ sortIndicator('dueDate') }}</button>
+                </th>
+                <th class="w-32">
+                  <button class="font-bold" type="button" (click)="setSort('paymentDate')">Pagamento {{ sortIndicator('paymentDate') }}</button>
+                </th>
+                <th class="w-40">
+                  <button class="font-bold" type="button" (click)="setSort('paymentMethod')">Forma {{ sortIndicator('paymentMethod') }}</button>
+                </th>
+                <th class="w-40">
+                  <button class="font-bold" type="button" (click)="setSort('financialStatus')">Status financeiro {{ sortIndicator('financialStatus') }}</button>
+                </th>
+                <th class="w-40">
+                  <button class="font-bold" type="button" (click)="setSort('rentalStatus')">Status locação {{ sortIndicator('rentalStatus') }}</button>
+                </th>
+                <th class="w-28">
+                  <button class="font-bold" type="button" (click)="setSort('operationalCode')">Cód. {{ sortIndicator('operationalCode') }}</button>
+                </th>
+                <th class="w-72">Observações</th>
+                <th class="sticky right-0 z-10 w-32 bg-base-100 text-right">Ações</th>
+              </tr>
+              <tr>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.category" (input)="setColumnFilter('category', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.contract" (input)="setColumnFilter('contract', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.customer" (input)="setColumnFilter('customer', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.period" (input)="setColumnFilter('period', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.value" (input)="setColumnFilter('value', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.startDate" (input)="setColumnFilter('startDate', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.endDate" (input)="setColumnFilter('endDate', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.dueDate" (input)="setColumnFilter('dueDate', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.paymentDate" (input)="setColumnFilter('paymentDate', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.paymentMethod" (input)="setColumnFilter('paymentMethod', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.financialStatus" (input)="setColumnFilter('financialStatus', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.rentalStatus" (input)="setColumnFilter('rentalStatus', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.operationalCode" (input)="setColumnFilter('operationalCode', $any($event.target).value)" /></th>
+                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.notes" (input)="setColumnFilter('notes', $any($event.target).value)" /></th>
+                <th class="sticky right-0 z-10 bg-base-100"></th>
               </tr>
             </thead>
             <tbody>
               @for (contract of filteredContracts(); track contract.id) {
                 <tr>
-                  <td class="align-top">
-                    <div class="grid min-w-[36rem] gap-4 py-2 md:grid-cols-[11rem_minmax(0,1fr)_minmax(0,1fr)]">
-                      <div class="flex items-center gap-3">
-                        <div class="grid h-11 w-11 shrink-0 place-items-center rounded-box bg-primary/10 text-primary">
-                          <lucide-angular [img]="FileText" class="h-5 w-5"></lucide-angular>
-                        </div>
-                        <div>
-                          <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Contrato</p>
-                          <p class="font-bold text-primary">{{ contract.contractNumber }}</p>
-                          <p class="text-xs text-base-content/60">{{ contract.createdAt | date: 'dd/MM/yyyy' }}</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Cliente</p>
-                        <p class="font-semibold leading-snug">{{ contract.customerName }}</p>
-                        <p class="text-xs text-base-content/60">{{ contract.customerPhone || 'Sem contato' }}</p>
-                      </div>
-
-                      <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Vendedor</p>
-                        <p class="font-semibold leading-snug">{{ contract.sellerName || 'Não informado' }}</p>
-                        <p class="text-xs text-base-content/60">
-                          {{ contract.sellerPhone || contract.sellerEmail || 'Sem contato' }}
-                        </p>
-                      </div>
-                    </div>
+                  <td class="font-medium">{{ contractCategoryLabel(contract) }}</td>
+                  <td>
+                    <a class="font-bold text-primary hover:underline" [routerLink]="['/gestor/contratos', contract.id]">
+                      {{ contract.contractNumber }}
+                    </a>
+                    <p class="text-[0.7rem] text-base-content/50">{{ contract.items.length }} item(ns)</p>
                   </td>
-                  <td class="align-top">
-                    <div class="grid min-w-[36rem] gap-3 py-2 sm:grid-cols-2 lg:grid-cols-[minmax(8rem,1.4fr)_4rem_7rem_7rem_7rem]">
-                      <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Período</p>
-                        <p class="font-semibold leading-snug">{{ rentalDurationLabel(contract) }}</p>
-                        <p class="text-xs text-base-content/60">{{ contractPeriod(contract) }}</p>
-                      </div>
-                      <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Itens</p>
-                        <p class="font-semibold">{{ contract.items.length }}</p>
-                      </div>
-                      <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Total</p>
-                        <p class="whitespace-nowrap font-semibold">{{ formatMoney(contract.totalCents) }}</p>
-                      </div>
-                      <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Status</p>
-                        <span
-                          class="badge mt-1"
-                          [class.badge-success]="contract.status === 'active'"
-                          [class.badge-error]="contract.status === 'cancelled'"
-                        >
-                          {{ statusLabel(contract.status) }}
-                        </span>
-                      </div>
-                      <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Ações</p>
-                        <details class="dropdown dropdown-end mt-1">
-                          <summary class="btn btn-sm btn-outline list-none">
-                            <lucide-angular [img]="FileText" class="h-4 w-4"></lucide-angular>
-                            Ações
-                          </summary>
-                          <ul
-                            class="menu dropdown-content z-20 mt-2 w-72 rounded-box border border-base-300 bg-base-100 p-2 text-left shadow-xl"
-                          >
-                            <li>
-                              <a [routerLink]="['/gestor/contratos', contract.id]">
-                                <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
-                                Visualizar
-                              </a>
-                            </li>
-                            <li>
-                              <a [routerLink]="['/gestor/contratos', contract.id, 'editar']">
-                                <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
-                                Editar
-                              </a>
-                            </li>
-                            @if (contract.status !== 'cancelled') {
-                              <li class="menu-title">Status</li>
-                              <li>
-                                <button
-                                  class="text-error"
-                                  type="button"
-                                  [disabled]="updatingContractStatusId === contract.id"
-                                  (click)="cancelContract(contract)"
-                                >
-                                  @if (updatingContractStatusId === contract.id) {
-                                    <span class="loading loading-spinner loading-xs"></span>
-                                  } @else {
-                                    <lucide-angular [img]="X" class="h-4 w-4"></lucide-angular>
-                                  }
-                                  Cancelar contrato
-                                </button>
-                              </li>
+                  <td>
+                    <p class="max-w-60 truncate font-semibold">{{ contract.customerName }}</p>
+                    <p class="text-[0.7rem] text-base-content/55">{{ contract.customerDocument || contract.customerPhone || 'Sem contato' }}</p>
+                  </td>
+                  <td>
+                    <p class="font-semibold">{{ rentalDurationLabel(contract) }}</p>
+                    <p class="text-[0.7rem] text-base-content/55">{{ periodLabel(contract.billingPeriod) }}</p>
+                  </td>
+                  <td class="whitespace-nowrap font-semibold">{{ formatMoney(contract.totalCents) }}</td>
+                  <td>{{ formatDate(contract.startDate) }}</td>
+                  <td>{{ formatDate(contract.endDate) }}</td>
+                  <td>{{ formatDate(contract.dueDate || contract.startDate) }}</td>
+                  <td>{{ formatDate(contract.paymentDate) }}</td>
+                  <td>{{ paymentMethodLabel(contract.paymentMethod) }}</td>
+                  <td>
+                    <span
+                      class="badge badge-sm"
+                      [class.badge-success]="effectiveFinancialStatus(contract) === 'paid'"
+                      [class.badge-error]="effectiveFinancialStatus(contract) === 'overdue'"
+                      [class.badge-warning]="effectiveFinancialStatus(contract) === 'pending' || effectiveFinancialStatus(contract) === 'partial'"
+                    >
+                      {{ financialStatusLabel(effectiveFinancialStatus(contract)) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      class="badge badge-sm"
+                      [class.badge-success]="contract.status === 'active'"
+                      [class.badge-error]="contract.status === 'cancelled'"
+                    >
+                      {{ statusLabel(contract.status) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge badge-outline badge-sm" [title]="operationalCodeDescription(contract.operationalCode)">
+                      {{ contract.operationalCode }}
+                    </span>
+                  </td>
+                  <td>
+                    <p class="line-clamp-2 max-w-72 text-xs text-base-content/70">{{ contract.notes || '-' }}</p>
+                  </td>
+                  <td class="sticky right-0 z-10 bg-base-100 text-right">
+                    <details class="dropdown dropdown-end">
+                      <summary class="btn btn-sm btn-outline list-none">
+                        <lucide-angular [img]="MoreVertical" class="h-4 w-4"></lucide-angular>
+                        Ações
+                      </summary>
+                      <ul class="menu dropdown-content z-20 mt-2 w-72 rounded-box border border-base-300 bg-base-100 p-2 text-left shadow-xl">
+                        <li>
+                          <a [routerLink]="['/gestor/contratos', contract.id]">
+                            <lucide-angular [img]="Eye" class="h-4 w-4"></lucide-angular>
+                            Visualizar
+                          </a>
+                        </li>
+                        <li>
+                          <a [routerLink]="['/gestor/contratos', contract.id, 'editar']">
+                            <lucide-angular [img]="Pencil" class="h-4 w-4"></lucide-angular>
+                            Editar
+                          </a>
+                        </li>
+                        @if (contract.status !== 'cancelled') {
+                          <li class="menu-title">Status</li>
+                          <li>
+                            <button class="text-error" type="button" [disabled]="updatingContractStatusId === contract.id" (click)="cancelContract(contract)">
+                              @if (updatingContractStatusId === contract.id) {
+                                <span class="loading loading-spinner loading-xs"></span>
+                              } @else {
+                                <lucide-angular [img]="X" class="h-4 w-4"></lucide-angular>
+                              }
+                              Cancelar contrato
+                            </button>
+                          </li>
+                        }
+                        <li class="menu-title">PDFs</li>
+                        <li>
+                          <button type="button" (click)="exportQuote(contract)">
+                            @if (exportingQuoteId === contract.id) {
+                              <span class="loading loading-spinner loading-xs"></span>
+                            } @else {
+                              <lucide-angular [img]="ClipboardList" class="h-4 w-4"></lucide-angular>
                             }
-                            <li class="menu-title">PDFs</li>
-                            <li>
-                              <button type="button" (click)="exportQuote(contract)">
-                                @if (exportingQuoteId === contract.id) {
-                                  <span class="loading loading-spinner loading-xs"></span>
-                                } @else {
-                                  <lucide-angular [img]="ClipboardList" class="h-4 w-4"></lucide-angular>
-                                }
-                                Orçamento
-                              </button>
-                            </li>
-                            <li>
-                              <button type="button" (click)="openInvoiceDialog(contract)">
-                                @if (exportingInvoiceId === contract.id) {
-                                  <span class="loading loading-spinner loading-xs"></span>
-                                } @else {
-                                  <lucide-angular [img]="ReceiptText" class="h-4 w-4"></lucide-angular>
-                                }
-                                Fatura
-                              </button>
-                            </li>
-                            <li>
-                              <button type="button" (click)="exportDeliveryReceipt(contract)">
-                                @if (exportingDeliveryReceiptId === contract.id) {
-                                  <span class="loading loading-spinner loading-xs"></span>
-                                } @else {
-                                  <lucide-angular [img]="FileCheck" class="h-4 w-4"></lucide-angular>
-                                }
-                                Comprovante de entrega
-                              </button>
-                            </li>
-                            <li>
-                              <button type="button" (click)="exportReturnReceipt(contract)">
-                                @if (exportingReturnReceiptId === contract.id) {
-                                  <span class="loading loading-spinner loading-xs"></span>
-                                } @else {
-                                  <lucide-angular [img]="RotateCcw" class="h-4 w-4"></lucide-angular>
-                                }
-                                Comprovante de devolução
-                              </button>
-                            </li>
-                            <li>
-                              <button type="button" (click)="exportPdf(contract)">
-                                @if (exportingContractId === contract.id) {
-                                  <span class="loading loading-spinner loading-xs"></span>
-                                } @else {
-                                  <lucide-angular [img]="Download" class="h-4 w-4"></lucide-angular>
-                                }
-                                Contrato de locação
-                              </button>
-                            </li>
-                          </ul>
-                        </details>
-                      </div>
-                    </div>
+                            Orçamento
+                          </button>
+                        </li>
+                        <li>
+                          <button type="button" (click)="openInvoiceDialog(contract)">
+                            @if (exportingInvoiceId === contract.id) {
+                              <span class="loading loading-spinner loading-xs"></span>
+                            } @else {
+                              <lucide-angular [img]="ReceiptText" class="h-4 w-4"></lucide-angular>
+                            }
+                            Fatura
+                          </button>
+                        </li>
+                        <li>
+                          <button type="button" (click)="exportDeliveryReceipt(contract)">
+                            @if (exportingDeliveryReceiptId === contract.id) {
+                              <span class="loading loading-spinner loading-xs"></span>
+                            } @else {
+                              <lucide-angular [img]="FileCheck" class="h-4 w-4"></lucide-angular>
+                            }
+                            Comprovante de entrega
+                          </button>
+                        </li>
+                        <li>
+                          <button type="button" (click)="exportReturnReceipt(contract)">
+                            @if (exportingReturnReceiptId === contract.id) {
+                              <span class="loading loading-spinner loading-xs"></span>
+                            } @else {
+                              <lucide-angular [img]="RotateCcw" class="h-4 w-4"></lucide-angular>
+                            }
+                            Comprovante de devolução
+                          </button>
+                        </li>
+                        <li>
+                          <button type="button" (click)="exportPdf(contract)">
+                            @if (exportingContractId === contract.id) {
+                              <span class="loading loading-spinner loading-xs"></span>
+                            } @else {
+                              <lucide-angular [img]="Download" class="h-4 w-4"></lucide-angular>
+                            }
+                            Contrato de locação
+                          </button>
+                        </li>
+                      </ul>
+                    </details>
                   </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="2" class="py-10 text-center text-base-content/60">
+                  <td colspan="15" class="py-10 text-center text-base-content/60">
                     Nenhum contrato encontrado.
                   </td>
                 </tr>

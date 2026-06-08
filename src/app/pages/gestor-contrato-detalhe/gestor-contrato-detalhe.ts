@@ -3,7 +3,14 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ArrowLeft, FileText, LucideAngularModule } from 'lucide-angular';
 
-import type { RentalBillingPeriod, RentalContract, RentalContractStatus } from '../../interfaces/rental-contract';
+import type {
+  RentalBillingPeriod,
+  RentalContract,
+  RentalContractStatus,
+  RentalFinancialStatus,
+  RentalOperationalCode,
+  RentalPaymentMethod,
+} from '../../interfaces/rental-contract';
 import { RentalContractService } from '../../services/rental-contract.service';
 import { formatCurrencyCents } from '../../utils/prices';
 
@@ -19,6 +26,29 @@ const STATUS_LABELS: Record<RentalContractStatus, string> = {
   closed: 'Encerrado',
   returned: 'Devolvido',
   cancelled: 'Cancelado',
+};
+const FINANCIAL_STATUS_LABELS: Record<RentalFinancialStatus, string> = {
+  pending: 'Pendente',
+  paid: 'Pago',
+  overdue: 'Atrasado',
+  partial: 'Parcial',
+  cancelled: 'Cancelado',
+};
+const PAYMENT_METHOD_LABELS: Record<RentalPaymentMethod, string> = {
+  not_defined: 'Não definido',
+  pix: 'Pix',
+  cash: 'Dinheiro',
+  credit_card: 'Cartão de crédito',
+  debit_card: 'Cartão de débito',
+  bank_transfer: 'Transferência',
+  boleto: 'Boleto',
+  courtesy: 'Cortesia',
+  other: 'Outro',
+};
+const OPERATIONAL_CODE_LABELS: Record<RentalOperationalCode, string> = {
+  CR: 'Contrato renovado',
+  SR: 'Sem renovação',
+  'SR/C': 'Sem renovação/coletado',
 };
 
 @Component({
@@ -74,6 +104,18 @@ export class GestorContratoDetalhePage implements OnInit {
 
   protected statusLabel(status: RentalContractStatus): string {
     return STATUS_LABELS[status];
+  }
+
+  protected financialStatusLabel(status: RentalFinancialStatus): string {
+    return FINANCIAL_STATUS_LABELS[status];
+  }
+
+  protected paymentMethodLabel(method: RentalPaymentMethod): string {
+    return PAYMENT_METHOD_LABELS[method];
+  }
+
+  protected operationalCodeLabel(code: RentalOperationalCode): string {
+    return OPERATIONAL_CODE_LABELS[code];
   }
 
   protected formatDate(value?: string): string {

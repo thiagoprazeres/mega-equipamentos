@@ -1,11 +1,26 @@
 export type RentalBillingPeriod = 'daily' | 'weekly' | 'fortnightly' | 'monthly';
 export type RentalContractStatus = 'draft' | 'active' | 'closed' | 'returned' | 'cancelled';
+export type RentalFinancialStatus = 'pending' | 'paid' | 'overdue' | 'partial' | 'cancelled';
+export type RentalOperationalCode = 'CR' | 'SR' | 'SR/C';
+export type RentalPaymentMethod =
+  | 'not_defined'
+  | 'pix'
+  | 'cash'
+  | 'credit_card'
+  | 'debit_card'
+  | 'bank_transfer'
+  | 'boleto'
+  | 'courtesy'
+  | 'other';
 
 export interface RentalContractItem {
   id?: number;
   contractId?: number;
   equipmentId: number;
   equipmentName: string;
+  equipmentCategoryName?: string;
+  equipmentCategoryCode?: string;
+  equipmentCode?: string;
   quantity: number;
   billingPeriod: RentalBillingPeriod;
   unitPriceCents: number;
@@ -34,6 +49,10 @@ export interface RentalContract {
   rentalPeriodCount: number;
   startDate: string;
   endDate?: string;
+  dueDate?: string;
+  paymentDate?: string;
+  paymentMethod: RentalPaymentMethod;
+  financialStatus: RentalFinancialStatus;
   deliveryAddress?: string;
   worksiteAddress?: string;
   notes?: string;
@@ -44,6 +63,7 @@ export interface RentalContract {
   surchargeCents: number;
   totalCents: number;
   status: RentalContractStatus;
+  operationalCode: RentalOperationalCode;
   items: RentalContractItem[];
   createdAt?: string;
   updatedAt?: string;

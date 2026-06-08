@@ -109,8 +109,8 @@
                 class="input input-bordered w-full"
                 type="date"
                 formControlName="startDate"
-                (input)="syncEndDateFromRentalPeriod()"
-                (change)="syncEndDateFromRentalPeriod()"
+                (input)="syncEndDateFromRentalPeriod(); syncDueDateFromStartIfEmpty()"
+                (change)="syncEndDateFromRentalPeriod(); syncDueDateFromStartIfEmpty()"
               />
             </label>
 
@@ -130,6 +130,52 @@
                   Recalcular
                 </button>
               </div>
+            </label>
+          </div>
+        </section>
+
+        <section class="rounded-box border border-base-300 bg-base-100 p-5">
+          <h2 class="text-xl font-bold text-primary">Controle financeiro e operacional</h2>
+          <p class="mt-1 text-sm text-base-content/60">
+            Use CR para contrato renovado, SR para sem renovação e SR/C para sem renovação/coletado.
+          </p>
+
+          <div class="mt-4 grid gap-4 md:grid-cols-3">
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Data de vencimento</span>
+              <input class="input input-bordered w-full" type="date" formControlName="dueDate" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Data de pagamento</span>
+              <input class="input input-bordered w-full" type="date" formControlName="paymentDate" />
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Forma de pagamento</span>
+              <select class="select select-bordered w-full" formControlName="paymentMethod">
+                @for (option of paymentMethodOptions; track option.value) {
+                  <option [ngValue]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="flex flex-col gap-1.5">
+              <span class="text-sm font-semibold text-base-content/80">Status financeiro</span>
+              <select class="select select-bordered w-full" formControlName="financialStatus">
+                @for (option of financialStatusOptions; track option.value) {
+                  <option [ngValue]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="flex flex-col gap-1.5 md:col-span-2">
+              <span class="text-sm font-semibold text-base-content/80">Código operacional</span>
+              <select class="select select-bordered w-full" formControlName="operationalCode">
+                @for (option of operationalCodeOptions; track option.value) {
+                  <option [ngValue]="option.value">{{ option.label }} - {{ option.description }}</option>
+                }
+              </select>
             </label>
           </div>
         </section>

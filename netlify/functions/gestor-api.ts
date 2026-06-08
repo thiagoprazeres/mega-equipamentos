@@ -35,6 +35,9 @@ import {
   type LeadOrigin,
   type RentalBillingPeriod,
   type RentalContractStatus,
+  type RentalFinancialStatus,
+  type RentalOperationalCode,
+  type RentalPaymentMethod,
   type RentalQuoteStatus,
   type StaffUserRole,
 } from '../../src/server/db/schema';
@@ -68,6 +71,7 @@ let quotesWithoutLeadMigrationReady = false;
 let invoicePixChargesMigrationReady = false;
 let financialTransactionsMigrationReady = false;
 let hardcodedContractsCleanupReady = false;
+let rentalContractManagementFieldsReady = false;
 
 export const handler: Handler = async (event) => {
   try {
@@ -77,11 +81,19 @@ export const handler: Handler = async (event) => {
 
     const [resource, id, action] = routeSegments(event);
 
+    await requireAuthenticatedSession(event);
+
+    if (
+      resource === 'rental-contracts' ||
+      resource === 'invoice-charges' ||
+      resource === 'financial-transactions'
+    ) {
+      await ensureRentalContractManagementFields();
+    }
+
     if (resource === 'rental-contracts') {
       await cleanupHardcodedContracts();
     }
-
-    await requireAuthenticatedSession(event);
 
     switch (resource) {
       case 'categories':
@@ -787,6 +799,10 @@ async function saveRentalContract(input: Record<string, unknown>) {
     rentalPeriodCount,
     startDate: textInput(input.startDate),
     endDate: nullableTextInput(input.endDate),
+    dueDate: nullableTextInput(input.dueDate) ?? textInput(input.endDate) ?? textInput(input.startDate),
+    paymentDate: nullableTextInput(input.paymentDate),
+    paymentMethod: normalizeContractPaymentMethod(input.paymentMethod),
+    financialStatus: normalizeRentalFinancialStatus(input.financialStatus),
     deliveryAddress: textInput(input.deliveryAddress),
     worksiteAddress: textInput(input.worksiteAddress),
     notes: textInput(input.notes),
@@ -797,6 +813,7 @@ async function saveRentalContract(input: Record<string, unknown>) {
     surchargeCents,
     totalCents: rentalTotalCents(subtotalCents, shippingCents, discountCents, surchargeCents),
     status: normalizeContractStatus(input.status),
+    operationalCode: normalizeOperationalCode(input.operationalCode),
   };
 
   const saved = await getDb().transaction(async (tx) => {
@@ -910,22 +927,36 @@ async function createInvoiceCharge(input: Record<string, unknown>) {
     description: `FAT ${contract.contractNumber}`,
   });
 
-  const [row] = await getDb()
-    .insert(invoicePixCharges)
-    .values({
-      contractId: contract.id,
-      invoiceNumber: `FAT-${contract.contractNumber}`,
-      txid: pix.txid,
-      brcode: pix.brcode,
-      pixKey,
-      receiverName: pix.receiverName,
-      receiverCity: pix.receiverCity,
-      amountCents: contract.totalCents,
-      dueDate,
-      additionalInfo,
-      status: 'pending',
-    })
-    .returning();
+  const [row] = await getDb().transaction(async (tx) => {
+    const [charge] = await tx
+      .insert(invoicePixCharges)
+      .values({
+        contractId: contract.id,
+        invoiceNumber: `FAT-${contract.contractNumber}`,
+        txid: pix.txid,
+        brcode: pix.brcode,
+        pixKey,
+        receiverName: pix.receiverName,
+        receiverCity: pix.receiverCity,
+        amountCents: contract.totalCents,
+        dueDate,
+        additionalInfo,
+        status: 'pending',
+      })
+      .returning();
+
+    await tx
+      .update(rentalContracts)
+      .set({
+        dueDate,
+        paymentMethod: 'pix',
+        financialStatus: 'pending',
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(rentalContracts.id, contract.id));
+
+    return charge ? [charge] : [];
+  });
 
   if (!row) {
     throw httpError(500, 'Não foi possível criar a cobrança PIX.');
@@ -972,26 +1003,42 @@ async function confirmInvoiceCharge(id: number, input: Record<string, unknown>) 
     channel: 'manual',
   });
   const nextStatus = invoiceChargeStatusAfterRisk(risk.verdict, charge.amountCents, paidAmountCents);
-  const [row] = await getDb()
-    .update(invoicePixCharges)
-    .set({
-      status: nextStatus,
-      endToEndId: parsedEndToEndId.endToEndId,
-      paidAmountCents,
-      paidAt,
-      payerIspb: parsedEndToEndId.ispb,
-      payerBankName: parsedEndToEndId.bankName,
-      payerName: textInput(input.payerName),
-      payerDocument: textInput(input.payerDocument),
-      riskScore: risk.score,
-      riskBand: risk.band,
-      riskVerdict: risk.verdict,
-      riskSignals: risk.signals,
-      riskEvidences: risk.evidences,
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(invoicePixCharges.id, id))
-    .returning();
+  const [row] = await getDb().transaction(async (tx) => {
+    const [updatedCharge] = await tx
+      .update(invoicePixCharges)
+      .set({
+        status: nextStatus,
+        endToEndId: parsedEndToEndId.endToEndId,
+        paidAmountCents,
+        paidAt,
+        payerIspb: parsedEndToEndId.ispb,
+        payerBankName: parsedEndToEndId.bankName,
+        payerName: textInput(input.payerName),
+        payerDocument: textInput(input.payerDocument),
+        riskScore: risk.score,
+        riskBand: risk.band,
+        riskVerdict: risk.verdict,
+        riskSignals: risk.signals,
+        riskEvidences: risk.evidences,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(invoicePixCharges.id, id))
+      .returning();
+
+    if (updatedCharge && nextStatus === 'paid') {
+      await tx
+        .update(rentalContracts)
+        .set({
+          paymentDate: paidAt.slice(0, 10),
+          paymentMethod: 'pix',
+          financialStatus: 'paid',
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(rentalContracts.id, updatedCharge.contractId));
+    }
+
+    return updatedCharge ? [updatedCharge] : [];
+  });
 
   if (!row) {
     throw httpError(500, 'Não foi possível confirmar o recebimento.');
@@ -1358,6 +1405,10 @@ async function convertRentalQuoteToContract(id: number) {
         rentalPeriodCount: periodCountInput(quote.rentalPeriodCount),
         startDate: quote.startDate,
         endDate: endDate || null,
+        dueDate: quote.startDate,
+        paymentDate: null,
+        paymentMethod: 'pix',
+        financialStatus: 'pending',
         deliveryAddress: quote.deliveryAddress,
         worksiteAddress: quote.worksiteAddress,
         notes: contractNotes,
@@ -1367,7 +1418,8 @@ async function convertRentalQuoteToContract(id: number) {
         discountCents: quote.discountCents,
         surchargeCents: quote.surchargeCents,
         totalCents: quote.totalCents,
-        status: 'draft',
+        status: 'active',
+        operationalCode: 'SR',
       })
       .returning();
 
@@ -1476,15 +1528,26 @@ async function loadContractItemsByContractId(
   }
 
   const rows = await getDb()
-    .select()
+    .select({
+      item: rentalContractItems,
+      equipmentCode: equipments.equipmentCode,
+      equipmentCategoryCode: categories.categoryCode,
+      equipmentCategoryName: categories.nome,
+    })
     .from(rentalContractItems)
+    .leftJoin(equipments, eq(rentalContractItems.equipmentId, equipments.id))
+    .leftJoin(categories, eq(equipments.categoryId, categories.id))
     .where(inArray(rentalContractItems.contractId, contractIds))
     .orderBy(asc(rentalContractItems.sortOrder), asc(rentalContractItems.id));
 
   for (const row of rows) {
-    const items = itemsByContractId.get(row.contractId) ?? [];
-    items.push(mapContractItemRow(row));
-    itemsByContractId.set(row.contractId, items);
+    const items = itemsByContractId.get(row.item.contractId) ?? [];
+    items.push(mapContractItemRow(row.item, {
+      equipmentCode: row.equipmentCode ?? '',
+      equipmentCategoryCode: row.equipmentCategoryCode ?? '',
+      equipmentCategoryName: row.equipmentCategoryName ?? '',
+    }));
+    itemsByContractId.set(row.item.contractId, items);
   }
 
   return itemsByContractId;
@@ -1815,6 +1878,10 @@ function mapContractRow(row: RentalContractRow, items: ReturnType<typeof mapCont
     rentalPeriodCount: periodCountInput(row.rentalPeriodCount),
     startDate: row.startDate,
     endDate: row.endDate ?? undefined,
+    dueDate: row.dueDate ?? undefined,
+    paymentDate: row.paymentDate ?? undefined,
+    paymentMethod: normalizeContractPaymentMethod(row.paymentMethod),
+    financialStatus: normalizeRentalFinancialStatus(row.financialStatus),
     deliveryAddress: row.deliveryAddress || undefined,
     worksiteAddress: row.worksiteAddress || undefined,
     notes: row.notes || undefined,
@@ -1825,18 +1892,29 @@ function mapContractRow(row: RentalContractRow, items: ReturnType<typeof mapCont
     surchargeCents: row.surchargeCents,
     totalCents: row.totalCents,
     status: normalizeContractStatus(row.status),
+    operationalCode: normalizeOperationalCode(row.operationalCode),
     items,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
 }
 
-function mapContractItemRow(row: RentalContractItemRow) {
+function mapContractItemRow(
+  row: RentalContractItemRow,
+  equipment?: {
+    equipmentCode?: string;
+    equipmentCategoryCode?: string;
+    equipmentCategoryName?: string;
+  }
+) {
   return {
     id: row.id,
     contractId: row.contractId,
     equipmentId: row.equipmentId,
     equipmentName: row.equipmentName,
+    equipmentCategoryName: equipment?.equipmentCategoryName || undefined,
+    equipmentCategoryCode: equipment?.equipmentCategoryCode || undefined,
+    equipmentCode: equipment?.equipmentCode || undefined,
     quantity: row.quantity,
     billingPeriod: normalizeBillingPeriod(row.billingPeriod),
     unitPriceCents: row.unitPriceCents,
@@ -2219,6 +2297,46 @@ function normalizeContractStatus(value: unknown): RentalContractStatus {
   return 'draft';
 }
 
+function normalizeRentalFinancialStatus(value: unknown): RentalFinancialStatus {
+  if (
+    value === 'paid' ||
+    value === 'overdue' ||
+    value === 'partial' ||
+    value === 'cancelled'
+  ) {
+    return value;
+  }
+
+  return 'pending';
+}
+
+function normalizeOperationalCode(value: unknown): RentalOperationalCode {
+  if (value === 'CR' || value === 'SR/C') {
+    return value;
+  }
+
+  return 'SR';
+}
+
+function normalizeContractPaymentMethod(value: unknown): RentalPaymentMethod {
+  const normalized = textInput(value);
+
+  if (
+    normalized === 'pix' ||
+    normalized === 'cash' ||
+    normalized === 'credit_card' ||
+    normalized === 'debit_card' ||
+    normalized === 'bank_transfer' ||
+    normalized === 'boleto' ||
+    normalized === 'courtesy' ||
+    normalized === 'other'
+  ) {
+    return normalized;
+  }
+
+  return 'not_defined';
+}
+
 function normalizeInvoiceChargeStatus(value: unknown): InvoicePixChargeStatus {
   if (
     value === 'paid' ||
@@ -2417,6 +2535,90 @@ async function ensureFinancialTransactionsTable() {
   `);
 
   financialTransactionsMigrationReady = true;
+}
+
+async function ensureRentalContractManagementFields() {
+  if (rentalContractManagementFieldsReady) {
+    return;
+  }
+
+  await getDb().execute(sql`
+    alter table public.rental_contracts
+      add column if not exists due_date date,
+      add column if not exists payment_date date,
+      add column if not exists payment_method text not null default 'not_defined',
+      add column if not exists financial_status text not null default 'pending',
+      add column if not exists operational_code text not null default 'SR'
+  `);
+  await getDb().execute(sql`
+    update public.rental_contracts
+    set due_date = coalesce(due_date, start_date)
+    where due_date is null
+  `);
+  await getDb().execute(sql`
+    update public.rental_contracts
+    set financial_status = 'cancelled'
+    where status = 'cancelled'
+      and financial_status = 'pending'
+  `);
+  await getDb().execute(sql`
+    update public.rental_contracts
+    set operational_code = 'SR/C'
+    where status in ('closed', 'returned')
+      and operational_code = 'SR'
+  `);
+  await getDb().execute(sql`
+    do $$
+    begin
+      if not exists (
+        select 1 from pg_constraint where conname = 'rental_contracts_payment_method_check'
+      ) then
+        alter table public.rental_contracts
+          add constraint rental_contracts_payment_method_check
+          check (payment_method in (
+            'not_defined',
+            'pix',
+            'cash',
+            'credit_card',
+            'debit_card',
+            'bank_transfer',
+            'boleto',
+            'courtesy',
+            'other'
+          ));
+      end if;
+
+      if not exists (
+        select 1 from pg_constraint where conname = 'rental_contracts_financial_status_check'
+      ) then
+        alter table public.rental_contracts
+          add constraint rental_contracts_financial_status_check
+          check (financial_status in ('pending', 'paid', 'overdue', 'partial', 'cancelled'));
+      end if;
+
+      if not exists (
+        select 1 from pg_constraint where conname = 'rental_contracts_operational_code_check'
+      ) then
+        alter table public.rental_contracts
+          add constraint rental_contracts_operational_code_check
+          check (operational_code in ('CR', 'SR', 'SR/C'));
+      end if;
+    end $$
+  `);
+  await getDb().execute(sql`
+    create index if not exists rental_contracts_due_date_idx
+      on public.rental_contracts(due_date)
+  `);
+  await getDb().execute(sql`
+    create index if not exists rental_contracts_financial_status_idx
+      on public.rental_contracts(financial_status)
+  `);
+  await getDb().execute(sql`
+    create index if not exists rental_contracts_operational_code_idx
+      on public.rental_contracts(operational_code)
+  `);
+
+  rentalContractManagementFieldsReady = true;
 }
 
 function emptyEquipmentPrices() {
