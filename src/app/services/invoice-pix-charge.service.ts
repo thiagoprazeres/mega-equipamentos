@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import type { InvoicePixCharge, InvoicePixChargeStatus } from '../interfaces/invoice-pix-charge';
+import type { RentalPaymentMethod } from '../interfaces/rental-contract';
 import { GestorApiService } from './gestor-api.service';
 
 export interface CreateInvoicePixChargeInput {
@@ -10,7 +11,8 @@ export interface CreateInvoicePixChargeInput {
 }
 
 export interface ConfirmInvoicePixChargeInput {
-  endToEndId: string;
+  endToEndId?: string;
+  paymentMethod?: RentalPaymentMethod;
   paidAmountCents: number;
   paidAt?: string;
   payerName?: string;

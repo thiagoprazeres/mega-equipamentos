@@ -18,6 +18,7 @@ import type {
   InvoicePixCharge,
   InvoicePixChargeStatus,
 } from '../../interfaces/invoice-pix-charge';
+import type { RentalPaymentMethod } from '../../interfaces/rental-contract';
 import { AuthService } from '../../services/auth.service';
 import { InvoicePixChargeService } from '../../services/invoice-pix-charge.service';
 import { centsToDecimalInput, formatCurrencyCents, parseCurrencyToCents } from '../../utils/prices';
@@ -49,6 +50,16 @@ export class GestorRecebimentosPage implements OnInit {
     { value: 'rejected', label: 'Rejeitados' },
     { value: 'cancelled', label: 'Cancelados' },
   ];
+  protected readonly paymentMethodOptions: Array<{ value: RentalPaymentMethod; label: string }> = [
+    { value: 'pix', label: 'PIX' },
+    { value: 'cash', label: 'Dinheiro' },
+    { value: 'credit_card', label: 'Cartão de crédito' },
+    { value: 'debit_card', label: 'Cartão de débito' },
+    { value: 'bank_transfer', label: 'Transferência' },
+    { value: 'boleto', label: 'Boleto' },
+    { value: 'courtesy', label: 'Cortesia' },
+    { value: 'other', label: 'Outro' },
+  ];
 
   protected charges: InvoicePixCharge[] = [];
   protected query = '';
@@ -58,6 +69,7 @@ export class GestorRecebimentosPage implements OnInit {
   protected receiptDialogOpen = false;
   protected selectedCharge: InvoicePixCharge | null = null;
   protected receiptEndToEndId = '';
+  protected receiptPaymentMethod: RentalPaymentMethod = 'pix';
   protected receiptPaidAmount = '';
   protected receiptPaidAt = '';
   protected receiptPayerName = '';
@@ -112,6 +124,7 @@ export class GestorRecebimentosPage implements OnInit {
   protected openReceiptDialog(charge: InvoicePixCharge) {
     this.selectedCharge = charge;
     this.receiptEndToEndId = charge.endToEndId ?? '';
+    this.receiptPaymentMethod = 'pix';
     this.receiptPaidAmount = centsToDecimalInput(charge.paidAmountCents || charge.amountCents);
     this.receiptPaidAt = toDateTimeLocalInput(charge.paidAt ? new Date(charge.paidAt) : new Date());
     this.receiptPayerName = charge.payerName ?? '';
@@ -137,18 +150,14 @@ export class GestorRecebimentosPage implements OnInit {
       return;
     }
 
-    if (!this.receiptEndToEndId.trim()) {
-      this.errorMessage = 'Informe o EndToEndId do PIX recebido.';
-      return;
-    }
-
     this.confirming = true;
     this.errorMessage = '';
     this.successMessage = '';
 
     try {
       const updated = await this.invoicePixChargeService.confirmCharge(charge.id, {
-        endToEndId: this.receiptEndToEndId,
+        endToEndId: this.receiptEndToEndId.trim(),
+        paymentMethod: this.receiptPaymentMethod,
         paidAmountCents: parseCurrencyToCents(this.receiptPaidAmount),
         paidAt: this.receiptPaidAt,
         payerName: this.receiptPayerName,

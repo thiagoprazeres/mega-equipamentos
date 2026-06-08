@@ -976,50 +976,75 @@ async function confirmInvoiceCharge(id: number, input: Record<string, unknown>) 
     throw httpError(404, 'Cobrança PIX não encontrada.');
   }
 
-  let parsedEndToEndId: ReturnType<typeof parsePixReceiptEndToEndId>;
+  const rawPaymentMethod = textInput(input.paymentMethod);
+  const paymentMethod = rawPaymentMethod
+    ? normalizeContractPaymentMethod(rawPaymentMethod)
+    : 'pix';
+  const rawEndToEndId = textInput(input.endToEndId);
+  let parsedEndToEndId: ReturnType<typeof parsePixReceiptEndToEndId> | null = null;
 
-  try {
-    parsedEndToEndId = parsePixReceiptEndToEndId(textInput(input.endToEndId));
-  } catch (error) {
-    throw httpError(400, error instanceof Error ? error.message : 'EndToEndId inválido.');
+  if (rawEndToEndId) {
+    try {
+      parsedEndToEndId = parsePixReceiptEndToEndId(rawEndToEndId);
+    } catch (error) {
+      throw httpError(400, error instanceof Error ? error.message : 'EndToEndId inválido.');
+    }
   }
 
   const paidAmountCents = centsInput(input.paidAmountCents, charge.amountCents);
   const paidAt = datetimeInput(input.paidAt);
-  const knownRows = await getDb()
-    .select({ endToEndId: invoicePixCharges.endToEndId })
-    .from(invoicePixCharges)
-    .where(sql`${invoicePixCharges.endToEndId} <> '' and ${invoicePixCharges.id} <> ${charge.id}`);
-  const risk = analyzePixReceiptRisk({
-    txid: charge.txid,
-    endToEndId: parsedEndToEndId.endToEndId,
-    expectedAmountCents: charge.amountCents,
-    paidAmountCents,
-    paidAt,
-    chargeCreatedAt: charge.createdAt,
-    payerIspb: parsedEndToEndId.ispb,
-    pixKey: charge.pixKey,
-    knownEndToEndIds: knownRows.map((row) => row.endToEndId),
-    channel: 'manual',
-  });
-  const nextStatus = invoiceChargeStatusAfterRisk(risk.verdict, charge.amountCents, paidAmountCents);
+  let nextStatus: InvoicePixChargeStatus = 'paid';
+  let riskScore = 0;
+  let riskBand = parsedEndToEndId ? 'low' : 'manual';
+  let riskVerdict = 'approved';
+  let riskSignals: unknown[] = [];
+  let riskEvidences: unknown[] = [
+    { type: 'payment_method', value: paymentMethod },
+    { type: 'confirmation_channel', value: 'manual' },
+  ];
+
+  if (parsedEndToEndId) {
+    const knownRows = await getDb()
+      .select({ endToEndId: invoicePixCharges.endToEndId })
+      .from(invoicePixCharges)
+      .where(sql`${invoicePixCharges.endToEndId} <> '' and ${invoicePixCharges.id} <> ${charge.id}`);
+    const risk = analyzePixReceiptRisk({
+      txid: charge.txid,
+      endToEndId: parsedEndToEndId.endToEndId,
+      expectedAmountCents: charge.amountCents,
+      paidAmountCents,
+      paidAt,
+      chargeCreatedAt: charge.createdAt,
+      payerIspb: parsedEndToEndId.ispb,
+      pixKey: charge.pixKey,
+      knownEndToEndIds: knownRows.map((row) => row.endToEndId),
+      channel: 'manual',
+    });
+    nextStatus = invoiceChargeStatusAfterRisk(risk.verdict, charge.amountCents, paidAmountCents);
+    riskScore = risk.score;
+    riskBand = risk.band;
+    riskVerdict = risk.verdict;
+    riskSignals = risk.signals;
+    riskEvidences = [...risk.evidences, { type: 'payment_method', value: paymentMethod }];
+  }
+
   const [row] = await getDb().transaction(async (tx) => {
     const [updatedCharge] = await tx
       .update(invoicePixCharges)
       .set({
         status: nextStatus,
-        endToEndId: parsedEndToEndId.endToEndId,
+        endToEndId: parsedEndToEndId?.endToEndId ?? '',
         paidAmountCents,
         paidAt,
-        payerIspb: parsedEndToEndId.ispb,
-        payerBankName: parsedEndToEndId.bankName,
+        payerIspb: parsedEndToEndId?.ispb ?? '',
+        payerBankName: parsedEndToEndId?.bankName ?? '',
         payerName: textInput(input.payerName),
         payerDocument: textInput(input.payerDocument),
-        riskScore: risk.score,
-        riskBand: risk.band,
-        riskVerdict: risk.verdict,
-        riskSignals: risk.signals,
-        riskEvidences: risk.evidences,
+        riskScore,
+        riskBand,
+        riskVerdict,
+        riskSignals,
+        riskEvidences,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(invoicePixCharges.id, id))
@@ -1030,7 +1055,7 @@ async function confirmInvoiceCharge(id: number, input: Record<string, unknown>) 
         .update(rentalContracts)
         .set({
           paymentDate: paidAt.slice(0, 10),
-          paymentMethod: 'pix',
+          paymentMethod,
           financialStatus: 'paid',
           updatedAt: new Date().toISOString(),
         })
