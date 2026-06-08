@@ -148,13 +148,13 @@
     }
 
     <section class="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">
-      <div class="grid gap-3 xl:grid-cols-[minmax(18rem,1fr)_repeat(5,minmax(10rem,12rem))]">
+      <div class="grid gap-3 xl:grid-cols-[minmax(18rem,1fr)_repeat(4,minmax(10rem,12rem))]">
         <label class="input input-bordered flex items-center gap-2">
           <lucide-angular [img]="Search" class="h-4 w-4 opacity-60"></lucide-angular>
           <input
             class="grow"
             type="search"
-            placeholder="Buscar por contrato, cliente, CPF/CNPJ, categoria, observação ou equipamento"
+            placeholder="Buscar por contrato, cliente, CPF/CNPJ, categoria ou equipamento"
             [value]="query"
             (input)="query = $any($event.target).value"
           />
@@ -188,12 +188,6 @@
           }
         </select>
 
-        <select class="select select-bordered w-full" [value]="selectedPaymentMethod" (change)="setPaymentMethod($any($event.target).value)">
-          <option value="all">Forma de pagamento</option>
-          @for (option of paymentMethodOptions; track option.value) {
-            <option [value]="option.value">{{ option.label }}</option>
-          }
-        </select>
       </div>
 
       <div class="mt-4 grid gap-3 xl:grid-cols-[auto_repeat(3,minmax(10rem,12rem))_auto_auto] xl:items-end">
@@ -266,9 +260,7 @@
         <div class="flex items-center justify-between gap-3 border-b border-base-300 px-4 py-3">
           <div>
             <p class="font-bold">Planilha operacional de contratos</p>
-            <p class="text-xs text-base-content/60">
-              Legenda: CR = contrato renovado | SR = sem renovação | SR/C = sem renovação/coletado
-            </p>
+            <p class="text-xs text-base-content/60">Use filtros por coluna para localizar contratos rapidamente.</p>
           </div>
         </div>
 
@@ -304,9 +296,6 @@
                   <button class="font-bold" type="button" (click)="setSort('paymentDate')">Pagamento {{ sortIndicator('paymentDate') }}</button>
                 </th>
                 <th class="w-40">
-                  <button class="font-bold" type="button" (click)="setSort('paymentMethod')">Forma {{ sortIndicator('paymentMethod') }}</button>
-                </th>
-                <th class="w-40">
                   <button class="font-bold" type="button" (click)="setSort('financialStatus')">Status financeiro {{ sortIndicator('financialStatus') }}</button>
                 </th>
                 <th class="w-40">
@@ -315,7 +304,6 @@
                 <th class="w-28">
                   <button class="font-bold" type="button" (click)="setSort('operationalCode')">Cód. {{ sortIndicator('operationalCode') }}</button>
                 </th>
-                <th class="w-72">Observações</th>
                 <th class="w-32 text-right">Ações</th>
               </tr>
               <tr>
@@ -328,11 +316,9 @@
                 <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.endDate" (input)="setColumnFilter('endDate', $any($event.target).value)" /></th>
                 <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.dueDate" (input)="setColumnFilter('dueDate', $any($event.target).value)" /></th>
                 <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.paymentDate" (input)="setColumnFilter('paymentDate', $any($event.target).value)" /></th>
-                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.paymentMethod" (input)="setColumnFilter('paymentMethod', $any($event.target).value)" /></th>
                 <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.financialStatus" (input)="setColumnFilter('financialStatus', $any($event.target).value)" /></th>
                 <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.rentalStatus" (input)="setColumnFilter('rentalStatus', $any($event.target).value)" /></th>
                 <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.operationalCode" (input)="setColumnFilter('operationalCode', $any($event.target).value)" /></th>
-                <th><input class="input input-xs input-bordered w-full" placeholder="Filtrar" [value]="columnFilters.notes" (input)="setColumnFilter('notes', $any($event.target).value)" /></th>
                 <th></th>
               </tr>
             </thead>
@@ -359,7 +345,6 @@
                   <td>{{ formatDate(contract.endDate) }}</td>
                   <td>{{ formatDate(contract.dueDate || contract.startDate) }}</td>
                   <td>{{ formatDate(contract.paymentDate) }}</td>
-                  <td>{{ paymentMethodLabel(contract.paymentMethod) }}</td>
                   <td>
                     <span
                       class="badge badge-sm"
@@ -383,9 +368,6 @@
                     <span class="badge badge-outline badge-sm" [title]="operationalCodeDescription(contract.operationalCode)">
                       {{ contract.operationalCode }}
                     </span>
-                  </td>
-                  <td>
-                    <p class="line-clamp-2 max-w-72 text-xs text-base-content/70">{{ contract.notes || '-' }}</p>
                   </td>
                   <td class="text-right">
                     <details class="dropdown dropdown-end">
@@ -419,6 +401,12 @@
                             </button>
                           </li>
                         }
+                        <li class="menu-title">Código operacional</li>
+                        <li>
+                          <span class="text-xs leading-relaxed text-base-content/70">
+                            {{ contract.operationalCode }} - {{ operationalCodeDescription(contract.operationalCode) }}
+                          </span>
+                        </li>
                         <li class="menu-title">PDFs</li>
                         <li>
                           <button type="button" (click)="exportQuote(contract)">
@@ -476,7 +464,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="15" class="py-10 text-center text-base-content/60">
+                  <td colspan="13" class="py-10 text-center text-base-content/60">
                     Nenhum contrato encontrado.
                   </td>
                 </tr>

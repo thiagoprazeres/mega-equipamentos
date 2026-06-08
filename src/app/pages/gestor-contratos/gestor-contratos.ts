@@ -22,7 +22,6 @@ import {
   QrCode,
   RotateCcw,
   Search,
-  Table2,
   Truck,
   WalletCards,
   X,
@@ -36,7 +35,6 @@ import type {
   RentalContractStatus,
   RentalFinancialStatus,
   RentalOperationalCode,
-  RentalPaymentMethod,
 } from '../../interfaces/rental-contract';
 import type { InvoicePixCharge } from '../../interfaces/invoice-pix-charge';
 import { AuthService } from '../../services/auth.service';
@@ -69,7 +67,6 @@ type ContractSortKey =
   | 'endDate'
   | 'dueDate'
   | 'paymentDate'
-  | 'paymentMethod'
   | 'financialStatus'
   | 'rentalStatus'
   | 'operationalCode';
@@ -91,11 +88,9 @@ type ColumnFilters = Record<
   | 'endDate'
   | 'dueDate'
   | 'paymentDate'
-  | 'paymentMethod'
   | 'financialStatus'
   | 'rentalStatus'
-  | 'operationalCode'
-  | 'notes',
+  | 'operationalCode',
   string
 >;
 
@@ -145,7 +140,6 @@ export class GestorContratosPage implements OnInit {
   protected readonly QrCode = QrCode;
   protected readonly RotateCcw = RotateCcw;
   protected readonly Search = Search;
-  protected readonly Table2 = Table2;
   protected readonly Truck = Truck;
   protected readonly WalletCards = WalletCards;
   protected readonly X = X;
@@ -174,17 +168,6 @@ export class GestorContratosPage implements OnInit {
     { value: 'partial', label: 'Parcial' },
     { value: 'cancelled', label: 'Cancelado' },
   ];
-  protected readonly paymentMethodOptions: Array<{ value: RentalPaymentMethod; label: string }> = [
-    { value: 'not_defined', label: 'Não definido' },
-    { value: 'pix', label: 'Pix' },
-    { value: 'cash', label: 'Dinheiro' },
-    { value: 'credit_card', label: 'Cartão de crédito' },
-    { value: 'debit_card', label: 'Cartão de débito' },
-    { value: 'bank_transfer', label: 'Transferência' },
-    { value: 'boleto', label: 'Boleto' },
-    { value: 'courtesy', label: 'Cortesia' },
-    { value: 'other', label: 'Outro' },
-  ];
   protected readonly smartFilterOptions: Array<{ value: SmartFilter; label: string }> = [
     { value: 'all', label: 'Todos' },
     { value: 'active', label: 'Ativos' },
@@ -207,7 +190,6 @@ export class GestorContratosPage implements OnInit {
   protected selectedPeriod: RentalBillingPeriod | 'all' = 'all';
   protected selectedCategory = 'all';
   protected selectedFinancialStatus: RentalFinancialStatus | 'all' = 'all';
-  protected selectedPaymentMethod: RentalPaymentMethod | 'all' = 'all';
   protected selectedSmartFilter: SmartFilter = 'all';
   protected columnFilters: ColumnFilters = emptyColumnFilters();
   protected loading = false;
@@ -252,8 +234,6 @@ export class GestorContratosPage implements OnInit {
       const matchesFinancialStatus =
         this.selectedFinancialStatus === 'all' ||
         this.effectiveFinancialStatus(contract) === this.selectedFinancialStatus;
-      const matchesPaymentMethod =
-        this.selectedPaymentMethod === 'all' || contract.paymentMethod === this.selectedPaymentMethod;
       const matchesSmartFilter = this.contractMatchesSmartFilter(contract, this.selectedSmartFilter);
       const matchesDateRange = contractMatchesDateRange(
         contract,
@@ -280,7 +260,6 @@ export class GestorContratosPage implements OnInit {
         contract.worksiteAddress,
         contract.dueDate,
         contract.paymentDate,
-        this.paymentMethodLabel(contract.paymentMethod),
         this.financialStatusLabel(this.effectiveFinancialStatus(contract)),
         contract.operationalCode,
         this.operationalCodeDescription(contract.operationalCode),
@@ -305,7 +284,6 @@ export class GestorContratosPage implements OnInit {
         matchesPeriod &&
         matchesCategory &&
         matchesFinancialStatus &&
-        matchesPaymentMethod &&
         matchesSmartFilter &&
         matchesDateRange &&
         matchesQuery &&
@@ -474,10 +452,6 @@ export class GestorContratosPage implements OnInit {
 
   protected setFinancialStatus(status: RentalFinancialStatus | 'all') {
     this.selectedFinancialStatus = status;
-  }
-
-  protected setPaymentMethod(method: RentalPaymentMethod | 'all') {
-    this.selectedPaymentMethod = method;
   }
 
   protected setSmartFilter(filter: SmartFilter) {
@@ -766,10 +740,6 @@ export class GestorContratosPage implements OnInit {
     return this.financialStatusOptions.find((option) => option.value === status)?.label ?? status;
   }
 
-  protected paymentMethodLabel(method: RentalPaymentMethod): string {
-    return this.paymentMethodOptions.find((option) => option.value === method)?.label ?? method;
-  }
-
   protected operationalCodeDescription(code: RentalOperationalCode): string {
     const descriptions: Record<RentalOperationalCode, string> = {
       CR: 'Contrato renovado',
@@ -879,11 +849,9 @@ export class GestorContratosPage implements OnInit {
       'Data fim',
       'Data vencimento',
       'Data pagamento',
-      'Forma pagamento',
       'Status financeiro',
       'Status locação',
       'Código operacional',
-      'Observações',
     ];
     const rows = this.filteredContracts().map((contract) => [
       this.contractCategoryLabel(contract),
@@ -895,11 +863,9 @@ export class GestorContratosPage implements OnInit {
       this.formatDate(contract.endDate),
       this.formatDate(contract.dueDate),
       this.formatDate(contract.paymentDate),
-      this.paymentMethodLabel(contract.paymentMethod),
       this.financialStatusLabel(this.effectiveFinancialStatus(contract)),
       this.statusLabel(contract.status),
       contract.operationalCode,
-      contract.notes ?? '',
     ]);
     const csv = [header, ...rows].map((row) => row.map(csvCell).join(';')).join('\n');
     const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' });
@@ -936,8 +902,6 @@ export class GestorContratosPage implements OnInit {
         return contract.dueDate ?? '';
       case 'paymentDate':
         return contract.paymentDate ?? '';
-      case 'paymentMethod':
-        return contract.paymentMethod;
       case 'financialStatus':
         return this.effectiveFinancialStatus(contract);
       case 'rentalStatus':
@@ -962,14 +926,12 @@ export class GestorContratosPage implements OnInit {
       endDate: [contract.endDate, this.formatDate(contract.endDate)],
       dueDate: [contract.dueDate, this.formatDate(contract.dueDate)],
       paymentDate: [contract.paymentDate, this.formatDate(contract.paymentDate)],
-      paymentMethod: [this.paymentMethodLabel(contract.paymentMethod), contract.paymentMethod],
       financialStatus: [
         this.financialStatusLabel(this.effectiveFinancialStatus(contract)),
         this.effectiveFinancialStatus(contract),
       ],
       rentalStatus: [this.statusLabel(contract.status), contract.status],
       operationalCode: [contract.operationalCode, this.operationalCodeDescription(contract.operationalCode)],
-      notes: [contract.notes, contract.deliveryAddress, contract.worksiteAddress],
     };
 
     return Object.entries(filters).every(([key, query]) =>
@@ -1215,11 +1177,9 @@ function emptyColumnFilters(): ColumnFilters {
     endDate: '',
     dueDate: '',
     paymentDate: '',
-    paymentMethod: '',
     financialStatus: '',
     rentalStatus: '',
     operationalCode: '',
-    notes: '',
   };
 }
 
