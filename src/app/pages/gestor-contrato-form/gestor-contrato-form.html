@@ -47,7 +47,7 @@
                 [value]="customerQuery"
                 (input)="customerQuery = $any($event.target).value"
               />
-              <select class="select select-bordered w-full" formControlName="customerId">
+              <select class="select select-bordered w-full" formControlName="customerId" (change)="changeCustomer()">
                 <option [ngValue]="0">Selecione um cliente</option>
                 @for (customer of filteredCustomerOptions(); track customer.id) {
                   <option [ngValue]="customer.id">{{ customerOptionLabel(customer) }}</option>
@@ -268,7 +268,7 @@
               <input
                 class="input input-bordered w-full"
                 formControlName="deliveryAddress"
-                (input)="syncWorksiteAddressFromDelivery()"
+                (input)="markDeliveryAddressTouched()"
               />
             </label>
 

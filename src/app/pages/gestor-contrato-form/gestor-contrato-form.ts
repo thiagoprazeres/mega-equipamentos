@@ -157,8 +157,10 @@ export class GestorContratoFormPage implements OnInit {
   protected loadFailed = false;
   protected saving = false;
   protected editingContract: RentalContract | null = null;
+  protected deliveryAddressTouched = false;
   protected worksiteAddressTouched = false;
   protected endDateTouched = false;
+  private lastCustomerAddressAutofill = '';
   protected errorMessage = '';
   protected successMessage = '';
 
@@ -223,8 +225,20 @@ export class GestorContratoFormPage implements OnInit {
     });
   }
 
+  protected markDeliveryAddressTouched() {
+    this.deliveryAddressTouched = true;
+    this.syncWorksiteAddressFromDelivery();
+  }
+
   protected markWorksiteAddressTouched() {
     this.worksiteAddressTouched = true;
+  }
+
+  protected changeCustomer() {
+    const customer = this.selectedCustomer();
+
+    this.customerQuery = customer ? this.customerOptionLabel(customer) : '';
+    this.fillContractAddressesFromCustomer(customer);
   }
 
   protected syncEndDateFromRentalPeriod(force = false) {
@@ -595,8 +609,10 @@ export class GestorContratoFormPage implements OnInit {
 
     this.editingContract = null;
     this.contractItems = [];
+    this.deliveryAddressTouched = false;
     this.worksiteAddressTouched = false;
     this.endDateTouched = false;
+    this.lastCustomerAddressAutofill = customerAddress;
     this.customerQuery = preselectedCustomer ? this.customerOptionLabel(preselectedCustomer) : '';
 
     if (customerId && !preselectedCustomer) {
@@ -635,6 +651,8 @@ export class GestorContratoFormPage implements OnInit {
   private populateEditForm(contract: RentalContract) {
     this.editingContract = contract;
     const customer = this.customers.find((item) => item.id === contract.customerId);
+    const customerAddress = customer ? customerContractAddress(customer) : '';
+    const contractDeliveryAddress = contract.deliveryAddress ?? '';
     this.customerQuery = customer ? this.customerOptionLabel(customer) : contract.customerName;
     this.contractItems = contract.items.map((item) => ({
       ...item,
@@ -644,6 +662,10 @@ export class GestorContratoFormPage implements OnInit {
     this.worksiteAddressTouched = Boolean(
       contract.worksiteAddress && contract.worksiteAddress !== (contract.deliveryAddress ?? '')
     );
+    this.deliveryAddressTouched = Boolean(
+      contractDeliveryAddress && contractDeliveryAddress !== customerAddress
+    );
+    this.lastCustomerAddressAutofill = this.deliveryAddressTouched ? '' : contractDeliveryAddress;
     this.endDateTouched =
       Boolean(contract.endDate) &&
       contract.endDate !==
@@ -712,6 +734,32 @@ export class GestorContratoFormPage implements OnInit {
   private selectedCustomer(): Customer | undefined {
     const selectedId = Number(this.form.controls.customerId.value);
     return this.customers.find((customer) => customer.id === selectedId);
+  }
+
+  private fillContractAddressesFromCustomer(customer?: Customer) {
+    const customerAddress = customer ? customerContractAddress(customer) : '';
+
+    if (!customerAddress) {
+      return;
+    }
+
+    const deliveryAddress = this.form.controls.deliveryAddress.value.trim();
+    const canFillDeliveryAddress =
+      !this.deliveryAddressTouched ||
+      !deliveryAddress ||
+      deliveryAddress === this.lastCustomerAddressAutofill;
+
+    if (!canFillDeliveryAddress) {
+      return;
+    }
+
+    this.form.controls.deliveryAddress.setValue(customerAddress, { emitEvent: false });
+    this.lastCustomerAddressAutofill = customerAddress;
+    this.deliveryAddressTouched = false;
+
+    if (!this.worksiteAddressTouched) {
+      this.form.controls.worksiteAddress.setValue(customerAddress, { emitEvent: false });
+    }
   }
 
   private customerCode(customer: Customer): string {
