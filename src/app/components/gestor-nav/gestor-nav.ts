@@ -31,7 +31,7 @@ interface GestorNavItem {
       <div class="flex h-16 items-center gap-3 border-b border-base-300 px-3">
         <img
           class="h-10 w-10 shrink-0 rounded-lg bg-base-100 object-contain p-1 ring-1 ring-base-300"
-          src="logo-mega-gestor-rental-mark.svg"
+          src="logo-mega-gestor-rental-mark.png"
           alt="Mega Gestor Rental"
         />
         <div class="min-w-0 is-drawer-close:hidden">
