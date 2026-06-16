@@ -38,7 +38,7 @@ export const routes: Routes = [
     path: 'gestor/equipamentos',
     canActivate: [gestorAuthGuard],
     loadComponent: () => import('./pages/gestor-equipamentos/gestor-equipamentos').then(m => m.GestorEquipamentosPage),
-    title: 'Equipamentos e Preços | Área Gestora Mega Equipamentos',
+    title: 'Estoque | Área Gestora Mega Equipamentos',
   },
   {
     path: 'gestor/equipamentos/novo',
